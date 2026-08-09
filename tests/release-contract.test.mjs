@@ -202,6 +202,7 @@ test("admin login and resource creation remain environment-backed and server-gat
 
 test("category contact coverage is global dataset-backed rather than filtered-result derived", () => {
   const statsRoute = read("src/app/api/stats/route.ts");
+  const adminStatsRoute = read("src/app/api/admin/stats/route.ts");
   const directory = read("src/components/bndr/directory.tsx");
   const types = read("src/lib/types.ts");
   assert.match(statsRoute, /categoryContactCoverage/);
@@ -210,4 +211,8 @@ test("category contact coverage is global dataset-backed rather than filtered-re
   assert.match(directory, /stats\?\.categoryContactCoverage/);
   assert.doesNotMatch(directory, /for \(const resource of resources\)[\s\S]{0,600}categoryStats/);
   assert.match(types, /categoryContactCoverage:/);
+  assert.match(adminStatsRoute, /categoryContactCoverage/);
+  assert.match(adminStatsRoute, /phoneNormalized:\s*\{\s*not:\s*null\s*\}/);
+  assert.match(adminStatsRoute, /email:\s*\{\s*not:\s*null\s*\}/);
+  assert.match(adminStatsRoute, /website:\s*\{\s*not:\s*null\s*\}/);
 });
