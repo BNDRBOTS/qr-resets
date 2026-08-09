@@ -24,8 +24,8 @@ export default async function AdminPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-30 border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80">
-        <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4">
+      <header className="bndr-glass-bar sticky top-0 z-30 border-b border-border/70 bg-card/70">
+        <div className="mx-auto flex min-h-14 max-w-7xl flex-wrap items-center justify-between gap-2 px-3 py-2 sm:px-4">
           <div className="flex items-center gap-3">
             <Link href="/" className="text-sm font-medium text-muted-foreground hover:text-foreground">
               ← Back to Directory
@@ -43,7 +43,7 @@ export default async function AdminPage() {
           </div>
         </div>
       </header>
-      <main className="mx-auto max-w-7xl px-4 py-6">
+      <main className="mx-auto max-w-7xl px-3 py-5 sm:px-4 sm:py-6">
         <AdminDashboard />
       </main>
     </div>

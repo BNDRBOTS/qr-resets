@@ -47,7 +47,7 @@ export function useGoalCelebration({
     // Only fire on the not-met → met transition (not on every render where
     // goalMet is true, and not on initial mount if the goal was already met).
     if (goalMet && !prevGoalMetRef.current) {
-      toast.success("🎉 Weekly goal achieved!", {
+      toast.success("Weekly goal achieved!", {
         description: `You've logged ${thisWeekCount} contact${thisWeekCount === 1 ? "" : "s"} this week — target reached.`,
         duration: 5000,
       });
@@ -63,7 +63,7 @@ export function useGoalCelebration({
       // Check if the new streak crossed a milestone.
       const hitMilestone = STREAK_MILESTONES.includes(streak);
       if (hitMilestone) {
-        toast.success(`🔥 ${streak}-week streak!`, {
+        toast.success(`${streak}-week streak!`, {
           description: `Consistent outreach for ${streak} consecutive weeks — outstanding dedication.`,
           duration: 6000,
         });

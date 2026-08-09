@@ -211,6 +211,12 @@ export interface PublicStats {
   withPhone: number;
   withEmail: number;
   withWebsite: number;
+  categoryContactCoverage: {
+    category: string;
+    withPhone: number;
+    withEmail: number;
+    withWebsite: number;
+  }[];
 }
 
 export interface AdminStats extends PublicStats {

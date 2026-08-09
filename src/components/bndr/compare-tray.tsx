@@ -33,7 +33,7 @@ export function CompareTray({ items, max, onOpen, onRemove, onClear }: CompareTr
         transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
         className="fixed bottom-6 left-1/2 z-30 -translate-x-1/2 print:hidden"
       >
-        <div className="flex items-center gap-3 rounded-2xl border border-border/60 bg-card/85 px-4 py-3 shadow-[0_20px_60px_-12px_rgba(0,0,0,0.6)] backdrop-blur-xl">
+        <div className="flex items-center gap-3 rounded-2xl border border-border/60 bg-card/85 px-4 py-3 shadow-[var(--shadow-surface-hover)] backdrop-blur-xl">
           <div className="flex items-center gap-2">
             <span className="flex size-8 items-center justify-center rounded-full bg-primary/15 text-primary">
               <ArrowLeftRight className="size-4" aria-hidden />
@@ -80,7 +80,7 @@ export function CompareTray({ items, max, onOpen, onRemove, onClear }: CompareTr
               disabled={!canCompare}
               className={
                 canCompare
-                  ? "gap-1.5 shadow-[0_0_18px_-4px_oklch(0.70_0.26_255/0.7)]"
+                  ? "gap-1.5 shadow-[var(--shadow-accent-strong)]"
                   : "gap-1.5 opacity-60"
               }
             >

@@ -5,7 +5,6 @@ import { useQuery } from "@tanstack/react-query";
 import { GrainOverlay } from "@/components/bndr/grain-overlay";
 import { SiteHeader } from "@/components/bndr/site-header";
 import { Hero } from "@/components/bndr/hero";
-import { FeaturedSpotlight } from "@/components/bndr/featured-spotlight";
 import { RecentlyViewedStrip } from "@/components/bndr/recently-viewed-strip";
 import { StatsStrip } from "@/components/bndr/stats-strip";
 import { CategoryPills } from "@/components/bndr/category-pills";
@@ -45,8 +44,6 @@ import { useOutreachStats } from "@/components/bndr/use-outreach-stats";
 import { fetchResources, fetchStats, fetchResource } from "@/lib/api";
 import { CATEGORIES, type Resource, type CategorySlug } from "@/lib/types";
 import { toast } from "sonner";
-
-const PAGE_SIZE = 24;
 
 /**
  * Parse the current URL search params into directory state.
@@ -248,21 +245,22 @@ export function Directory() {
     return map;
   }, [stats]);
 
-  // Per-category contact method coverage stats (phone/email/website %).
+  // Per-category contact coverage comes from the unfiltered public stats API,
+  // so category cards remain source-accurate while the user searches/filters.
   const categoryStats = useMemo(() => {
     const map: Record<string, { withPhone: number; withEmail: number; withWebsite: number }> = {};
     for (const c of CATEGORIES) {
       map[c.slug] = { withPhone: 0, withEmail: 0, withWebsite: 0 };
     }
-    for (const r of resources) {
-      const s = map[r.category];
-      if (!s) continue;
-      if (r.phoneNormalized) s.withPhone++;
-      if (r.email) s.withEmail++;
-      if (r.website) s.withWebsite++;
+    for (const row of stats?.categoryContactCoverage ?? []) {
+      map[row.category] = {
+        withPhone: row.withPhone,
+        withEmail: row.withEmail,
+        withWebsite: row.withWebsite,
+      };
     }
     return map;
-  }, [resources]);
+  }, [stats]);
 
   const handleOpen = useCallback(
     (r: Resource) => {
@@ -488,7 +486,6 @@ export function Directory() {
               onBrowseAll={() => handleJump("resources")}
             />
 
-            <FeaturedSpotlight resources={resources} onOpen={handleOpen} />
 
             <RecentlyViewedStrip
               recent={recent}
@@ -635,7 +632,7 @@ export function Directory() {
                     loading={isLoading || (isFetching && resources.length === 0)}
                     totalCount={totalCount}
                     directoryTotal={stats?.totalResources ?? 0}
-                    pageSize={PAGE_SIZE}
+                    pageSize={500}
                     onReset={clearSearch}
                     onOpen={handleOpen}
                     isSaved={isSaved}

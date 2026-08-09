@@ -9,7 +9,6 @@ import {
   Info,
   Sparkles,
   ExternalLink,
-  ArrowUpRight,
   Bookmark,
   BookmarkCheck,
   ArrowLeftRight,
@@ -88,12 +87,9 @@ function firstPhone(normalized: string | null): string | null {
 }
 
 /**
- * Glassmorphic resource card.
- *  - Priority=1 cards span all 3 columns on lg / 2 on md as a horizontal
- *    "featured banner" (content left, quick-action stack right). This creates
- *    clear editorial hierarchy instead of the previous awkward left-stacked
- *    2-col span that broke row rhythm.
- *  - Normal cards stay 1-column with vertical layout.
+ * Glassmorphic resource card with consistent geometry for every resource.
+ * Priority is preserved as metadata and an explicit filter, never as a larger
+ * card footprint that could visually over-weight one resource or category.
  */
 export function ResourceCard({
   resource,
@@ -134,7 +130,7 @@ export function ResourceCard({
             aria-label={isComparing ? `Remove ${resource.name} from comparison` : `Add ${resource.name} to comparison`}
             aria-pressed={isComparing}
             className={
-              "rounded-full p-1 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 " +
+              "flex size-8 items-center justify-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 " +
               (isComparing
                 ? "text-primary hover:bg-primary/15"
                 : "text-muted-foreground/60 hover:text-primary hover:bg-primary/10")
@@ -168,7 +164,7 @@ export function ResourceCard({
             aria-label={isSaved ? `Remove ${resource.name} from saved` : `Save ${resource.name}`}
             aria-pressed={isSaved}
             className={
-              "rounded-full p-1 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 " +
+              "flex size-8 items-center justify-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 " +
               (isSaved
                 ? "text-primary hover:bg-primary/15"
                 : "text-muted-foreground/60 hover:text-primary hover:bg-primary/10")
@@ -208,7 +204,7 @@ export function ResourceCard({
               }
             }}
             aria-label={`Share ${resource.name}`}
-            className="rounded-full p-1 text-muted-foreground/60 transition-colors hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
+            className="flex size-8 items-center justify-center rounded-full text-muted-foreground/60 transition-colors hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
           >
             <Share2 className="size-3.5" aria-hidden />
           </button>
@@ -246,7 +242,7 @@ export function ResourceCard({
           <Tooltip>
             <TooltipTrigger asChild>
               <span
-                className="inline-flex items-center gap-1 rounded-full border border-amber-500/40 bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-medium text-amber-600 dark:text-amber-400"
+                className="bndr-status-pill inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-medium"
                 aria-label="Follow-up needed: saved but not contacted recently"
               >
                 <AlertCircle className="size-3" aria-hidden />
@@ -299,7 +295,7 @@ export function ResourceCard({
         </TooltipProvider>
       ) : null}
       {/* Right-aligned action icons */}
-      <div className="ml-auto flex items-center gap-0.5">
+      <div className="ml-auto flex shrink-0 items-center gap-1">
         {rating > 0 ? (
           <TooltipProvider delayDuration={150}>
             <Tooltip>
@@ -336,7 +332,7 @@ export function ResourceCard({
                   type="button"
                   onClick={stop}
                   aria-label="Source note"
-                  className="rounded-full p-1 text-muted-foreground/70 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
+                  className="flex size-8 items-center justify-center rounded-full text-muted-foreground/70 hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
                 >
                   <Info className="size-3.5" />
                 </button>
@@ -356,7 +352,7 @@ export function ResourceCard({
 
   const Tags = tags.length > 0 ? (
     <div className="flex flex-wrap gap-1.5 pt-1">
-      {tags.slice(0, isPriority ? 6 : 4).map((t) =>
+      {tags.slice(0, 4).map((t) =>
         onTagClick ? (
           <button
             key={t}
@@ -378,116 +374,16 @@ export function ResourceCard({
           </span>
         ),
       )}
-      {tags.length > (isPriority ? 6 : 4) ? (
+      {tags.length > 4 ? (
         <span className="rounded-lg border border-primary/30 bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary/80">
-          +{tags.length - (isPriority ? 6 : 4)}
+          +{tags.length - 4}
         </span>
       ) : null}
     </div>
   ) : null;
 
-  // ---- PRIORITY: horizontal featured banner --------------------------------
-
-  if (isPriority) {
-    return (
-      <motion.article
-        initial={{ opacity: 0, y: 16 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-60px" }}
-        transition={{ duration: 0.5, delay: Math.min(index * 0.05, 0.3) }}
-        onClick={() => onOpen(resource)}
-        className="bndr-card bndr-card-priority bndr-priority-glow group relative flex cursor-pointer flex-col gap-4 rounded-2xl p-6 md:col-span-2 lg:col-span-3 lg:flex-row lg:items-stretch md:p-7"
-      >
-        {/* Left: content (60%) */}
-        <div className="flex flex-1 flex-col gap-3 lg:pr-6">
-          {Badges}
-          <h3 className="text-xl font-semibold leading-snug tracking-tight text-foreground md:text-2xl">
-            <button
-              type="button"
-              onClick={(e) => { e.stopPropagation(); onOpen(resource); }}
-              className="rounded-sm text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
-            >
-              <Highlight text={resource.name} query={query} />
-            </button>
-          </h3>
-          {resource.description ? (
-            <p className="bndr-line-clamp-2 text-sm leading-relaxed text-foreground/90 md:text-[15px]">
-              <Highlight text={resource.description} query={query} />
-            </p>
-          ) : null}
-          {Tags}
-        </div>
-
-        {/* Vertical divider on lg */}
-        <div className="hidden w-px bg-border/60 lg:block" aria-hidden />
-
-        {/* Right: quick-action panel (40%) */}
-        <div className="flex flex-col gap-2 lg:w-[38%] lg:shrink-0">
-          <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground/70">
-            Quick contact
-          </p>
-          <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 lg:grid-cols-1">
-            {phoneDisplay ? (
-              <a
-                href={`tel:${phone}`}
-                onClick={stop}
-                className="bndr-quick-call inline-flex items-center gap-2.5 rounded-lg border border-primary/40 bg-primary/15 px-3 py-2 text-sm font-medium text-foreground transition-all hover:border-primary/70 hover:bg-primary/20 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
-              >
-                <Phone className="size-4 shrink-0 text-primary" aria-hidden />
-                <span className="font-mono tabular-nums">{phoneDisplay}</span>
-                <ArrowUpRight className="ml-auto size-3.5 shrink-0 opacity-50 transition-opacity group-hover:opacity-100" aria-hidden />
-              </a>
-            ) : null}
-            {resource.email ? (
-              <a
-                href={`mailto:${resource.email}`}
-                onClick={stop}
-                className="inline-flex items-center gap-2.5 truncate rounded-lg border border-border/60 bg-card/40 px-3 py-2 text-sm text-muted-foreground transition-all hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
-              >
-                <Mail className="size-4 shrink-0 text-primary" aria-hidden />
-                <span className="truncate">{resource.email}</span>
-              </a>
-            ) : null}
-            {resource.website ? (
-              <a
-                href={resource.website}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={stop}
-                className="inline-flex items-center gap-2.5 truncate rounded-lg border border-border/60 bg-card/40 px-3 py-2 text-sm text-muted-foreground transition-all hover:border-primary/40 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
-              >
-                <Globe className="size-4 shrink-0 text-primary" aria-hidden />
-                <span className="truncate">
-                  {decodeUrlForDisplay(resource.website)
-                    .replace(/^https?:\/\//, "")
-                    .replace(/\/$/, "")}
-                </span>
-                <span
-                  className="ml-auto flex items-center gap-1"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                  }}
-                >
-                  <LinkStatusDot resourceId={resource.id} />
-                  <ExternalLink className="size-3 shrink-0 opacity-60" aria-hidden />
-                </span>
-              </a>
-            ) : null}
-            {resource.address ? (
-              <span className="inline-flex items-center gap-2.5 truncate rounded-lg border border-border/40 bg-transparent px-3 py-2 text-sm text-muted-foreground/80">
-                <MapPin className="size-4 shrink-0 text-primary/70" aria-hidden />
-                <span className="truncate">{resource.address}</span>
-              </span>
-            ) : null}
-          </div>
-          <p className="mt-auto pt-1 text-[10px] text-muted-foreground/60">
-            Tap to view full details
-          </p>
-        </div>
-      </motion.article>
-    );
-  }
+  // ---- Unified resource card -------------------------------------------------
+  // Priority remains a badge/filter only; all resources keep equal card geometry.
 
   // ---- NORMAL: vertical compact card ---------------------------------------
 
@@ -498,7 +394,7 @@ export function ResourceCard({
       viewport={{ once: true, margin: "-60px" }}
       transition={{ duration: 0.45, delay: Math.min(index * 0.04, 0.32) }}
       onClick={() => onOpen(resource)}
-      className="bndr-card group relative flex cursor-pointer flex-col gap-3 rounded-2xl p-6"
+      className="bndr-card group relative flex cursor-pointer flex-col gap-3 rounded-2xl p-4 sm:p-5 lg:p-6"
     >
       {Badges}
 
@@ -516,25 +412,25 @@ export function ResourceCard({
       {hasContact ? (
         <div className="flex flex-wrap items-center gap-1.5">
           {phoneDisplay ? (
-            <span className="inline-flex items-center gap-1 rounded-md bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-500" title="Phone available">
+            <span className="bndr-contact-chip" title="Phone available">
               <Phone className="size-2.5" aria-hidden />
               Phone
             </span>
           ) : null}
           {resource.email ? (
-            <span className="inline-flex items-center gap-1 rounded-md bg-blue-500/10 px-2 py-0.5 text-[10px] font-medium text-blue-400" title="Email available">
+            <span className="bndr-contact-chip" title="Email available">
               <Mail className="size-2.5" aria-hidden />
               Email
             </span>
           ) : null}
           {resource.website ? (
-            <span className="inline-flex items-center gap-1 rounded-md bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary" title="Website available">
+            <span className="bndr-contact-chip" title="Website available">
               <Globe className="size-2.5" aria-hidden />
               Web
             </span>
           ) : null}
           {resource.address ? (
-            <span className="inline-flex items-center gap-1 rounded-md bg-amber-500/10 px-2 py-0.5 text-[10px] font-medium text-amber-400" title="Address available">
+            <span className="bndr-contact-chip" title="Address available">
               <MapPin className="size-2.5" aria-hidden />
               Address
             </span>

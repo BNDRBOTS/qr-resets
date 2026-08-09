@@ -51,7 +51,7 @@ export function QrTableOfContents() {
                 key={item.id}
                 type="button"
                 onClick={(e) => handleClick(e, item.id)}
-                className="group flex items-center gap-3 rounded-xl border border-border/50 bg-background/40 px-4 py-3 text-left transition-all hover:-translate-y-0.5 hover:border-primary/50 hover:bg-primary/5 hover:shadow-[0_8px_24px_-12px_oklch(0.62_0.19_18/0.4)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
+                className="group flex items-center gap-3 rounded-xl border border-border/50 bg-background/40 px-4 py-3 text-left transition-all hover:-translate-y-0.5 hover:border-primary/50 hover:bg-primary/5 hover:shadow-[var(--shadow-accent-soft)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
               >
                 <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-muted/60 font-mono text-xs font-bold tabular-nums text-muted-foreground transition-colors group-hover:bg-primary/20 group-hover:text-primary">
                   {String(i + 1).padStart(2, "0")}

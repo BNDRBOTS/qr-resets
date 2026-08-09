@@ -394,7 +394,7 @@ export function AdminLinkAudit({ onRan }: AdminLinkAuditProps) {
               runMut.mutate();
             }}
             disabled={runMut.isPending}
-            className="bg-primary shadow-[0_0_20px_-6px_oklch(0.70_0.26_255/0.7)] hover:bg-primary/90"
+            className="bg-primary shadow-[var(--shadow-accent-strong)] hover:bg-primary/90"
           >
             {runMut.isPending ? (
               <RefreshCw className="size-4 animate-spin" aria-hidden />

@@ -61,6 +61,7 @@ import { escapeHtml } from "@/lib/export-safety";
 import type { ContactLogEntry } from "./use-contact-log";
 import { useOutreachStats } from "./use-outreach-stats";
 import { useLongestStreak } from "./use-longest-streak";
+import { BndrGoalIcon, BndrWarningIcon } from "@/components/shared/bndr-icons";
 
 interface AdvocateDashboardProps {
   open: boolean;
@@ -97,37 +98,37 @@ const METHOD_META: Record<
   phone: {
     label: "Phone call",
     icon: <Phone className="size-3.5" aria-hidden />,
-    color: "oklch(0.62 0.22 145)",
+    color: "var(--chart-1)",
   },
   email: {
     label: "Email",
     icon: <Mail className="size-3.5" aria-hidden />,
-    color: "oklch(0.62 0.20 250)",
+    color: "var(--chart-2)",
   },
   "in-person": {
     label: "In person",
     icon: <User className="size-3.5" aria-hidden />,
-    color: "oklch(0.62 0.22 70)",
+    color: "var(--chart-3)",
   },
   voicemail: {
     label: "Voicemail",
     icon: <Voicemail className="size-3.5" aria-hidden />,
-    color: "oklch(0.62 0.20 25)",
+    color: "var(--chart-4)",
   },
   text: {
     label: "Text message",
     icon: <MessageCircle className="size-3.5" aria-hidden />,
-    color: "oklch(0.62 0.20 195)",
+    color: "var(--chart-5)",
   },
   other: {
     label: "Other",
     icon: <HelpCircle className="size-3.5" aria-hidden />,
-    color: "oklch(0.62 0.02 280)",
+    color: "var(--muted-foreground)",
   },
   unspecified: {
     label: "Unspecified",
     icon: <HelpCircle className="size-3.5" aria-hidden />,
-    color: "oklch(0.60 0.02 280)",
+    color: "var(--muted-foreground)",
   },
 };
 
@@ -351,7 +352,8 @@ export function AdvocateDashboard({
   const prevGoalMetRef = useRef(false);
   useEffect(() => {
     if (goalMet && !prevGoalMetRef.current && open) {
-      toast.success("🎉 Weekly goal achieved!", {
+      toast.success("Weekly goal achieved!", {
+        icon: <BndrGoalIcon className="size-4 text-primary" />,
         description: `You've logged ${thisWeekCount} contact${thisWeekCount === 1 ? "" : "s"} this week — target reached.`,
         duration: 4000,
       });
@@ -381,9 +383,9 @@ export function AdvocateDashboard({
       `  Contacted: ${stats.contactedCount}`,
       `  Follow-up needed: ${stats.followUpCount}`,
       `  Notes: ${stats.notesCount}`,
-      `  Rated: ${stats.ratingsCount}${stats.avgRating > 0 ? ` (avg ${stats.avgRating.toFixed(1)}★)` : ""}`,
+      `  Rated: ${stats.ratingsCount}${stats.avgRating > 0 ? ` (avg ${stats.avgRating.toFixed(1)}/5)` : ""}`,
       `  Cadence: ${stats.cadencePerWeek.toFixed(1)} contacts/week (30d)`,
-      `  This week: ${thisWeekCount}/${weeklyGoal}${goalMet ? " ✓ goal met" : ` (${goalRemaining} to go)`}`,
+      `  This week: ${thisWeekCount}/${weeklyGoal}${goalMet ? " (goal met)" : ` (${goalRemaining} to go)`}`,
       streak > 0 ? `  Streak: ${streak} week${streak === 1 ? "" : "s"}${streakAtRisk ? " (at risk!)" : ""}` : null,
       longestStreak > 0 ? `  Longest streak: ${longestStreak} weeks` : null,
       stats.totalMethodContacts > 0
@@ -577,7 +579,7 @@ export function AdvocateDashboard({
     // Append a compact summary section so the text is useful even with 0 follow-ups.
     const summary = [
       `Saved: ${stats.savedCount} · Contacted: ${stats.contactedCount} · Follow-up: ${stats.followUpCount}`,
-      `This week: ${thisWeekCount}/${weeklyGoal}${goalMet ? " ✓ goal met" : ` (${goalRemaining} to go)`}`,
+      `This week: ${thisWeekCount}/${weeklyGoal}${goalMet ? " (goal met)" : ` (${goalRemaining} to go)`}`,
       streak > 0 ? `Streak: ${streak} week${streak === 1 ? "" : "s"}` : null,
       stats.totalMethodContacts > 0
         ? `Contact methods: ${stats.methodBreakdown.map(([m, c]) => `${METHOD_META[m]?.label ?? m} ${c}`).join(", ")}`
@@ -630,7 +632,7 @@ export function AdvocateDashboard({
       <div class="goal">
         <div class="goal-head">
           <span><strong>${thisWeekCount}</strong> / ${weeklyGoal} ${weeklyGoal === 1 ? "contact" : "contacts"}</span>
-          <span class="goal-status" style="color:${goalBarColor}">${goalMet ? "✓ Goal met" : `${goalRemaining} to go`}</span>
+          <span class="goal-status" style="color:${goalBarColor}">${goalMet ? "Goal met" : `${goalRemaining} to go`}</span>
         </div>
         <div class="goal-track"><div class="goal-fill" style="width:${goalBarPct}%;background:${goalBarColor}"></div></div>
       </div>` : "";
@@ -763,7 +765,7 @@ export function AdvocateDashboard({
       label: "Rated",
       value: stats.ratingsCount,
       icon: Star,
-      hint: stats.avgRating > 0 ? `avg ${stats.avgRating.toFixed(1)}★` : "no ratings",
+      hint: stats.avgRating > 0 ? `avg ${stats.avgRating.toFixed(1)}/5` : "no ratings",
       accent: "text-primary",
     },
     {
@@ -860,7 +862,7 @@ export function AdvocateDashboard({
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: -6, scale: 0.97 }}
                         transition={{ duration: 0.14, ease: "easeOut" }}
-                        className="absolute right-0 top-full z-50 mt-1.5 w-56 overflow-hidden rounded-xl border border-border/60 bg-popover/95 shadow-[0_20px_60px_-12px_rgba(0,0,0,0.6)] backdrop-blur-xl"
+                        className="absolute right-0 top-full z-50 mt-1.5 w-56 overflow-hidden rounded-xl border border-border/60 bg-popover/95 shadow-[var(--shadow-surface-hover)] backdrop-blur-xl"
                       >
                         <div className="border-b border-border/40 px-3 py-2">
                           <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground/70">
@@ -1137,16 +1139,17 @@ export function AdvocateDashboard({
                             </span>
                           ) : null}
                         </p>
-                        <p className="text-[11px] text-muted-foreground">
-                          {streakAtRisk
-                            ? "⚠ Streak at risk — log a contact this week to keep it alive!"
+                        <p className="flex items-start gap-1.5 text-[11px] text-muted-foreground">
+                          {streakAtRisk ? <BndrWarningIcon className="mt-0.5 size-3 shrink-0 text-primary" /> : null}
+                          <span>{streakAtRisk
+                            ? "Streak at risk — log a contact this week to keep it alive!"
                             : streak === 1
                               ? "You've logged a contact this week — keep it going!"
                               : streak < 4
                                 ? "Consistent outreach. Don't break the chain."
                                 : streak < 8
                                   ? "Strong cadence — your outreach is building momentum."
-                                  : "Exceptional consistency — advocate of the month territory."}
+                                  : "Exceptional consistency — advocate of the month territory."}</span>
                         </p>
                         {longestStreak > streak ? (
                           <p className="mt-0.5 text-[10px] text-muted-foreground/70">
@@ -1396,8 +1399,8 @@ export function AdvocateDashboard({
                                         height: `${h}%`,
                                         background: w.count > 0
                                           ? (isCurrent
-                                            ? "linear-gradient(to top, oklch(0.48 0.30 255), oklch(0.62 0.26 255))"
-                                            : "linear-gradient(to top, oklch(0.48 0.30 255 / 0.6), oklch(0.62 0.26 255 / 0.6))")
+                                            ? "linear-gradient(to top, var(--brand-accent), var(--brand-secondary))"
+                                            : "linear-gradient(to top, var(--glow-primary), var(--glow-secondary))")
                                           : "var(--muted)",
                                       }}
                                     />

@@ -67,7 +67,7 @@ export function CrisisHelpButton() {
             whileHover={{ scale: 1.06 }}
             whileTap={{ scale: 0.96 }}
             aria-label="Open crisis help — 24/7 hotlines"
-            className="group fixed bottom-4 right-4 z-40 flex items-center gap-2.5 rounded-full border border-primary/40 bg-card/80 px-4 py-3 text-sm font-medium text-foreground shadow-[0_0_30px_-6px_oklch(0.70_0.26_255/0.6)] backdrop-blur-xl transition-colors hover:border-primary/70 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 sm:bottom-6 sm:right-6 sm:px-5 sm:py-3.5 print:hidden"
+            className="group fixed bottom-4 right-4 z-40 flex items-center gap-2.5 rounded-full border border-primary/40 bg-card/80 px-4 py-3 text-sm font-medium text-foreground shadow-[var(--shadow-accent-strong)] backdrop-blur-xl transition-colors hover:border-primary/70 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 sm:bottom-6 sm:right-6 sm:px-5 sm:py-3.5 print:hidden"
           >
             <span className="relative flex size-2.5">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />

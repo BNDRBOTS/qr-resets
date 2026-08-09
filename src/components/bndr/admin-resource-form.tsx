@@ -348,7 +348,7 @@ export function AdminResourceForm({ editing, onDone }: AdminResourceFormProps) {
           <Button
             type="submit"
             disabled={saveMut.isPending}
-            className="bg-primary shadow-[0_0_20px_-6px_oklch(0.70_0.26_255/0.7)] hover:bg-primary/90"
+            className="bg-primary shadow-[var(--shadow-accent-strong)] hover:bg-primary/90"
           >
             <Save className="size-4" aria-hidden />
             {saveMut.isPending

@@ -36,7 +36,7 @@ export function BackToTop({ threshold = 0.4 }: { threshold?: number }) {
           transition={{ duration: 0.2 }}
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
           aria-label="Back to top"
-          className="fixed bottom-6 right-6 z-50 flex size-11 items-center justify-center rounded-full border border-primary/40 bg-card/80 backdrop-blur-xl shadow-[0_0_24px_-6px_oklch(0.62_0.19_18/0.6)] transition-all hover:border-primary/70 hover:bg-primary/15 hover:shadow-[0_0_32px_-4px_oklch(0.62_0.19_18/0.8)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
+          className="fixed bottom-6 right-6 z-50 flex size-11 items-center justify-center rounded-full border border-primary/40 bg-card/80 backdrop-blur-xl shadow-[var(--shadow-accent-soft)] transition-all hover:border-primary/70 hover:bg-primary/15 hover:shadow-[var(--shadow-accent-strong)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
         >
           <ArrowUp className="size-5 text-primary" aria-hidden />
         </motion.button>

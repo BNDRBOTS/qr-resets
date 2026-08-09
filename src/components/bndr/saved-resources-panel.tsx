@@ -451,10 +451,10 @@ export function SavedResourcesPanel({
       const note = getNote?.(r.id) ?? "";
       const rating = getRating?.(r.id) ?? 0;
       const contacted = getContacted?.(r.id) ?? "";
-      const stars = rating > 0 ? "★".repeat(rating) + "☆".repeat(5 - rating) : "";
+      const ratingText = rating > 0 ? `${rating}/5` : "";
       const contactLog = [
         contacted ? `Last contacted: ${new Date(contacted + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}` : "",
-        stars ? `Rating: ${stars}` : "",
+        ratingText ? `Rating: ${ratingText}` : "",
       ].filter(Boolean).join(" · ");
       return {
         name: r.name,
@@ -755,7 +755,7 @@ export function SavedResourcesPanel({
                               animate={{ opacity: 1, y: 0, scale: 1 }}
                               exit={{ opacity: 0, y: -6, scale: 0.97 }}
                               transition={{ duration: 0.14, ease: "easeOut" }}
-                              className="absolute right-0 top-full z-50 mt-1.5 w-56 overflow-hidden rounded-xl border border-border/60 bg-popover/95 shadow-[0_20px_60px_-12px_rgba(0,0,0,0.6)] backdrop-blur-xl"
+                              className="absolute right-0 top-full z-50 mt-1.5 w-56 overflow-hidden rounded-xl border border-border/60 bg-popover/95 shadow-[var(--shadow-surface-hover)] backdrop-blur-xl"
                             >
                               <div className="border-b border-border/40 px-3 py-2">
                                 <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground/70">
