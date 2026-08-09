@@ -18,6 +18,12 @@ export interface PublicStats {
   withPhone: number;
   withEmail: number;
   withWebsite: number;
+  categoryContactCoverage: {
+    category: string;
+    withPhone: number;
+    withEmail: number;
+    withWebsite: number;
+  }[];
 }
 
 export async function GET() {
@@ -37,18 +43,47 @@ export async function GET() {
       where: { ...pubFilter, website: { not: null } },
     });
 
-    const counts = await db.resource.groupBy({
-      by: ["category"],
-      _count: { _all: true },
-      where: pubFilter,
-    });
-    const countMap = new Map<string, number>();
-    for (const row of counts) {
-      countMap.set(row.category, row._count._all);
-    }
+    // Per-category totals and contact coverage come directly from the full
+    // published dataset. They never inherit the user's current search/filter.
+    const [counts, phoneCounts, emailCounts, websiteCounts] = await Promise.all([
+      db.resource.groupBy({
+        by: ["category"],
+        _count: { _all: true },
+        where: pubFilter,
+      }),
+      db.resource.groupBy({
+        by: ["category"],
+        _count: { _all: true },
+        where: { ...pubFilter, phoneNormalized: { not: null } },
+      }),
+      db.resource.groupBy({
+        by: ["category"],
+        _count: { _all: true },
+        where: { ...pubFilter, email: { not: null } },
+      }),
+      db.resource.groupBy({
+        by: ["category"],
+        _count: { _all: true },
+        where: { ...pubFilter, website: { not: null } },
+      }),
+    ]);
+
+    const toCountMap = (rows: typeof counts) =>
+      new Map(rows.map((row) => [row.category, row._count._all]));
+    const countMap = toCountMap(counts);
+    const phoneMap = toCountMap(phoneCounts);
+    const emailMap = toCountMap(emailCounts);
+    const websiteMap = toCountMap(websiteCounts);
+
     const byCategory = CATEGORIES.map((c) => ({
       category: c.slug,
       count: countMap.get(c.slug) ?? 0,
+    }));
+    const categoryContactCoverage = CATEGORIES.map((c) => ({
+      category: c.slug,
+      withPhone: phoneMap.get(c.slug) ?? 0,
+      withEmail: emailMap.get(c.slug) ?? 0,
+      withWebsite: websiteMap.get(c.slug) ?? 0,
     }));
 
     const stats: PublicStats = {
@@ -58,6 +93,7 @@ export async function GET() {
       withPhone,
       withEmail,
       withWebsite,
+      categoryContactCoverage,
     };
 
     return NextResponse.json(stats);

@@ -39,13 +39,40 @@ export async function GET(req: Request) {
       by: ["category"],
       _count: { _all: true },
     });
+    const phoneCounts = await db.resource.groupBy({
+      by: ["category"],
+      _count: { _all: true },
+      where: { phoneNormalized: { not: null } },
+    });
+    const emailCounts = await db.resource.groupBy({
+      by: ["category"],
+      _count: { _all: true },
+      where: { email: { not: null } },
+    });
+    const websiteCounts = await db.resource.groupBy({
+      by: ["category"],
+      _count: { _all: true },
+      where: { website: { not: null } },
+    });
+
     const countMap = new Map<string, number>();
-    for (const row of counts) {
-      countMap.set(row.category, row._count._all);
-    }
+    const phoneMap = new Map<string, number>();
+    const emailMap = new Map<string, number>();
+    const websiteMap = new Map<string, number>();
+    for (const row of counts) countMap.set(row.category, row._count._all);
+    for (const row of phoneCounts) phoneMap.set(row.category, row._count._all);
+    for (const row of emailCounts) emailMap.set(row.category, row._count._all);
+    for (const row of websiteCounts) websiteMap.set(row.category, row._count._all);
+
     const byCategory = CATEGORIES.map((c) => ({
       category: c.slug,
       count: countMap.get(c.slug) ?? 0,
+    }));
+    const categoryContactCoverage = CATEGORIES.map((c) => ({
+      category: c.slug,
+      withPhone: phoneMap.get(c.slug) ?? 0,
+      withEmail: emailMap.get(c.slug) ?? 0,
+      withWebsite: websiteMap.get(c.slug) ?? 0,
     }));
 
     const recentAuditRows = await db.auditLog.findMany({
@@ -84,6 +111,7 @@ export async function GET(req: Request) {
       withPhone,
       withEmail,
       withWebsite,
+      categoryContactCoverage,
       recentAudit,
       lastPiipass,
       auditCount,

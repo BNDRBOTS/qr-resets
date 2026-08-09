@@ -80,7 +80,7 @@ export function SectionNav({ sections }: SectionNavProps) {
                 <span
                   className={`block rounded-full transition-all duration-300 ${
                     isActive
-                      ? "size-3 bg-primary shadow-[0_0_8px_oklch(0.70_0.26_330/0.6)]"
+                      ? "size-3 bg-primary shadow-[0_0_8px_var(--glow-primary)]"
                       : "size-2 bg-muted-foreground/40 group-hover:bg-muted-foreground/70"
                   }`}
                 />

@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/accordion";
 import { Logo } from "@/components/shared/logo";
 import { MissionConnection } from "@/components/shared/mission-connection";
+import { BndrCheckIcon, BndrCloseIcon } from "@/components/shared/bndr-icons";
 import { Section } from "./qr-section";
 import { QrNav } from "./qr-nav";
 import { QrScrollProgress } from "./qr-scroll-progress";
@@ -242,7 +243,7 @@ function QrHero() {
       {/* Cool-blue circular halo behind the logo */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute left-1/2 top-[38%] -z-0 h-[70vmin] w-[70vmin] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle_at_center,oklch(0.58_0.14_235/0.18),transparent_70%)] blur-3xl"
+        className="bndr-hero-halo pointer-events-none absolute left-1/2 top-[38%] -z-0 h-[70vmin] w-[70vmin] -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl"
       />
 
       {/* Ambient floating particles */}
@@ -255,7 +256,7 @@ function QrHero() {
         transition={{ duration: 1, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
         className="relative"
       >
-        <Logo size={128} priority className="drop-shadow-[0_0_28px_oklch(0.62_0.19_18/0.55)]" />
+        <Logo size={128} priority className="drop-shadow-[0_0_28px_var(--glow-primary)]" />
       </motion.div>
 
       {/* Brand label */}
@@ -577,12 +578,7 @@ function QrConsentPromise() {
               key={i}
               className="flex items-start gap-3 rounded-lg border border-border/60 bg-card/40 p-3.5 text-sm leading-relaxed text-foreground/90"
             >
-              <span
-                aria-hidden="true"
-                className="mt-0.5 shrink-0 text-xs font-bold text-primary"
-              >
-                ✕
-              </span>
+              <BndrCloseIcon className="mt-0.5 size-3.5 shrink-0 text-primary" />
               <span>{item}</span>
             </div>
           ))}
@@ -751,7 +747,7 @@ function ChoiceField({
               "rounded-full border px-4 py-1.5 text-sm transition-all",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60",
               active
-                ? "border-primary bg-primary/15 text-foreground shadow-[0_0_18px_-6px_oklch(0.62_0.19_18/0.4)]"
+                ? "border-primary bg-primary/15 text-foreground shadow-[var(--shadow-accent-soft)]"
                 : "border-border/60 text-muted-foreground hover:border-primary/50 hover:text-foreground",
             )}
           >
@@ -991,7 +987,7 @@ function QrGiveCalculator() {
   // Shared inline style for the slider track: a linear-gradient that fills
   // the active portion with cool-blue and leaves the rest muted.
   const sliderStyle = (pct: number): React.CSSProperties => ({
-    background: `linear-gradient(to right, oklch(0.58 0.14 235) 0%, oklch(0.58 0.14 235) ${pct}%, oklch(0.22 0.014 320) ${pct}%, oklch(0.22 0.014 320) 100%)`,
+    background: `linear-gradient(to right, var(--brand-accent) 0%, var(--brand-accent) ${pct}%, var(--muted) ${pct}%, var(--muted) 100%)`,
   });
 
   return (
@@ -1146,9 +1142,7 @@ function QrGive() {
                 key={i}
                 className="flex items-start gap-3 text-sm leading-relaxed text-foreground/90"
               >
-                <span aria-hidden="true" className="mt-0.5 text-xs font-bold text-primary">
-                  ✕
-                </span>
+                <BndrCloseIcon className="mt-0.5 size-3.5 shrink-0 text-primary" />
                 <span>{r}</span>
               </li>
             ))}
@@ -1370,9 +1364,7 @@ function QrRules() {
                     key={i}
                     className="flex items-start gap-3 text-sm leading-relaxed text-foreground/90"
                   >
-                    <span aria-hidden="true" className="mt-0.5 text-xs font-bold text-primary">
-                      ✓
-                    </span>
+                    <BndrCheckIcon className="mt-0.5 size-3.5 shrink-0 text-primary" />
                     <span>{m}</span>
                   </li>
                 ))}
@@ -1388,9 +1380,7 @@ function QrRules() {
                     key={i}
                     className="flex items-start gap-3 text-sm leading-relaxed text-foreground/90"
                   >
-                    <span aria-hidden="true" className="mt-0.5 text-xs font-bold text-destructive">
-                      ✕
-                    </span>
+                    <BndrCloseIcon className="mt-0.5 size-3.5 shrink-0 text-destructive" />
                     <span>{m}</span>
                   </li>
                 ))}
@@ -1454,9 +1444,7 @@ function QrTransparency() {
                   key={i}
                   className="flex items-start gap-3 text-sm leading-relaxed text-foreground/90"
                 >
-                  <span aria-hidden="true" className="mt-0.5 text-xs font-bold text-primary">
-                    ✓
-                  </span>
+                  <BndrCheckIcon className="mt-0.5 size-3.5 shrink-0 text-primary" />
                   <span>{w}</span>
                 </li>
               ))}
@@ -1472,9 +1460,7 @@ function QrTransparency() {
                   key={i}
                   className="flex items-start gap-3 text-sm leading-relaxed text-foreground/90"
                 >
-                  <span aria-hidden="true" className="mt-0.5 text-xs font-bold text-destructive">
-                    ✕
-                  </span>
+                  <BndrCloseIcon className="mt-0.5 size-3.5 shrink-0 text-destructive" />
                   <span>{w}</span>
                 </li>
               ))}
@@ -1646,9 +1632,7 @@ function QrEvidence() {
                 key={i}
                 className="flex items-start gap-3 rounded-lg border border-border/60 bg-card/40 p-3 text-sm leading-relaxed text-foreground/90"
               >
-                <span aria-hidden="true" className="mt-0.5 text-xs font-bold text-destructive">
-                  ✕
-                </span>
+                <BndrCloseIcon className="mt-0.5 size-3.5 shrink-0 text-destructive" />
                 <span>{c}</span>
               </li>
             ))}

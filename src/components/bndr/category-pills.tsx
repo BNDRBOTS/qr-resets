@@ -13,9 +13,9 @@ interface CategoryPillsProps {
 }
 
 /**
- * Horizontally-scrollable on mobile, wrapping on desktop. Each pill shows the
- * category shortName + count. "All" pill first. Clicking the small info icon
- * on a category pill opens the category overview modal (if onShowCategory set).
+ * Mobile-first category filter rail. Every category uses the same pill geometry.
+ * The overview control lives inside a dedicated icon cell so it cannot overlap
+ * the category label/count or create an asymmetrical joined-pill shape.
  */
 export function CategoryPills({
   active,
@@ -37,59 +37,53 @@ export function CategoryPills({
     <section
       id="categories"
       aria-label="Filter by category"
-      className="sticky top-16 z-30 border-b border-border/60 bg-background/80 backdrop-blur-xl"
+      className="bndr-glass-bar sticky top-16 z-30 border-y border-border/55"
     >
-      <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="bndr-pill-scroll flex gap-2 overflow-x-auto py-3">
-          {pills.map((p) => {
-            const isActive = active === p.slug;
-            const isCategory = p.slug !== "all";
+      <div className="container mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
+        <div className="bndr-pill-scroll flex gap-2 overflow-x-auto py-2.5 sm:flex-wrap sm:justify-center sm:overflow-visible sm:py-3">
+          {pills.map((pill) => {
+            const isActive = active === pill.slug;
+            const isCategory = pill.slug !== "all";
+
             return (
-              <div
-                key={p.slug}
-                className="group flex shrink-0 items-stretch"
+              <motion.div
+                key={pill.slug}
+                whileTap={{ scale: 0.985 }}
+                className={
+                  "bndr-filter-pill group flex h-10 shrink-0 items-stretch overflow-hidden rounded-full border transition-all " +
+                  (isActive
+                    ? "border-primary/55 bg-primary/12 text-primary shadow-[var(--shadow-accent-soft)]"
+                    : "border-border/70 bg-card/58 text-muted-foreground hover:border-primary/35 hover:bg-card/78 hover:text-foreground")
+                }
               >
-                <motion.button
+                <button
                   type="button"
-                  whileTap={{ scale: 0.97 }}
-                  onClick={() => onChange(p.slug)}
+                  onClick={() => onChange(pill.slug)}
                   aria-pressed={isActive}
-                  className={
-                    "flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm transition-colors " +
-                    (isActive
-                      ? "border-primary/60 bg-primary/15 text-primary shadow-[0_0_18px_-6px_oklch(0.70_0.26_255/0.6)]"
-                      : "border-border bg-muted/40 text-muted-foreground hover:border-primary/30 hover:text-primary") +
-                    (isCategory && onShowCategory ? " rounded-r-none pr-2.5" : "")
-                  }
+                  className="flex min-w-0 items-center gap-2 rounded-l-full px-3 text-sm font-medium outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/55 sm:px-3.5"
                 >
-                  <span className="whitespace-nowrap">{p.label}</span>
+                  <span className="max-w-[12.5rem] whitespace-nowrap">{pill.label}</span>
                   <span
                     className={
-                      "rounded-full px-1.5 py-0.5 text-[10px] font-medium tabular-nums " +
-                      (isActive
-                        ? "bg-primary/25 text-primary"
-                        : "bg-muted-foreground/15 text-muted-foreground")
+                      "inline-flex min-w-6 items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold tabular-nums " +
+                      (isActive ? "bg-primary/18 text-primary" : "bg-muted/75 text-muted-foreground")
                     }
                   >
-                    {p.count}
+                    {pill.count}
                   </span>
-                </motion.button>
+                </button>
+
                 {isCategory && onShowCategory ? (
                   <button
                     type="button"
-                    onClick={() => onShowCategory(p.slug as CategorySlug)}
-                    aria-label={`Overview of ${p.label} category`}
-                    className={
-                      "flex items-center justify-center rounded-full border border-l-0 px-1.5 text-muted-foreground/60 transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 " +
-                      (isActive
-                        ? "border-primary/60 bg-primary/15"
-                        : "border-border bg-muted/40 hover:border-primary/30")
-                    }
+                    onClick={() => onShowCategory(pill.slug as CategorySlug)}
+                    aria-label={`Overview of ${pill.label} category`}
+                    className="flex w-9 shrink-0 items-center justify-center border-l border-current/10 text-current/70 outline-none transition-colors hover:bg-primary/10 hover:text-primary focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/55"
                   >
-                    <Info className="size-3" aria-hidden />
+                    <Info className="size-3.5" aria-hidden />
                   </button>
                 ) : null}
-              </div>
+              </motion.div>
             );
           })}
         </div>

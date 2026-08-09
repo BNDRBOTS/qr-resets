@@ -66,7 +66,7 @@ export function AdminCleanup({ lastPiipass, onRan }: AdminCleanupProps) {
           <Button
             onClick={() => mut.mutate()}
             disabled={mut.isPending}
-            className="bg-primary shadow-[0_0_20px_-6px_oklch(0.70_0.26_255/0.7)] hover:bg-primary/90"
+            className="bg-primary shadow-[var(--shadow-accent-strong)] hover:bg-primary/90"
           >
             <Play className="size-4" aria-hidden />
             {mut.isPending ? "Running…" : "Run pass"}

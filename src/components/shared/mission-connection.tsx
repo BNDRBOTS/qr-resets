@@ -26,7 +26,7 @@ export function MissionConnection({ from }: { from: "bndr" | "qr" }) {
         {/* cool-blue radial accent */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute right-0 top-0 h-full w-1/2 bg-[radial-gradient(ellipse_at_right,oklch(0.62_0.19_18/0.12),transparent_70%)]"
+          className="pointer-events-none absolute right-0 top-0 h-full w-1/2 bg-[radial-gradient(ellipse_at_right,var(--glow-primary-soft),transparent_70%)]"
         />
         <div className="container mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col items-start gap-6 sm:flex-row sm:items-center sm:justify-between">
@@ -52,7 +52,7 @@ export function MissionConnection({ from }: { from: "bndr" | "qr" }) {
                   setSite("qr");
                   window.scrollTo({ top: 0 });
                 }}
-                className="gap-2 rounded-full shadow-[0_0_24px_-6px_oklch(0.62_0.19_18/0.6)] hover:shadow-[0_0_32px_-4px_oklch(0.62_0.19_18/0.8)]"
+                className="gap-2 rounded-full shadow-[var(--shadow-accent-soft)] hover:shadow-[var(--shadow-accent-strong)]"
               >
                 <Sparkles className="size-4" aria-hidden />
                 Explore QR Resets™
@@ -78,7 +78,7 @@ export function MissionConnection({ from }: { from: "bndr" | "qr" }) {
     >
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute left-0 top-0 h-full w-1/2 bg-[radial-gradient(ellipse_at_left,oklch(0.62_0.19_18/0.12),transparent_70%)]"
+        className="pointer-events-none absolute left-0 top-0 h-full w-1/2 bg-[radial-gradient(ellipse_at_left,var(--glow-primary-soft),transparent_70%)]"
       />
       <div className="container mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col items-start gap-6 sm:flex-row sm:items-center sm:justify-between">

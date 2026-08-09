@@ -29,7 +29,7 @@ export function CountBar({
     <motion.div
       initial={{ opacity: 0, y: -4 }}
       animate={{ opacity: 1, y: 0 }}
-      className="mb-4 flex flex-wrap items-center gap-3 rounded-xl border border-border/40 bg-card/30 px-4 py-2.5"
+      className="bndr-glass-bar mb-4 flex flex-wrap items-center gap-3 rounded-2xl px-3.5 py-3 sm:px-4"
     >
       <div className="flex items-center gap-2">
         <span className="text-sm font-bold tabular-nums text-foreground">
@@ -46,7 +46,7 @@ export function CountBar({
           initial={{ width: 0 }}
           animate={{ width: `${pct}%` }}
           transition={{ duration: 0.5, ease: "easeOut" }}
-          className={`h-full rounded-full ${isFiltered ? "bg-primary" : "bg-emerald-500"}`}
+          className="h-full rounded-full bg-primary shadow-[0_0_10px_var(--glow-primary)]"
         />
       </div>
 

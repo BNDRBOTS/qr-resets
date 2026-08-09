@@ -52,8 +52,8 @@ export function AdminLoginForm({
   }
 
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center bg-background px-4">
-      <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,_var(--brand-accent,oklch(0.62_0.14_235))/0.06),transparent_70%)]" />
+    <div className="relative flex min-h-screen min-h-[100svh] flex-col items-center justify-center overflow-hidden bg-background px-4 py-10 sm:px-6">
+      <div className="bndr-hero-halo pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[68vmin] w-[68vmin] -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl" />
       <div className="w-full max-w-sm">
         <div className="mb-6 flex flex-col items-center gap-3">
           <BndrLogo size={48} />
@@ -67,7 +67,7 @@ export function AdminLoginForm({
 
         <form
           onSubmit={handleSubmit}
-          className="space-y-4 rounded-xl border border-border bg-card/90 p-6 shadow-lg backdrop-blur"
+          className="bndr-glass-panel space-y-4 rounded-2xl p-4 sm:p-6"
         >
           <div className="space-y-2">
             <Label htmlFor="email" className="text-sm font-medium">
@@ -110,7 +110,7 @@ export function AdminLoginForm({
           </div>
 
           {err && (
-            <div className="flex items-start gap-2 rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
+            <div className="bndr-glass-control flex items-start gap-2 rounded-xl border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
               <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
               <span>{err}</span>
             </div>

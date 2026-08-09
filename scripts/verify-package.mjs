@@ -143,8 +143,8 @@ if (!siteRouter.includes("<Directory />") || !siteRouter.includes("<QrSite />"))
   fail("Root site router is not wired to both views");
 }
 const qrSite = readFileSync(join(root, "src/components/qr/qr-site.tsx"), "utf8");
-if (!qrSite.includes("h-[70vmin] w-[70vmin]") || !qrSite.includes("circle_at_center")) {
-  fail("QR hero halo is not a true 70vmin circle");
+if (!qrSite.includes("h-[70vmin] w-[70vmin]") || !qrSite.includes("bndr-hero-halo")) {
+  fail("QR hero halo is not a true 70vmin circle using the shared theme-aware halo");
 }
 if (qrSite.includes("h-[60vmin] w-[90vmin]") || qrSite.includes("ellipse_at_center")) {
   fail("Old oblong QR hero halo remains");
@@ -230,14 +230,54 @@ if (/session\?\.user\?\.email\s*\?\?\s*["']admin["']|session\?\.user\?\.email\s*
 }
 
 const globalsCss = readFileSync(join(root, "src/app/globals.css"), "utf8");
-if (!globalsCss.includes("--background: #F3EDE6;") || !globalsCss.includes("--foreground: #111111;")) {
-  fail("Default production palette is not literal sand-bone #F3EDE6 + black #111111");
+if (!globalsCss.includes("--theme-light-background: #F3EDE6;") || !globalsCss.includes("--theme-light-foreground: #111111;")) {
+  fail("Day palette no longer preserves literal sand-bone #F3EDE6 + black foreground");
 }
-if (!globalsCss.includes("--brand-accent-h: 235;") || /--magenta/.test(globalsCss)) {
-  fail("Brand accent is not the requested cool-blue family");
+if (!globalsCss.includes("--theme-light-primary: #FF355E;") || !globalsCss.includes("--brand-accent: var(--theme-light-primary);")) {
+  fail("Day accent is not globally wired to exact #FF355E");
+}
+if (!globalsCss.includes("--theme-dark-primary: oklch(0.68 0.16 235);") || !globalsCss.includes("--brand-accent: var(--theme-dark-primary);")) {
+  fail("Night mode no longer preserves the existing cool-blue accent family");
+}
+if (!globalsCss.includes("--glass-surface:") || !globalsCss.includes("--shadow-surface:") || !globalsCss.includes(".bndr-glass-panel")) {
+  fail("Global dimensional/glass surface tokens are incomplete");
 }
 if (!globalsCss.includes("circle at center") || globalsCss.includes("ellipse at center")) {
   fail("Hero halo gradient is not explicitly circular");
+}
+
+const categoryGrid = readFileSync(join(root, "src/components/bndr/category-grid.tsx"), "utf8");
+if (!categoryGrid.includes("CATEGORIES.map") || /sort\([^)]*count|slice\(0,\s*6\)|top 6/i.test(categoryGrid)) {
+  fail("Category browser is ranking or truncating categories instead of giving equal default prominence");
+}
+const categoryPills = readFileSync(join(root, "src/components/bndr/category-pills.tsx"), "utf8");
+if (!categoryPills.includes("bndr-filter-pill") || categoryPills.includes("rounded-r-none") || categoryPills.includes("border-l-0")) {
+  fail("Category filter pills regressed to asymmetric joined controls");
+}
+const resourceCardSource = readFileSync(join(root, "src/components/bndr/resource-card.tsx"), "utf8");
+if (/md:col-span-2|lg:col-span-3/.test(resourceCardSource) || /tags\.slice\(0,\s*isPriority/.test(resourceCardSource)) {
+  fail("Priority resources still receive disproportionate card footprint/content treatment");
+}
+if (directorySource.includes("FeaturedSpotlight") || !directorySource.includes("pageSize={500}")) {
+  fail("Directory still applies a universal featured spotlight or does not render the complete result set");
+}
+const defaultSearchSource = readFileSync(join(root, "src/lib/search.ts"), "utf8");
+if (!defaultSearchSource.includes("a.name.localeCompare(b.name)")) {
+  fail("Default all-resources ordering is not neutral alphabetical ordering");
+}
+
+const emojiPattern = /[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/u;
+for (const file of files.filter((file) => [".ts", ".tsx", ".js", ".mjs", ".md"].includes(extname(file)))) {
+  const rel = relative(root, file);
+  if (emojiPattern.test(readFileSync(file, "utf8"))) fail(`${rel}: emoji/symbol glyph remains`);
+}
+
+const authSource = readFileSync(join(root, "src/lib/auth-options.ts"), "utf8");
+if (!authSource.includes("process.env.ADMIN_EMAIL") || !authSource.includes("process.env.ADMIN_PASSWORD_HASH") || !authSource.includes("process.env.ADMIN_PASSWORD")) {
+  fail("Admin credentials are not sourced exclusively from environment variables");
+}
+if (/ADMIN_(?:EMAIL|PASSWORD|PASSWORD_HASH)\s*=\s*["'][^"']+["']/.test(authSource)) {
+  fail("Hard-coded admin credentials detected");
 }
 
 

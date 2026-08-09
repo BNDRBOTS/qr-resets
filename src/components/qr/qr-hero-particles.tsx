@@ -46,7 +46,7 @@ export function QrHeroParticles({ count = 24 }: { count?: number }) {
             top: `${p.startTop}%`,
             width: p.size,
             height: p.size,
-            boxShadow: `0 0 ${p.size * 3}px oklch(0.72 0.28 350 / 0.7)`,
+            boxShadow: `0 0 ${p.size * 3}px var(--glow-primary)`,
           }}
           animate={{
             y: [0, -120, -240],

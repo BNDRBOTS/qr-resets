@@ -46,7 +46,7 @@ export function Hero({
   return (
     <section
       id="top"
-      className="relative flex min-h-[88vh] flex-col items-center justify-center overflow-hidden px-4 py-20 text-center sm:px-6 lg:px-8"
+      className="relative flex min-h-[88vh] min-h-[calc(100svh-4rem)] flex-col items-center justify-center overflow-hidden px-4 py-14 text-center sm:px-6 sm:py-18 lg:px-8 lg:py-20"
     >
       {/* Warm circular radial halo behind the logo — theme-aware via .bndr-hero-halo */}
       <div
@@ -104,7 +104,7 @@ export function Hero({
             onClick={onTogglePriority}
             className={
               priorityOnly
-                ? "rounded-full shadow-[0_0_18px_-4px_oklch(0.70_0.26_255/0.7)]"
+                ? "rounded-full shadow-[var(--shadow-accent-strong)]"
                 : "rounded-full border-border hover:border-primary/40 hover:text-primary"
             }
             aria-pressed={priorityOnly}

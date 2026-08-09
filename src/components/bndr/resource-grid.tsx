@@ -133,7 +133,7 @@ export function ResourceGrid({
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative flex flex-col items-center justify-center gap-6 overflow-hidden rounded-2xl border border-dashed border-border/80 bg-card/20 px-6 py-20 text-center"
+        className="bndr-glass-panel relative flex flex-col items-center justify-center gap-5 overflow-hidden rounded-2xl px-4 py-14 text-center sm:gap-6 sm:px-6 sm:py-20"
       >
         {/* Decorative gradient blob */}
         <div
@@ -188,7 +188,7 @@ export function ResourceGrid({
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 lg:auto-rows-fr">
+      <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3 lg:auto-rows-fr">
         {shown.map((r, i) => (
           <ResourceCard
             key={r.id}
@@ -213,19 +213,16 @@ export function ResourceGrid({
       {/* Result count + Load more */}
       <div className="flex flex-col items-center gap-3 pt-4">
         <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
-          Showing {shown.length} of {totalCount}{" "}
-          {totalCount === 1 ? "match" : "matches"}
+          {shown.length >= totalCount
+            ? `Displaying all ${totalCount} ${totalCount === 1 ? "match" : "matches"}`
+            : `Showing ${shown.length} of ${totalCount} matches`}
         </p>
         {hasMore ? (
           <RevealMoreButton
             onClick={() => setVisibleCount((c) => c + pageSize)}
             remaining={totalCount - shown.length}
           />
-        ) : (
-          <p className="text-xs text-muted-foreground/60">
-            All {totalCount} {totalCount === 1 ? "match" : "matches"} shown
-          </p>
-        )}
+        ) : null}
       </div>
     </div>
   );

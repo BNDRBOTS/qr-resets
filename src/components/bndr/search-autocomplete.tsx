@@ -161,7 +161,7 @@ export function SearchAutocomplete({
         aria-controls="search-suggestions"
         role="combobox"
         aria-autocomplete="list"
-        className="bndr-search bndr-search-shadow h-14 rounded-full border-border bg-card/60 pl-12 pr-12 text-base backdrop-blur-xl transition-all duration-300 placeholder:text-muted-foreground focus:border-primary/50 focus:bg-card/80 focus:shadow-[0_0_0_3px_oklch(0.70_0.26_330/0.15),0_8px_30px_-8px_oklch(0.70_0.26_330/0.3)]"
+        className="bndr-search bndr-search-shadow h-14 rounded-full border-border bg-card/60 pl-12 pr-12 text-base backdrop-blur-xl transition-all duration-300 placeholder:text-muted-foreground focus:border-primary/50 focus:bg-card/80 focus:shadow-[var(--shadow-accent-strong)]"
       />
       {/* Clear button — one-click reset when there's a query */}
       {query.trim().length > 0 ? (
@@ -187,7 +187,7 @@ export function SearchAutocomplete({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.98 }}
             transition={{ duration: 0.15, ease: "easeOut" }}
-            className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-2xl border border-border/60 bg-popover/95 shadow-[0_20px_60px_-12px_rgba(0,0,0,0.7)] backdrop-blur-xl"
+            className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-2xl border border-border/60 bg-popover/95 shadow-[var(--shadow-surface-hover)] backdrop-blur-xl"
           >
             <div className="flex items-center justify-between px-3 py-1.5">
               <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-muted-foreground/70">
@@ -234,7 +234,7 @@ export function SearchAutocomplete({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.98 }}
             transition={{ duration: 0.15, ease: "easeOut" }}
-            className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-2xl border border-border/60 bg-popover/95 shadow-[0_20px_60px_-12px_rgba(0,0,0,0.7)] backdrop-blur-xl"
+            className="absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-2xl border border-border/60 bg-popover/95 shadow-[var(--shadow-surface-hover)] backdrop-blur-xl"
           >
             {/* Categories */}
             {suggestions.categories.length > 0 ? (

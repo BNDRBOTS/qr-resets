@@ -138,13 +138,12 @@ export function searchResources(
 ): ScoredResource[] {
   const tokens = meaningfulTokens(query);
   if (tokens.length === 0) {
-    // No query → priority-first then name, with the same pagination contract.
+    // No query means the neutral "all resources" view. Keep the complete set
+    // and sort by name only; priority remains an explicit filter/badge rather
+    // than silently dominating the default ordering.
     const sorted = resources
       .slice()
-      .sort((a, b) => {
-        if (b.priority !== a.priority) return b.priority - a.priority;
-        return a.name.localeCompare(b.name);
-      })
+      .sort((a, b) => a.name.localeCompare(b.name))
       .map((r) => ({ ...r, _score: 0, _matched: [] }));
     const limit = opts?.limit ?? sorted.length;
     const offset = opts?.offset ?? 0;
