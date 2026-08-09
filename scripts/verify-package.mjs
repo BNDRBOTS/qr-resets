@@ -180,8 +180,11 @@ for (const table of ["QrResetRequest", "QrRequestReview", "QrResetCase", "QrDona
   }
 }
 const healthRoute = readFileSync(join(root, "src/app/api/health/route.ts"), "utf8");
-if (!healthRoute.includes("db.datasetImport.findUnique") || !healthRoute.includes("sourceDatasetHash: EXPECTED_DATASET_SHA256") || !healthRoute.includes("datasetReady") || !healthRoute.includes("persistenceReady()") || !healthRoute.includes("adminConfigured()") || !healthRoute.includes("status: ready ? 200 : 503")) {
-  fail("Health endpoint is not a real DB + dataset + durable-persistence + admin readiness gate");
+if (!healthRoute.includes("db.datasetImport.findUnique") || !healthRoute.includes("sourceDatasetHash: EXPECTED_DATASET_SHA256") || !healthRoute.includes("datasetReady") || !healthRoute.includes("persistenceReady()") || !healthRoute.includes("adminConfigured()") || !healthRoute.includes("const ready = dbReady && datasetReady && persistence;") || !healthRoute.includes("status: ready ? 200 : 503")) {
+  fail("Health endpoint is not a real DB + dataset + durable-persistence readiness gate with non-blocking admin diagnostics");
+}
+if (healthRoute.includes("dbReady && datasetReady && persistence && admin")) {
+  fail("Admin credentials must not be a Railway deployment health prerequisite");
 }
 const adminDashboard = readFileSync(join(root, "src/components/bndr/admin-dashboard.tsx"), "utf8");
 if (!adminDashboard.includes("<AdminQrRequests />")) fail("Admin QR request review UI is not wired");

@@ -37,7 +37,7 @@ Do NOT add `NEXTAUTH_SECRET`, `RATE_LIMIT_PEPPER`, or `NEXTAUTH_URL` unless you 
 7. Starts `.next/standalone/server.js` on `0.0.0.0:$PORT`.
 8. Railway health-checks `/api/health`.
 
-`/api/health` returns HTTP 200 only when the DB is reachable, all 114 canonical resources are present, Railway persistence is durable, and single-admin credentials are configured.
+`/api/health` returns HTTP 200 when the DB is reachable, all 114 canonical resources are present, and Railway persistence is durable. Admin credential configuration is reported in the JSON diagnostics but does not block public deployment health; admin sign-in remains unavailable until credentials are configured.
 
 ## Optional PostgreSQL / Supabase
 

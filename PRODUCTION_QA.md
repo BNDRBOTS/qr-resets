@@ -20,7 +20,7 @@ The health endpoint requires:
 - canonical dataset import record is present;
 - exactly 114 canonical published rows are present;
 - persistence is durable in Railway production;
-- single-admin credentials are configured.
+- single-admin credential status is reported diagnostically but is not a Railway deployment-health prerequisite.
 
 ## Dependency-free gates executed in this artifact environment
 

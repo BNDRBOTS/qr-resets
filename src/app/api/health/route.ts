@@ -2,8 +2,9 @@
 // ----------------------------------------------------------------------------
 // Health validates the backend that is actually in use. Railway-local SQLite is
 // the default; PostgreSQL/Supabase is opt-in with STORAGE_BACKEND=postgres.
-// Public deployment readiness requires: database reachable, canonical 114-row
-// dataset present, durable persistence on Railway, and single-admin credentials.
+// Railway deployment readiness requires the server-owned data path to be usable:
+// database reachable, canonical 114-row dataset present, and durable persistence.
+// Admin credentials are reported diagnostically but do not make the public app unhealthy.
 
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
@@ -62,7 +63,7 @@ export async function GET() {
 
   const persistence = persistenceReady();
   const admin = adminConfigured();
-  const ready = dbReady && datasetReady && persistence && admin;
+  const ready = dbReady && datasetReady && persistence;
 
   return NextResponse.json(
     {
