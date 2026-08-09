@@ -1,0 +1,250 @@
+# QR Resets Mission Copy
+
+**QR Resets exists to help people meet urgent human needs with dignity, privacy, and autonomy — without forcing them to prove they are worthy of help.**
+
+Everyone needs the basics.
+
+Food.
+Safety.
+Shelter.
+A ride.
+A phone.
+A personal item.
+A medical trip.
+A rent gap.
+A quiet chance to ask for help without being publicly exposed, judged, or reduced to their worst moment.
+
+QR Resets uses public QR codes, local partners, and direct donor support to connect people with specific needs to people who want to help.
+
+The mission is simple:
+
+**Meet people where they are. Help with what is needed now. Preserve dignity. Create a path forward.**
+
+## Short version
+
+**QR Resets connects people with urgent needs to direct support through public QR codes — without judgment, humiliation, or unnecessary barriers.**
+
+It is built for people on the edge, people already in crisis, and people who still deserve a path back even when existing systems have failed them.
+
+**Help without humiliation.**
+**Support without judgment.**
+**Safety before collapse.**
+**A path back when no one else is offering one.**
+
+## Street-level mission
+
+Eventually, QR Resets is meant to reach people directly where they are.
+
+Not only online.
+Not only through programs.
+Not only after paperwork.
+Not only after someone fits a narrow category.
+
+The goal is to find people who would take a real opportunity for a comeback and help them move toward the next safer step.
+
+For one person, that might be a ride.
+For another, a phone.
+For another, temporary housing.
+For another, medical care.
+For another, a connection to the right service.
+For another, simply being treated like a human long enough to try again.
+
+## Core principle
+
+**A person does not become less worthy of dignity because they are poor, sick, ashamed, unhoused, overwhelmed, disqualified, addicted, traumatized, unsupported, or hard to help.**
+
+QR Resets is built around that truth.
+
+The platform is not about deciding who deserves humanity.
+
+It is about creating a practical path for people to receive specific help, preserve autonomy, and move one step closer to safety.
+
+================
+================
+
+# QR Resets math
+
+Phoenix **city** is about **1.67 million** people. Maricopa County is about **4.67 million**. The Phoenix metro area is about **5.19 million**, not quite 6 million. A 2025 FRED/Census-linked metro estimate is about **5.23 million**. ([Census.gov][1])
+
+## Pure $1/month math
+
+Assumption: each person gives **$1 per month**.
+
+|        Base population | If 0.1% give monthly | If 1% give monthly | If 5% give monthly | If 10% give monthly | If 50% give monthly |
+| ---------------------: | -------------------: | -----------------: | -----------------: | ------------------: | ------------------: |
+|    Phoenix city: 1.67M |            $1,673/mo |         $16,732/mo |         $83,658/mo |         $167,316/mo |         $836,582/mo |
+| Maricopa County: 4.67M |            $4,673/mo |         $46,731/mo |        $233,655/mo |         $467,310/mo |           $2.34M/mo |
+|   Phoenix metro: 5.19M |            $5,190/mo |         $51,900/mo |        $259,500/mo |         $519,000/mo |           $2.60M/mo |
+|        Hypothetical 6M |            $6,000/mo |         $60,000/mo |        $300,000/mo |         $600,000/mo |           $3.00M/mo |
+
+Annualized:
+
+| Base population |  1% monthly | 5% monthly | 10% monthly | 50% monthly |
+| --------------: | ----------: | ---------: | ----------: | ----------: |
+|    Phoenix city | $200,784/yr |  $1.00M/yr |   $2.01M/yr |  $10.04M/yr |
+| Maricopa County | $560,772/yr |  $2.80M/yr |   $5.61M/yr |  $28.04M/yr |
+|   Phoenix metro | $622,800/yr |  $3.11M/yr |   $6.23M/yr |  $31.14M/yr |
+| Hypothetical 6M | $720,000/yr |  $3.60M/yr |   $7.20M/yr |  $36.00M/yr |
+
+## The fee problem
+
+If each $1 donation is processed as a separate card transaction, Stripe’s standard listed U.S. online card fee is **2.9% + 30¢**, which leaves about **67.1¢** from each $1 before any other costs. ([Stripe][2])
+
+So the real net, if every $1 is its own transaction, looks more like this:
+
+| Base population | 1% monthly net | 5% monthly net | 10% monthly net | 50% monthly net |
+| --------------: | -------------: | -------------: | --------------: | --------------: |
+|    Phoenix city |     $11,229/mo |     $56,142/mo |     $112,284/mo |     $561,421/mo |
+| Maricopa County |     $31,355/mo |    $156,776/mo |     $313,552/mo |       $1.57M/mo |
+|   Phoenix metro |     $34,825/mo |    $174,125/mo |     $348,249/mo |       $1.74M/mo |
+| Hypothetical 6M |     $40,260/mo |    $201,300/mo |     $402,600/mo |       $2.01M/mo |
+
+That means your instinct is right, but the payment design matters.
+
+A pure **$1 public ask** is powerful.
+A pure **$1 card transaction every time** wastes a large percentage.
+
+## Realistic read
+
+The strongest version is:
+
+**Advertise $1. Let people give $1 without shame. Make the platform culturally built around $1. But technically design it so donors can add multiple $1 units in one transaction.**
+
+Example:
+
+| Donation | Stripe standard fee |    Net |
+| -------: | ------------------: | -----: |
+|       $1 |              $0.329 | $0.671 |
+|       $5 |              $0.445 | $4.555 |
+|      $10 |              $0.590 | $9.410 |
+
+So the public language can stay:
+
+**“One dollar helps.”**
+
+The checkout can allow:
+
+* $1
+* $2
+* $5
+* $10
+* custom
+
+But the psychology stays dignity-first:
+
+**No shame for $1. No pressure to give more.**
+
+## What this means
+
+This idea is not mathematically stupid.
+
+Even tiny participation is meaningful:
+
+* **0.1% of metro Phoenix** giving $1/month = about **$5,190/month gross**.
+* **1% of metro Phoenix** = about **$51,900/month gross**.
+* **5% of metro Phoenix** = about **$259,500/month gross**.
+* **10% of metro Phoenix** = about **$519,000/month gross**.
+* **Half of metro Phoenix** = about **$2.6M/month gross**, or **$31.1M/year gross**.
+
+The real bottleneck is not population.
+
+The bottleneck is:
+
+1. trust;
+2. local placement of QR codes;
+3. clean vetting without humiliation;
+4. payment-fee design;
+5. transparent need fulfillment;
+6. showing proof that dollars actually become help;
+7. preventing the platform from becoming bureaucratic or exploitative.
+
+## Clean public line
+
+**QR Resets is a dignity-first local aid platform built around the smallest possible ask: $1.**
+
+People scan QR codes placed around the city, give a dollar, and help fund specific needs for people close to collapse but still fighting to stay independent.
+
+The mission is bigger than emergency charity:
+
+**help before collapse, privacy before humiliation, autonomy before bureaucracy.**
+
+[1]: https://www.census.gov/quickfacts/fact/table/phoenixcityarizona/PST045224?utm_source=chatgpt.com "U.S. Census Bureau QuickFacts: Phoenix city, Arizona"
+[2]: https://stripe.com/pricing?utm_source=chatgpt.com "Pricing & Fees"
+
+==================
+==================
+
+That is the sharpest version: **trust-first, refusal-without-accusation, low-dollar dignity aid.**
+
+The important design principle is:
+
+**Beacon can deny a request without making a character claim about the person.**
+
+A denial can mean:
+
+* not enough info
+* item category not supported
+* request amount too high for current tier
+* fulfillment path unclear
+* duplicate request too soon
+* risk needs a second reviewer
+* platform does not have funds available
+
+It does **not** mean:
+
+* “you’re lying”
+* “you’re on drugs”
+* “you’re scamming”
+* “you don’t deserve help”
+
+That matters because anxious people, traumatized people, sick people, embarrassed people, and people in crisis can all present “messy.” A system that reads messy as guilty will fail the exact people it claims to serve.
+
+The second-review idea is strong. It takes pressure off the first reviewer and keeps the platform from becoming cold or arbitrary.
+
+Clean model:
+
+**Reviewer 1:** checks request against policy.
+**Reviewer 2 / human dignity review:** looks at edge cases before refusal becomes final.
+**Final answer:** neutral, no accusation, with a possible smaller/safer alternate fulfillment path.
+
+Example:
+
+**“We can’t fulfill this exact request as submitted, but we may be able to help with a lower-cost version, a restricted store card, or a direct vendor payment.”**
+
+That preserves the person while protecting the pool.
+
+The Amish register example maps to the deeper point: trust systems can work when the culture, stakes, and social norms support them. Beacon would not rely on pure trust everywhere. It would borrow the part that matters:
+
+**start from human trust, then add quiet guardrails only where needed.**
+
+The Facebook group comparison is exactly the market proof. People are already doing this in chaotic form:
+
+* public posts
+* screenshots
+* Venmo/Cash App
+* humiliation risk
+* scam risk
+* donor uncertainty
+* no fulfillment trail
+* no privacy
+* no repeatable structure
+
+Beacon makes the existing behavior cleaner:
+
+**anonymous request → small need → pooled/community funding → restricted fulfillment → receipt/status → dignity preserved**
+
+The “membership” angle can work if it is not treated like a paywall for desperate people. Better as trust/account structure:
+
+* free recipient account
+* donor account
+* sponsor account
+* local helper/reviewer account
+* business/event/Airbnb sponsor account
+
+QR Resets then becomes the low-friction public layer:
+
+**scan → reset page → tiny useful help → donate/sponsor/request → Beacon pool**
+
+That is a coherent ecosystem:
+
+**QR Resets brings people in. Beacon routes help. BNDR builds the system.**

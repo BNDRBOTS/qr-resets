@@ -1,0 +1,12 @@
+[build]
+builder = "railpack"
+buildCommand = "npm run build"
+
+[deploy]
+# Database initialization happens in the start command because Railway volumes
+# are mounted at service start, not during pre-deploy.
+startCommand = "npm run start"
+healthcheckPath = "/api/health"
+healthcheckTimeout = 180
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10

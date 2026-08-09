@@ -1,0 +1,78 @@
+{
+  "packageVersion": "1.1.4",
+  "generatedAt": "2026-08-09T09:18:56.424Z",
+  "artifactEnvironment": {
+    "node": "v22.16.0",
+    "npm": "10.9.2"
+  },
+  "gates": [
+    {
+      "name": "package-contract",
+      "command": "node scripts/verify-package.mjs",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 39,
+      "stdout": "BNDR package verification PASS\nFiles scanned: 250\nDataset rows: 114\nSource-verified flags: 103\nDataset SHA-256: 5e9a8438ee652c9be5b44fb781a2ba94db9dafffddcc720c254bc291aab2d72b",
+      "stderr": ""
+    },
+    {
+      "name": "canonical-dataset",
+      "command": "node scripts/verify-dataset.mjs",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 24,
+      "stdout": "{\"ok\":true,\"rows\":114,\"sourceVerified\":103,\"sha256\":\"5e9a8438ee652c9be5b44fb781a2ba94db9dafffddcc720c254bc291aab2d72b\"}",
+      "stderr": ""
+    },
+    {
+      "name": "import-graph",
+      "command": "node scripts/verify-imports.mjs",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 36,
+      "stdout": "{\n  \"ok\": true,\n  \"sourceFiles\": 184,\n  \"localImportEdges\": 463,\n  \"brokenLocalImports\": [],\n  \"undeclaredExternalRoots\": []\n}",
+      "stderr": ""
+    },
+    {
+      "name": "typescript-syntax",
+      "command": "node scripts/verify-syntax.mjs",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 1081,
+      "stdout": "{\n  \"ok\": true,\n  \"files\": 186,\n  \"diagnostics\": []\n}",
+      "stderr": ""
+    },
+    {
+      "name": "dependency-free-contract-tests",
+      "command": "npm run test:contracts",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 234,
+      "stdout": "> bndr-resource-directory-qr-resets@1.1.4 test:contracts\n> node --no-warnings --experimental-strip-types --test tests/*.test.mjs\n\nTAP version 13\n# Subtest: HTML output is escaped before print interpolation\nok 1 - HTML output is escaped before print interpolation\n  ---\n  duration_ms: 0.767342\n  type: 'test'\n  ...\n# Subtest: CSV cells neutralize spreadsheet formulas before quoting\nok 2 - CSV cells neutralize spreadsheet formulas before quoting\n  ---\n  duration_ms: 0.286586\n  type: 'test'\n  ...\n# Subtest: canonical dataset remains exactly 114 packaged resources\nok 3 - canonical dataset remains exactly 114 packaged resources\n  ---\n  duration_ms: 1.933839\n  type: 'test'\n  ...\n# Subtest: dual-view router keeps Resource Directory and QR Resets in one app\nok 4 - dual-view router keeps Resource Directory and QR Resets in one app\n  ---\n  duration_ms: 0.282781\n  type: 'test'\n  ...\n# Subtest: both hero halos are circular and use equal dimensions\nok 5 - both hero halos are circular and use equal dimensions\n  ---\n  duration_ms: 1.110653\n  type: 'test'\n  ...\n# Subtest: requested sand-bone and black default palette is literal\nok 6 - requested sand-bone and black default palette is literal\n  ---\n  duration_ms: 0.184955\n  type: 'test'\n  ...\n# Subtest: Railway initializes durable local storage at service start and uses real health path\nok 7 - Railway initializes durable local storage at service start and uses real health path\n  ---\n  duration_ms: 0.322249\n  type: 'test'\n  ...\n# Subtest: deployment seed is additive and canonical health check is data-backed\nok 8 - deployment seed is additive and canonical health check is data-backed\n  ---\n  duration_ms: 0.192957\n  type: 'test'\n  ...\n# Subtest: Railway config uses current railpack builder and start-time volume initialization\nok 9 - Railway config uses current railpack builder and start-time volume initialization\n  ---\n  duration_ms: 0.279707\n  type: 'test'\n  ...\n# Subtest: build is self-contained from Google font network fetches\nok 10 - build is self-contained from Google font network fetches\n  ---\n  duration_ms: 0.118686\n  type: 'test'\n  ...\n# Subtest: browser mutations are same-origin gated\nok 11 - browser mutations are same-origin gated\n  ---\n  duration_ms: 0.328439\n  type: 'test'\n  ...\n# Subtest: public pending register exposes only name and reason\nok 12 - public pending register exposes only name and reason\n  ---\n  duration_ms: 0.468637\n  type: 'test'\n  ...\n# Subtest: directory priority copy does not assert a strongest-five invariant\nok 13 - directory priority copy does not assert a strongest-five invariant\n  ---\n  duration_ms: 0.277393\n  type: 'test'\n  ...\n# Subtest: Railway-local SQLite is default while PostgreSQL/Supabase remains opt-in\nok 14 - Railway-local SQLite is default while PostgreSQL/Supabase remains opt-in\n  ---\n  duration_ms: 0.160709\n  type: 'test'\n  ...\n# Subtest: browser-side advocate state remains localStorage-backed\nok 15 - browser-side advocate state remains localStorage-backed\n  ---\n  duration_ms: 0.162002\n  type: 'test'\n  ...\n# Subtest: health requires durable persistence and configured single-admin access\nok 16 - health requires durable persistence and configured single-admin access\n  ---\n  duration_ms: 0.095101\n  type: 'test'\n  ...\n# Subtest: release verifier requires production start plus HTTP 200 health before runtime pass\nok 17 - release verifier requires production start plus HTTP 200 health before runtime pass\n  ---\n  duration_ms: 0.096493\n  type: 'test'\n  ...\n# Subtest: SSRF structure gate blocks http://127.0.0.1\nok 18 - SSRF structure gate blocks http://127.0.0.1\n  ---\n  duration_ms: 2.118012\n  type: 'test'\n  ...\n# Subtest: SSRF structure gate blocks http://10.0.0.1\nok 19 - SSRF structure gate blocks http://10.0.0.1\n  ---\n  duration_ms: 0.135191\n  type: 'test'\n  ...\n# Subtest: SSRF structure gate blocks http://172.16.0.1\nok 20 - SSRF structure gate blocks http://172.16.0.1\n  ---\n  duration_ms: 0.08078\n  type: 'test'\n  ...\n# Subtest: SSRF structure gate blocks http://192.168.1.1\nok 21 - SSRF structure gate blocks http://192.168.1.1\n  ---\n  duration_ms: 0.118496\n  type: 'test'\n  ...\n# Subtest: SSRF structure gate blocks http://169.254.169.254/latest/meta-data\nok 22 - SSRF structure gate blocks http://169.254.169.254/latest/meta-data\n  ---\n  duration_ms: 0.139318\n  type: 'test'\n  ...\n# Subtest: SSRF structure gate blocks http://100.100.100.200\nok 23 - SSRF structure gate blocks http://100.100.100.200\n  ---\n  duration_ms: 0.109803\n  type: 'test'\n  ...\n# Subtest: SSRF structure gate blocks http://[::1]\nok 24 - SSRF structure gate blocks http://[::1]\n  ---\n  duration_ms: 3.301674\n  type: 'test'\n  ...\n# Subtest: SSRF structure gate blocks http://[fd00:ec2::254]\nok 25 - SSRF structure gate blocks http://[fd00:ec2::254]\n  ---\n  duration_ms: 0.102443\n  type: 'test'\n  ...\n# Subtest: SSRF structure gate blocks http://localhost\nok 26 - SSRF structure gate blocks http://localhost\n  ---\n  duration_ms: 0.334769\n  type: 'test'\n  ...\n# Subtest: SSRF structure gate blocks http://metadata.google.internal\nok 27 - SSRF structure gate blocks http://metadata.google.internal\n  ---\n  duration_ms: 0.274929\n  type: 'test'\n  ...\n# Subtest: SSRF structure gate blocks http://user:password@example.com\nok 28 - SSRF structure gate blocks http://user:password@example.com\n  ---\n  duration_ms: 0.118957\n  type: 'test'\n  ...\n# Subtest: SSRF structure gate blocks ftp://example.com\nok 29 - SSRF structure gate blocks ftp://example.com\n  ---\n  duration_ms: 0.059819\n  type: 'test'\n  ...\n# Subtest: SSRF structure gate allows an ordinary public HTTPS hostname\nok 30 - SSRF structure gate allows an ordinary public HTTPS hostname\n  ---\n  duration_ms: 0.099288\n  type: 'test'\n  ...\n1..30\n# tests 30\n# suites 0\n# pass 30\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 134.420622",
+      "stderr": ""
+    },
+    {
+      "name": "typecheck",
+      "status": "BLOCKED",
+      "reason": "project dependencies are not installed in this execution tree"
+    },
+    {
+      "name": "lint",
+      "status": "BLOCKED",
+      "reason": "project dependencies are not installed in this execution tree"
+    },
+    {
+      "name": "next-production-build",
+      "status": "BLOCKED",
+      "reason": "project dependencies are not installed in this execution tree"
+    },
+    {
+      "name": "production-start-health",
+      "status": "BLOCKED",
+      "reason": "production build is unavailable because project dependencies are not installed"
+    }
+  ],
+  "productionRuntimeVerified": false,
+  "staticReleaseGatesPass": true,
+  "sourceTreeSha256": "e8068660d9126bb9f2419a2057cf5d9edc0344c2e877e924e9dc858cbcfcb2cc"
+}

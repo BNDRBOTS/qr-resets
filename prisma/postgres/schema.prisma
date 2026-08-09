@@ -1,0 +1,239 @@
+// BNDR. Resource Directory + QR Resets — optional PostgreSQL/Supabase backend.
+// This schema is preserved for an explicit STORAGE_BACKEND=postgres deployment.
+// Railway-local SQLite is the zero-external-database default.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Resource {
+  id                String   @id @default(cuid())
+  name              String
+  acronym           String?
+  description       String?
+  category          String
+  sourceCategory    String?
+  subcategory       String?
+  phoneRaw          String?
+  phoneNormalized   String?
+  phoneDisplay      String?
+  email             String?
+  address           String?
+  website           String?
+  tags              String   @default("")
+  priority          Int      @default(0)
+  verified          Boolean  @default(false)
+  published         Boolean  @default(false)
+  sourceNote        String?
+  piipassAt         DateTime? @db.Timestamptz(3)
+  piipassNotes      String?
+  sourceDatasetHash String?
+  sourceRow         Int?
+  createdAt         DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt         DateTime @updatedAt @db.Timestamptz(3)
+
+  auditLogs              AuditLog[]
+  urlVerificationResults UrlVerificationResult[]
+
+  @@index([category])
+  @@index([priority])
+  @@index([acronym])
+  @@index([published])
+  @@index([verified])
+  @@index([updatedAt])
+  @@index([sourceDatasetHash])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  action     String
+  resourceId String?
+  actor      String   @default("system")
+  summary    String
+  details    String?
+  createdAt  DateTime @default(now()) @db.Timestamptz(3)
+
+  resource Resource? @relation(fields: [resourceId], references: [id], onDelete: SetNull)
+
+  @@index([action])
+  @@index([resourceId])
+  @@index([createdAt])
+}
+
+model Category {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  description String?
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @db.Timestamptz(3)
+
+  @@index([sortOrder])
+}
+
+model RateLimitAttempt {
+  id        String   @id @default(cuid())
+  key       String
+  namespace String
+  expiresAt DateTime @db.Timestamptz(3)
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+
+  @@index([key, expiresAt])
+  @@index([namespace, expiresAt])
+}
+
+model PendingResource {
+  id        String   @id @default(cuid())
+  name      String
+  reason    String
+  website   String?
+  phone     String?
+  sources   Json?
+  notes     String?
+  createdAt DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @db.Timestamptz(3)
+
+  @@index([reason])
+  @@index([createdAt])
+}
+
+model UrlVerificationRun {
+  id         String   @id @default(cuid())
+  total      Int
+  verified   Int
+  durationMs Int
+  ranAt      DateTime @default(now()) @db.Timestamptz(3)
+
+  results UrlVerificationResult[]
+
+  @@index([ranAt])
+}
+
+model UrlVerificationResult {
+  id             String   @id @default(cuid())
+  runId          String
+  resourceId     String
+  name           String
+  website        String
+  status         String
+  statusCode     Int?
+  finalUrl       String?
+  note           String
+  offTopicReason String?
+  durationMs     Int
+  checkedAt      DateTime @db.Timestamptz(3)
+
+  run      UrlVerificationRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+  resource Resource           @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+
+  @@unique([runId, resourceId])
+  @@index([resourceId])
+  @@index([status])
+  @@index([checkedAt])
+}
+
+model DatasetImport {
+  id          String   @id @default(cuid())
+  datasetHash String   @unique
+  filename    String
+  rowCount    Int
+  mode        String   @default("replace")
+  appliedAt   DateTime @default(now()) @db.Timestamptz(3)
+
+  @@index([appliedAt])
+}
+
+// QR Resets — PostgreSQL persistence baseline.
+// Browser clients never connect to these tables directly; all writes flow
+// through validated Next.js server routes using the database-owner connection.
+model QrResetRequest {
+  id               String   @id @default(cuid())
+  displayName      String?
+  contactMethod    String?
+  contactDetails   String?
+  location         String?
+  situation        String?
+  urgentProblem    String?
+  blockers         String?
+  proposedHelp     String?
+  unwantedSupport  String?
+  deadline         String?
+  alreadyWorking   String?
+  currentHelp      String?
+  planPreference   String?
+  documentsNote    String?
+  consentRequired  Json
+  consentOptional  Json?
+  status           String   @default("received")
+  createdAt        DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt        DateTime @updatedAt @db.Timestamptz(3)
+
+  reviews QrRequestReview[]
+  reset   QrResetCase?
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+model QrRequestReview {
+  id         String   @id @default(cuid())
+  requestId  String
+  stage      Int      @default(1)
+  decision   String
+  reasonCode String?
+  notes      String?
+  actor      String   @default("system")
+  createdAt  DateTime @default(now()) @db.Timestamptz(3)
+
+  request QrResetRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+
+  @@index([requestId])
+  @@index([stage])
+  @@index([decision])
+}
+
+model QrResetCase {
+  id            String   @id @default(cuid())
+  requestId     String   @unique
+  status        String   @default("planning")
+  approvedCents Int?
+  fundedCents   Int      @default(0)
+  plan          Json?
+  activatedAt   DateTime? @db.Timestamptz(3)
+  closedAt      DateTime? @db.Timestamptz(3)
+  createdAt     DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt     DateTime @updatedAt @db.Timestamptz(3)
+
+  request   QrResetRequest    @relation(fields: [requestId], references: [id], onDelete: Restrict)
+  donations QrDonationEvent[]
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+model QrDonationEvent {
+  id               String   @id @default(cuid())
+  processor        String   @default("stripe")
+  processorEventId String   @unique
+  checkoutId       String?
+  amountCents      Int
+  currency         String   @default("usd")
+  recurring        Boolean  @default(false)
+  status           String
+  resetCaseId      String?
+  metadata         Json?
+  occurredAt       DateTime @db.Timestamptz(3)
+  createdAt        DateTime @default(now()) @db.Timestamptz(3)
+
+  resetCase QrResetCase? @relation(fields: [resetCaseId], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([resetCaseId])
+  @@index([occurredAt])
+}

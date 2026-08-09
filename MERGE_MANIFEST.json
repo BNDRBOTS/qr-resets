@@ -1,0 +1,36 @@
+{
+  "version": "1.1.4",
+  "productionBase": {
+    "archive": "bndr-workspace-one-verified-114-railway-fixed(1).zip",
+    "sha256": "df1143eb7f1d9d2f474334b30c6cda8e37feed8f10c05d5bbf88de18de424e7b"
+  },
+  "dualViewSource": {
+    "archive": "bndr-clean (2).zip",
+    "sha256": "f7dc3183507dba9a320c1db20a0831aa0159fd1c02d3a32c639829a54b54d7a2"
+  },
+  "canonicalDataset": {
+    "rows": 114,
+    "sha256": "5e9a8438ee652c9be5b44fb781a2ba94db9dafffddcc720c254bc291aab2d72b"
+  },
+  "backend": {
+    "default": "sqlite",
+    "railwayPersistence": "RAILWAY_VOLUME_MOUNT_PATH/bndr.db",
+    "postgresOptional": true,
+    "postgresSchema": "prisma/postgres/schema.prisma",
+    "supabaseSchema": "supabase/schema.sql",
+    "clientLocalStorage": true
+  },
+  "currentTree": {
+    "fileCountExcludingManifest": 250
+  },
+  "criticalFiles": {
+    "package.json": "4298ceacb5db68284780582ebafc47b216a7608a18a493482f0bcd9d13100b02",
+    "railway.toml": "afe7f914bc981e4d734fa4bdc67c9aee40b10be48b9c159417fd2dfc5eacdd29",
+    "prisma/sqlite/schema.prisma": "4f2f6001c0ace8c9fb32fd546cfc560cb2c4137901e984cef40d9bb4b41ebf76",
+    "prisma/postgres/schema.prisma": "3202e5988d625c7cff0c84060b370ff7dcbf0cf7802400338959fd39c34f4211",
+    "src/app/api/health/route.ts": "1fe176910374c1e244f97888a35331ad67b6e719577b7c80b8f79605bd0587ce",
+    "scripts/start-production.mjs": "b24a49b744ff039979229339fc96fb4b8f31c135602c9b74e398e0459dcd8718",
+    "scripts/storage-backend.mjs": "2b66586b912680a8523784b77737a6ab777af7a01eb3f17416d322936c0a2f2b",
+    "prisma/verified-resources.csv": "5e9a8438ee652c9be5b44fb781a2ba94db9dafffddcc720c254bc291aab2d72b"
+  }
+}

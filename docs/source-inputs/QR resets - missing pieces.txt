@@ -1,0 +1,21 @@
+## Main missing pieces that must exist somewhere
+
+* **$1 is the public ask: someone sees a QuickResets code, gives one buck, and joins a clean line of micro-support toward someone in a critical situation; $1 is intentionally enough, so donors are not pressured to prove they gave more and people in need are supported without their crisis becoming a public test of worth.**  
+
+* **Donors give into a dignity-first support flow: someone scans a QuickResets code, gives a dollar, and that support moves through the platform toward a real person’s urgent need; QuickResets/Beacon keeps the process human, reviewed, and traceable enough to protect the donors and recipients without turning the person’s crisis into public begging or a character test.**  
+
+* **Requests are reviewed with care: enough verification to protect donors and the support pool, without turning someone’s need into a judgment of their character.**
+* **When QuickResets cannot meet a request exactly as submitted, the goal is still to find a respectful path that can work — a smaller version of the need, direct payment to the vendor, a ride, a referral, or another practical route that protects both the person asking and the people funding the support pool.**
+
+* **Immediate help matters, but QuickResets is built to go beyond the first dollar: urgent needs are met first, then advocate/service routing helps uncover and bridge the unspoken gaps — the ride, copay, paperwork, privacy, shame, trauma, or missing support — that often get mislabeled as non-compliance when the real issue is that the person was never given a workable path to follow.**
+
+* **Quiet outreach matters because people often need help before they are able to ask for it clearly: many do not know where to go, fear judgment or privacy loss, lack transportation or access, or need a direct bridge to shelter, health care, treatment, housing, or the right service connection.** SAMHSA’s latest available NSDUH detailed tables support the unmet-need and barrier claims; USICH supports the outreach, shelter/housing, health care, treatment, and coordinated service-connection claims. ([SAMHSA][1]) ([USICH][2])
+
+* **Long-term mission includes strong outreach, proper crisis routing that acknowledges and aims to meet the individual’s full-picture need, temporary housing, and privacy-centered support — with the standard continuing to refine as the mission grows, while never reducing the goal of meeting someone exactly where they are in full or pretending any part of their reality is not important or relevant.**
+
+* **Our current stage is building the payment rail and landing page so each dollar can move cleanly, then printing the first QR codes and placing them around Phoenix Metro, Sedona, and other locations where they make sense. Quiet outreach is also part of the build, so the system can find people before they fall deeper.** 
+
+* **QuickResets is not generic charity; it is dignity-first micro-support for the moment when one specific need can decide whether someone keeps standing or falls deeper — a dollar from the donor side, a real reset from the recipient side, and a direct path toward help before or during collapse.**
+
+[1]: https://www.samhsa.gov/data/sites/default/files/reports/rpt56484/NSDUHDetailedTabs2024/NSDUHDetailedTabs2024/2024-nsduh-detailed-tables-sect6pe.htm "Section 6 PE Tables - Results from the 2024 National Survey on Drug Use and Health: Detailed Tables, SAMHSA, CBHSQ"
+[2]: https://www.usich.gov/federal-strategic-plan/improve-effectiveness-homelessness-response-systems "Improve Effectiveness of Homelessness Response Systems | United States Interagency Council on Homelessness"

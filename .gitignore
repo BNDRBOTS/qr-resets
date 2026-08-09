@@ -1,0 +1,44 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# next.js
+.next/
+out/
+build/
+dist/
+
+# production
+*.tsbuildinfo
+next-env.d.ts
+
+# env files — use .env.example as the template
+.env
+.env.local
+.env.*.local
+
+# Prisma client and migration state are generated during install/deploy.
+
+# logs
+*.log
+dev.log
+server.log
+
+# misc
+.DS_Store
+*.pem
+.vscode/
+.idea/
+coverage/
+*.lcov
+
+# uploaded files (user inputs)
+upload/
+tool-results/
+download/
+mini-services/
+
+# skills (internal tooling)
+skills/
+

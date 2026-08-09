@@ -1,0 +1,851 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  --font-italic: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+/* ----------------------------------------------------------------------------
+   BNDR. — sand-bone + cool-blue accent theme.
+   Light = sand-bone off-white (warm, hue 75). Dark = warm charcoal.
+   Accent = restrained cool blue; primary text and controls remain near-black.
+   :root carries LIGHT values; .dark carries DARK values.
+   next-themes toggles the .dark class on <html>. Default = light (sand/bone production surface).
+---------------------------------------------------------------------------- */
+:root {
+  --radius: 0.75rem;
+
+  /* Cool-blue accent. Black remains the primary brand/control color. */
+  --brand-accent-h: 235;
+  --brand-accent-c: 0.14;
+  --brand-accent-l: 0.50;
+  --brand-accent: oklch(var(--brand-accent-l) var(--brand-accent-c) var(--brand-accent-h));
+
+  /* Sand-bone surface system — warm off-white, not pure white.
+     Hue 75 = warm yellow-beige, low chroma for a natural sand tone. */
+  --background: #F3EDE6;
+  --foreground: #111111;
+  /* Cards are slightly lighter + warmer than bg for elevation. */
+  --card: #F9F4EE;
+  --card-foreground: #111111;
+  --popover: #F9F4EE;
+  --popover-foreground: #111111;
+
+  /* Primary controls stay black on sand-bone. */
+  --primary: #111111;
+  --primary-foreground: #F9F4EE;
+  --secondary: oklch(0.90 0.010 75);
+  --secondary-foreground: #111111;
+
+  /* Muted text + surface. */
+  --muted: oklch(0.91 0.008 75);
+  --muted-foreground: oklch(0.48 0.012 60);
+
+  /* Hover accent — subtle cool-blue-tinted sand surface. */
+  --accent: oklch(0.92 0.018 235);
+  --accent-foreground: #111111;
+
+  /* Hairline borders + inputs use warm dark at low alpha on light. */
+  --border: oklch(0.30 0.01 60 / 12%);
+  --input: oklch(0.30 0.01 60 / 15%);
+  --ring: #111111;
+
+  --destructive: oklch(0.52 0.24 22);
+
+  /* Chart palette — deeper for light-bg legibility. */
+  --chart-1: oklch(0.52 0.14 235);
+  --chart-2: oklch(0.50 0.22 5);
+  --chart-3: oklch(0.48 0.16 200);
+  --chart-4: oklch(0.60 0.20 90);
+  --chart-5: oklch(0.42 0.24 290);
+
+  --sidebar: oklch(0.96 0.010 75);
+  --sidebar-foreground: #111111;
+  --sidebar-primary: #111111;
+  --sidebar-primary-foreground: #F9F4EE;
+  --sidebar-accent: oklch(0.92 0.02 235);
+  --sidebar-accent-foreground: #111111;
+  --sidebar-border: oklch(0 0 0 / 10%);
+  --sidebar-ring: var(--brand-accent);
+}
+
+.dark {
+  --radius: 0.75rem;
+  /* Dark mode keeps the same cool-blue accent family. */
+  --brand-accent-h: 235;
+  --brand-accent-c: 0.16;
+  --brand-accent-l: 0.68;
+  --brand-accent: oklch(var(--brand-accent-l) var(--brand-accent-c) var(--brand-accent-h));
+  /* Warm charcoal — not pure black, carries the sand warmth. */
+  --background: oklch(0.09 0.008 60);
+  --foreground: oklch(0.95 0.008 75);
+  --card: oklch(0.12 0.010 60);
+  --card-foreground: oklch(0.95 0.008 75);
+  --popover: oklch(0.11 0.010 60);
+  --popover-foreground: oklch(0.95 0.008 75);
+  --primary: var(--brand-accent);
+  --primary-foreground: oklch(0.98 0.005 75);
+  --secondary: oklch(0.16 0.010 60);
+  --secondary-foreground: oklch(0.95 0.008 75);
+  --muted: oklch(0.14 0.008 60);
+  --muted-foreground: oklch(0.76 0.012 60);
+  --accent: oklch(0.19 0.035 235);
+  --accent-foreground: oklch(0.95 0.008 75);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 13%);
+  --ring: var(--brand-accent);
+  --destructive: oklch(0.62 0.24 22);
+  --chart-1: oklch(0.68 0.16 235);
+  --chart-2: oklch(0.68 0.20 5);
+  --chart-3: oklch(0.66 0.16 200);
+  --chart-4: oklch(0.78 0.18 90);
+  --chart-5: oklch(0.60 0.22 290);
+  --sidebar: oklch(0.10 0.010 60);
+  --sidebar-foreground: oklch(0.95 0.008 75);
+  --sidebar-primary: var(--brand-accent);
+  --sidebar-primary-foreground: oklch(0.98 0.005 75);
+  --sidebar-accent: oklch(0.19 0.035 235);
+  --sidebar-accent-foreground: oklch(0.95 0.008 75);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: var(--brand-accent);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    color-scheme: light;
+  }
+  html.dark {
+    color-scheme: dark;
+  }
+  body {
+    @apply bg-background text-foreground;
+    /* Clean flat background — no shiny gradient bar at the top.
+       The sand-bone / warm charcoal is the full surface. */
+  }
+  /* Cool-blue focus treatment. */
+  :focus-visible {
+    outline: none;
+  }
+  ::selection {
+    background: oklch(0.52 0.16 235 / 0.22);
+    color: oklch(0.18 0.02 75);
+  }
+  html.dark ::selection {
+    background: oklch(0.70 0.16 235 / 0.30);
+    color: oklch(0.99 0 0);
+  }
+}
+
+/* ----------------------------------------------------------------------------
+   BNDR. signature FX utilities.
+---------------------------------------------------------------------------- */
+
+/* The giant wordmark glow — cinematic layered bloom with chromatic edge.
+   Toned down from the previous "hot" bloom for a cleaner, professional look
+   while keeping a restrained cool-blue bloom.
+   Light mode: dark text with a soft blue bloom.
+   Dark mode: near-white text with the full neon bloom. */
+.bndr-wordmark {
+  color: oklch(0.18 0.02 250);
+  letter-spacing: -0.04em;
+  text-shadow:
+    0 0 2px oklch(0.48 0.30 235 / 0.3),
+    0 0 12px oklch(0.48 0.30 235 / 0.18),
+    0 0 38px oklch(0.48 0.30 235 / 0.12);
+}
+html.dark .bndr-wordmark {
+  color: oklch(0.98 0.01 250);
+  text-shadow:
+    0 0 2px oklch(0.85 0.18 235 / 0.85),
+    0 0 12px oklch(0.70 0.26 235 / 0.55),
+    0 0 38px oklch(0.70 0.26 235 / 0.38),
+    0 0 90px oklch(0.70 0.26 235 / 0.26),
+    1px 0 6px oklch(0.70 0.22 5 / 0.28),
+    -1px 0 6px oklch(0.65 0.20 200 / 0.22);
+  animation: bndr-glow-pulse 4s ease-in-out infinite;
+}
+
+.bndr-wordmark .bndr-dot {
+  color: oklch(0.48 0.30 235);
+  text-shadow:
+    0 0 2px oklch(0.48 0.30 235 / 0.6),
+    0 0 14px oklch(0.48 0.30 235 / 0.4),
+    0 0 34px oklch(0.48 0.30 235 / 0.25);
+}
+html.dark .bndr-wordmark .bndr-dot {
+  color: oklch(0.70 0.26 235);
+  text-shadow:
+    0 0 2px oklch(0.95 0.18 235 / 1),
+    0 0 14px oklch(0.70 0.26 235 / 0.85),
+    0 0 34px oklch(0.70 0.26 235 / 0.65),
+    0 0 72px oklch(0.70 0.26 235 / 0.5);
+}
+
+/* Small wordmark for the header/footer logo — same family, less glow.
+   Used as the Inter-italic fallback when the real logo image is unavailable. */
+.bndr-wordmark-sm {
+  color: oklch(0.18 0.02 250);
+  letter-spacing: -0.04em;
+  text-shadow:
+    0 0 1px oklch(0.48 0.30 235 / 0.25),
+    0 0 6px oklch(0.48 0.30 235 / 0.15);
+}
+html.dark .bndr-wordmark-sm {
+  color: oklch(0.98 0.01 250);
+  text-shadow:
+    0 0 1px oklch(0.85 0.18 235 / 0.75),
+    0 0 6px oklch(0.70 0.26 235 / 0.4),
+    0 0 16px oklch(0.70 0.26 235 / 0.26);
+}
+
+/* Local black logo on sand-bone; dark mode inverts it to white. A restrained
+   cool-blue shadow keeps the mark crisp without changing its geometry. */
+.bndr-logo-glow {
+  filter:
+    drop-shadow(0 0 5px oklch(0.52 0.14 235 / 0.18))
+    drop-shadow(0 0 16px oklch(0.52 0.14 235 / 0.10));
+  transition: filter 0.3s ease;
+}
+html.dark .bndr-logo-glow {
+  filter:
+    invert(1)
+    drop-shadow(0 0 7px oklch(0.70 0.16 235 / 0.40))
+    drop-shadow(0 0 22px oklch(0.70 0.16 235 / 0.22));
+}
+.bndr-logo-glow:hover {
+  filter:
+    drop-shadow(0 0 7px oklch(0.58 0.16 235 / 0.30))
+    drop-shadow(0 0 22px oklch(0.58 0.16 235 / 0.16));
+}
+html.dark .bndr-logo-glow:hover {
+  filter:
+    invert(1)
+    drop-shadow(0 0 9px oklch(0.76 0.16 235 / 0.55))
+    drop-shadow(0 0 28px oklch(0.70 0.16 235 / 0.30));
+}
+
+@keyframes bndr-glow-pulse {
+  0%, 100% {
+    text-shadow:
+      0 0 2px oklch(0.85 0.18 235 / 0.85),
+      0 0 12px oklch(0.70 0.26 235 / 0.55),
+      0 0 38px oklch(0.70 0.26 235 / 0.38),
+      0 0 90px oklch(0.70 0.26 235 / 0.26),
+      1px 0 6px oklch(0.70 0.22 5 / 0.28),
+      -1px 0 6px oklch(0.65 0.20 200 / 0.22);
+  }
+  50% {
+    text-shadow:
+      0 0 3px oklch(0.90 0.18 235 / 0.95),
+      0 0 18px oklch(0.70 0.26 235 / 0.65),
+      0 0 52px oklch(0.70 0.26 235 / 0.48),
+      0 0 118px oklch(0.70 0.26 235 / 0.34),
+      1.5px 0 8px oklch(0.70 0.22 5 / 0.34),
+      -1.5px 0 8px oklch(0.65 0.20 200 / 0.26);
+  }
+}
+
+/* Section headings — tighter tracking for editorial feel. */
+section h2 {
+  letter-spacing: -0.02em;
+}
+
+/* ----------------------------------------------------------------------------
+   Glassmorphic resource card — tuned for READABILITY.
+   More opaque background, stronger border, brighter body copy, generous
+   padding. Hover lift + cool-blue glow + shine sweep retained but refined.
+   Theme-aware: light mode uses the --card token directly; dark mode layers
+   a translucent dark surface for the glassmorphic look.
+---------------------------------------------------------------------------- */
+.bndr-card {
+  background: var(--card);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  border: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease,
+    background-color 0.25s ease;
+}
+html.dark .bndr-card {
+  background: oklch(0.13 0.015 250 / 0.86);
+}
+.bndr-card:hover {
+  border-color: oklch(0.70 0.26 235 / 0.45);
+  background: var(--card);
+  transform: translateY(-2px);
+  box-shadow:
+    0 0 0 1px oklch(0.70 0.26 235 / 0.28),
+    0 10px 44px -14px oklch(0.70 0.26 235 / 0.38);
+}
+html.dark .bndr-card:hover {
+  background: oklch(0.15 0.017 250 / 0.94);
+}
+/* Shine sweep — diagonal light band that sweeps across the card on hover. */
+.bndr-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    115deg,
+    transparent 30%,
+    oklch(0.85 0.14 235 / 0.07) 45%,
+    oklch(0.90 0.10 235 / 0.11) 50%,
+    oklch(0.85 0.14 235 / 0.07) 55%,
+    transparent 70%
+  );
+  background-size: 300% 100%;
+  background-position: 200% 0;
+  pointer-events: none;
+  transition: background-position 0.7s ease;
+}
+.bndr-card:hover::after {
+  background-position: -100% 0;
+}
+
+/* Priority card variant — same as normal card, just with the Priority badge.
+   No special blue bar/gradient/accent line (removed per user request). */
+.bndr-card-priority {
+  background: var(--card);
+  position: relative;
+  overflow: hidden;
+}
+html.dark .bndr-card-priority {
+  background: oklch(0.13 0.015 250 / 0.9);
+}
+.bndr-card-priority:hover {
+  border-color: oklch(0.70 0.26 235 / 0.55);
+  box-shadow:
+    0 0 0 1px oklch(0.70 0.26 235 / 0.3),
+    0 10px 44px -14px oklch(0.70 0.26 235 / 0.35);
+}
+
+/* Quick-contact phone button on priority cards — distinct cool-blue glow on
+   hover for tactile feedback. */
+.bndr-quick-call {
+  transition:
+    box-shadow 0.25s ease,
+    background-color 0.25s ease,
+    border-color 0.25s ease,
+    transform 0.15s ease;
+}
+.bndr-quick-call:hover {
+  box-shadow:
+    0 0 0 1px oklch(0.70 0.26 235 / 0.6),
+    0 0 24px -4px oklch(0.70 0.26 235 / 0.5);
+  transform: translateY(-1px);
+}
+
+/* The slow-hue-shifting cool-blue gradient hairline. */
+.bndr-gradient-line {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    oklch(0.48 0.30 235 / 0.55) 30%,
+    oklch(0.60 0.22 5 / 0.5) 50%,
+    oklch(0.48 0.30 235 / 0.55) 70%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: bndr-gradient-shift 9s linear infinite;
+}
+html.dark .bndr-gradient-line {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    oklch(0.70 0.26 235 / 0.7) 30%,
+    oklch(0.78 0.24 5 / 0.65) 50%,
+    oklch(0.70 0.26 235 / 0.7) 70%,
+    transparent 100%
+  );
+}
+@keyframes bndr-gradient-shift {
+  0% {
+    background-position: 0% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Premium grain overlay. Fixed, pointer-events-none, very low opacity.
+   Light mode hides it (grain reads as dirt on white). */
+.bndr-grain {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+  mix-blend-mode: overlay;
+}
+html.dark .bndr-grain {
+  opacity: 0.03;
+}
+
+/* Hero radial halo behind the logo — cool circular bloom. */
+.bndr-hero-halo {
+  background: radial-gradient(
+    circle at center,
+    oklch(0.48 0.30 235 / 0.14),
+    transparent 70%
+  );
+}
+html.dark .bndr-hero-halo {
+  background: radial-gradient(
+    circle at center,
+    oklch(0.70 0.26 235 / 0.26),
+    transparent 70%
+  );
+}
+
+/* Brand-blue search-input ambient shadow (resting state). */
+.bndr-search-shadow {
+  box-shadow: 0 0 40px -12px oklch(0.48 0.30 235 / 0.25);
+}
+html.dark .bndr-search-shadow {
+  box-shadow: 0 0 40px -12px oklch(0.70 0.26 235 / 0.4);
+}
+
+/* Cool-blue search-input focus ring. */
+.bndr-search:focus-visible {
+  border-color: oklch(0.48 0.30 235 / 0.6);
+  box-shadow:
+    0 0 0 1px oklch(0.48 0.30 235 / 0.4),
+    0 0 0 4px oklch(0.48 0.30 235 / 0.12),
+    0 0 24px oklch(0.48 0.30 235 / 0.18);
+}
+html.dark .bndr-search:focus-visible {
+  border-color: oklch(0.70 0.26 235 / 0.6);
+  box-shadow:
+    0 0 0 1px oklch(0.70 0.26 235 / 0.4),
+    0 0 0 4px oklch(0.70 0.26 235 / 0.15),
+    0 0 24px oklch(0.70 0.26 235 / 0.25);
+}
+
+/* Search match highlight (subtle cool blue). */
+.bndr-mark {
+  background: oklch(0.48 0.30 235 / 0.18);
+  color: oklch(0.22 0.02 250);
+  border-radius: 2px;
+  padding: 0 1px;
+}
+html.dark .bndr-mark {
+  background: oklch(0.70 0.26 235 / 0.24);
+  color: oklch(0.98 0.01 250);
+}
+
+/* Line clamp utilities (Tailwind v4 has built-in line-clamp, but keep a
+   fallback class for the description block). */
+.bndr-line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.bndr-line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Horizontal pill bar with momentum scrolling on mobile. */
+.bndr-pill-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.bndr-pill-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* Custom scrollbar for long lists (max-h-* overflow-y-auto panels). */
+.bndr-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: oklch(0.70 0.26 235 / 0.35) transparent;
+}
+.bndr-scroll::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.bndr-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.bndr-scroll::-webkit-scrollbar-thumb {
+  background: oklch(0.70 0.26 235 / 0.3);
+  border-radius: 9999px;
+}
+.bndr-scroll::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.70 0.26 235 / 0.5);
+}
+
+/* Subtle entrance helper for non-Framer cases. */
+@keyframes bndr-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.bndr-fade-up {
+  animation: bndr-fade-up 0.5s ease-out both;
+}
+
+/* Italic system-font fallback wordmark used only if the local PNG cannot load. */
+.bndr-fallback-italic {
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-style: italic;
+  font-weight: 800;
+}
+
+/* Goal-achievement celebration — a gentle pulse + shimmer on the banner. */
+.bndr-celebrate {
+  animation: bndr-celebrate-pulse 2s ease-in-out infinite;
+  position: relative;
+  overflow: hidden;
+}
+.bndr-celebrate::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    115deg,
+    transparent 30%,
+    oklch(0.90 0.12 235 / 0.12) 45%,
+    oklch(0.95 0.08 235 / 0.18) 50%,
+    oklch(0.90 0.12 235 / 0.12) 55%,
+    transparent 70%
+  );
+  background-size: 300% 100%;
+  background-position: 200% 0;
+  pointer-events: none;
+  animation: bndr-celebrate-shimmer 3s linear infinite;
+}
+@keyframes bndr-celebrate-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 oklch(0.72 0.19 235 / 0);
+  }
+  50% {
+    box-shadow: 0 0 12px 0 oklch(0.72 0.19 235 / 0.25);
+  }
+}
+@keyframes bndr-celebrate-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+/* Near-goal pulse — a gentle glow on the progress bar when ≥80% complete
+   (but not yet met). Encourages the advocate to push the last bit. */
+.bndr-goal-near {
+  animation: bndr-goal-near-pulse 2.2s ease-in-out infinite;
+}
+@keyframes bndr-goal-near-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 oklch(0.70 0.26 235 / 0);
+    opacity: 1;
+  }
+  50% {
+    box-shadow: 0 0 8px 1px oklch(0.70 0.26 235 / 0.4);
+    opacity: 0.92;
+  }
+}
+
+/* Animated flame on the streak callout — a subtle flicker + glow pulse. */
+.bndr-flame-flicker {
+  animation: bndr-flame-flicker 1.8s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+.bndr-flame-glow {
+  animation: bndr-flame-glow 2.4s ease-in-out infinite;
+}
+@keyframes bndr-flame-flicker {
+  0%, 100% {
+    transform: scaleY(1) scaleX(1) rotate(-1deg);
+    opacity: 1;
+  }
+  25% {
+    transform: scaleY(1.08) scaleX(0.96) rotate(1deg);
+    opacity: 0.92;
+  }
+  50% {
+    transform: scaleY(0.96) scaleX(1.04) rotate(-1.5deg);
+    opacity: 1;
+  }
+  75% {
+    transform: scaleY(1.05) scaleX(0.98) rotate(0.5deg);
+    opacity: 0.95;
+  }
+}
+@keyframes bndr-flame-glow {
+  0%, 100% {
+    box-shadow: 0 0 8px oklch(0.48 0.30 235 / 0.25);
+  }
+  50% {
+    box-shadow: 0 0 16px oklch(0.48 0.30 235 / 0.45);
+  }
+}
+html.dark .bndr-flame-glow {
+  box-shadow: 0 0 8px oklch(0.70 0.26 235 / 0.3);
+}
+html.dark .bndr-flame-glow {
+  animation: bndr-flame-glow-dark 2.4s ease-in-out infinite;
+}
+@keyframes bndr-flame-glow-dark {
+  0%, 100% {
+    box-shadow: 0 0 8px oklch(0.70 0.26 235 / 0.3);
+  }
+  50% {
+    box-shadow: 0 0 18px oklch(0.70 0.26 235 / 0.5);
+  }
+}
+
+/* Respect reduced motion. */
+@media (prefers-reduced-motion: reduce) {
+  .bndr-wordmark,
+  .bndr-gradient-line,
+  .bndr-flame-flicker,
+  .bndr-flame-glow,
+  .bndr-featured-pulse,
+  .bndr-priority-glow,
+  .bndr-shimmer::after,
+  .bndr-counter-enter,
+  .bndr-quick-access,
+  .bndr-skeleton-fade {
+    animation: none !important;
+  }
+  .bndr-card,
+  .bndr-card-priority {
+    transition: none !important;
+  }
+  .bndr-shimmer::after {
+    display: none;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* ---- Featured Spotlight (daily rotating resource) ------------------------ */
+/* A subtle pulsing glow on the "Featured Today" badge to draw attention
+   without being distracting. */
+.bndr-featured-pulse {
+  animation: bndr-featured-pulse 3s ease-in-out infinite;
+}
+@keyframes bndr-featured-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 oklch(0.70 0.26 330 / 0);
+  }
+  50% {
+    box-shadow: 0 0 0 4px oklch(0.70 0.26 330 / 0.08);
+  }
+}
+
+/* Suggestion chips in the empty search state — smooth hover transition. */
+.bndr-suggestion-chip {
+  transition: all 0.2s ease;
+}
+.bndr-suggestion-chip:hover {
+  transform: translateY(-1px);
+}
+
+/* Focus-visible ring for all interactive elements (accessibility). */
+*:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* Smooth scrolling for anchor jumps (keyboard nav). */
+html {
+  scroll-behavior: smooth;
+}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* ---- Category Grid hover glow -------------------------------------------- */
+.bndr-category-card-glow {
+  position: relative;
+}
+.bndr-category-card-glow::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    135deg,
+    oklch(0.70 0.26 330 / 0.3),
+    transparent 40%,
+    transparent 60%,
+    oklch(0.70 0.26 330 / 0.15)
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+.bndr-category-card-glow:hover::before {
+  opacity: 1;
+}
+
+/* ---- Animated counter entrance ------------------------------------------- */
+.bndr-counter-enter {
+  animation: bndr-counter-fade 0.6s ease-out;
+}
+@keyframes bndr-counter-fade {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---- Skeleton card staggered entrance ------------------------------------ */
+.bndr-card[style*="animation-delay"] {
+  animation: bndr-skeleton-fade 0.4s ease-out both;
+}
+@keyframes bndr-skeleton-fade {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---- Quick Access floating widget ---------------------------------------- */
+.bndr-quick-access {
+  animation: bndr-quick-access-slide 0.4s ease-out;
+}
+@keyframes bndr-quick-access-slide {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ---- Shimmer animation for skeleton loaders -------------------------------- */
+.bndr-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.bndr-shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    oklch(1 0 0 / 0.04) 40%,
+    oklch(1 0 0 / 0.08) 50%,
+    oklch(1 0 0 / 0.04) 60%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: bndr-shimmer-sweep 1.8s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes bndr-shimmer-sweep {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* ---- Enhanced card hover micro-interaction -------------------------------- */
+.bndr-card:hover {
+  transform: translateY(-3px) scale(1.005);
+}
+.bndr-card:active {
+  transform: translateY(-1px) scale(0.998);
+  transition-duration: 0.1s;
+}
+
+/* ---- Pulse glow for priority cards ---------------------------------------- */
+.bndr-priority-glow {
+  animation: bndr-priority-pulse 4s ease-in-out infinite;
+}
+@keyframes bndr-priority-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 1px oklch(0.70 0.26 330 / 0.2), 0 4px 20px -8px oklch(0.70 0.26 330 / 0.15);
+  }
+  50% {
+    box-shadow: 0 0 0 1px oklch(0.70 0.26 330 / 0.35), 0 6px 28px -8px oklch(0.70 0.26 330 / 0.25);
+  }
+}
+

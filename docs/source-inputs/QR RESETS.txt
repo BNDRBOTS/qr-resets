@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en" class="antialiased selection:bg-[#E51D34] selection:text-white">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickResets. | Help Without Humiliation</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800;900&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.19/bundled/lenis.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        concrete: '#BDB9B1',
+                        sticker: '#F4F1E8',
+                        ink: '#111111',
+                        crimson: '#E51D34',
+                        muted: '#666666'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    letterSpacing: {
+                        tighter: '-0.05em',
+                        tight: '-0.02em',
+                        widest: '0.15em'
+                    },
+                    transitionTimingFunction: {
+                        'brutal': 'cubic-bezier(0.16, 1, 0.3, 1)',
+                    },
+                    boxShadow: {
+                        'brutal': '6px 6px 0px #111111',
+                        'brutal-lg': '12px 12px 0px #111111',
+                        'brutal-hover': '2px 2px 0px #111111',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .brutalist-card {
+                @apply bg-sticker border-2 border-ink shadow-brutal transition-all duration-300 ease-brutal hover:shadow-brutal-hover hover:translate-x-[4px] hover:translate-y-[4px];
+            }
+            .brutalist-btn {
+                @apply bg-ink text-sticker font-bold tracking-widest text-[11px] uppercase px-8 py-4 border-2 border-ink hover:bg-sticker hover:text-ink transition-colors duration-300;
+            }
+            .brutalist-btn-outline {
+                @apply bg-transparent text-ink font-bold tracking-widest text-[11px] uppercase px-8 py-4 border-2 border-ink hover:bg-ink hover:text-sticker transition-colors duration-300;
+            }
+            .hide-scrollbar::-webkit-scrollbar { display: none; }
+            .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        }
+
+        body {
+            cursor: none;
+            background-color: #BDB9B1; /* Concrete Base */
+            color: #111111;
+            overflow-x: hidden;
+        }
+
+        /* WebGL Noise Foundation */
+        #webgl-noise {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            pointer-events: none;
+            opacity: 0.4;
+            mix-blend-mode: multiply;
+        }
+
+        /* Physical Cursor */
+        #cursor {
+            position: fixed;
+            top: 0; left: 0;
+            width: 12px; height: 12px;
+            background: #E51D34;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 9999;
+            transition: width 0.2s ease, height 0.2s ease;
+        }
+        #cursor-follower {
+            position: fixed;
+            top: 0; left: 0;
+            width: 40px; height: 40px;
+            border: 2px solid #111111;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 9998;
+            transition: transform 0.1s linear, width 0.3s ease, height 0.3s ease, border-radius 0.3s ease;
+        }
+
+        .hover-active #cursor { width: 0; height: 0; }
+        .hover-active #cursor-follower {
+            width: 60px; height: 60px;
+            background: rgba(17, 17, 17, 0.1);
+            border-radius: 0%;
+        }
+
+        /* Loader */
+        #loader {
+            position: fixed;
+            inset: 0;
+            background: #F4F1E8;
+            z-index: 10000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            border-bottom: 4px solid #111;
+        }
+        .progress-bar-container {
+            width: 200px;
+            height: 4px;
+            background: #D1CCC5;
+            margin-top: 24px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #111;
+        }
+        .progress-fill {
+            position: absolute;
+            top: 0; left: 0;
+            height: 100%;
+            width: 0%;
+            background: #E51D34;
+        }
+
+        /* Kinetic Typography Sub-structure */
+        .split-line { 
+            overflow: hidden; 
+            display: block; 
+            padding-right: 0.5em; 
+            margin-right: -0.5em;
+        }
+        .char { 
+            display: inline-block; 
+            transform: translateY(110%); 
+            will-change: transform;
+            padding-right: 0.1em;
+            margin-right: -0.1em;
+        }
+
+        /* Custom SVG Background for the "Sticker" panels */
+        .bg-paper-texture {
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+        }
+    </style>
+</head>
+<body class="hide-scrollbar font-sans">
+
+    <div id="loader">
+        <div class="font-black text-ink text-5xl tracking-tighter" id="loader-percentage">000</div>
+        <div class="font-bold text-[10px] tracking-widest text-muted mt-2 uppercase">Connecting</div>
+        <div class="progress-bar-container">
+            <div class="progress-fill" id="loader-fill"></div>
+        </div>
+    </div>
+
+    <!-- Generative Concrete Overlay -->
+    <div id="webgl-noise"></div>
+
+    <!-- Brutalist Cursor -->
+    <div id="cursor"></div>
+    <div id="cursor-follower"></div>
+
+    <nav class="fixed top-0 left-0 w-full px-4 sm:px-6 lg:px-8 py-4 sm:py-6 flex justify-between items-center z-50 pointer-events-none transition-all duration-300">
+        <div class="font-black text-xl sm:text-2xl tracking-tighter pointer-events-auto hover-trigger mix-blend-difference text-sticker">
+            QuickResets<span class="text-crimson">.</span>
+        </div>
+        <div class="hidden md:flex gap-4 pointer-events-auto">
+            <button class="bg-sticker text-ink font-bold tracking-widest text-[10px] uppercase px-5 py-2 hover-trigger border-2 border-ink hover:bg-ink hover:text-sticker transition-colors">Donate $1</button>
+        </div>
+    </nav>
+
+    <main id="scroll-container" class="relative w-full z-10 pt-20 sm:pt-24 pb-16 sm:pb-24 px-4 sm:px-6 lg:px-8 flex flex-col gap-6 sm:gap-8 lg:gap-12">
+        
+        <!-- Hero Sticker -->
+        <section class="w-full min-h-[80vh] lg:min-h-[85vh] bg-sticker bg-paper-texture rounded-2xl md:rounded-[2rem] border-2 border-ink shadow-brutal md:shadow-brutal-lg flex flex-col justify-center items-center text-center p-6 sm:p-8 lg:p-12 relative overflow-hidden">
+            
+            <div class="max-w-4xl lg:max-w-5xl relative z-10 w-full">
+                <div class="font-bold text-ink tracking-widest text-[9px] sm:text-[10px] md:text-xs mb-6 sm:mb-8 reveal-up uppercase border border-ink inline-block px-3 py-1.5 sm:px-4 sm:py-2 rounded-full">Dignity First</div>
+                
+                <h1 class="text-[12vw] sm:text-[10vw] lg:text-[9vw] xl:text-[8vw] leading-[0.85] font-black tracking-tighter mb-6 sm:mb-8 text-ink uppercase">
+                    <div class="kinetic-text">HELP WITHOUT</div>
+                    <div class="kinetic-text">HUMILIATION<span class="text-crimson">.</span></div>
+                </h1>
+                
+                <h2 class="text-2xl sm:text-4xl lg:text-5xl xl:text-6xl font-black tracking-tighter text-ink mb-8 sm:mb-12 reveal-up">
+                    SCAN. $1. RESET.
+                </h2>
+
+                <p class="text-lg sm:text-xl lg:text-2xl xl:text-3xl text-muted font-medium max-w-2xl mx-auto reveal-up leading-relaxed sm:leading-snug">
+                    A QR code. A dollar. A real person gets help. <br class="hidden sm:block">
+                    No public begging. No shame. No judgment.
+                </p>
+                
+                <div class="mt-10 sm:mt-16 flex flex-col sm:flex-row justify-center items-center gap-3 sm:gap-4 reveal-up">
+                    <button class="brutalist-btn hover-trigger w-full sm:w-auto py-3 sm:py-4 px-6 sm:px-8">Scan & Give</button>
+                    <button class="brutalist-btn-outline hover-trigger w-full sm:w-auto py-3 sm:py-4 px-6 sm:px-8">Request Help</button>
+                </div>
+            </div>
+
+            <!-- Decorative corner elements to reinforce physical framing -->
+            <div class="absolute top-4 sm:top-8 left-4 sm:left-8 w-3 sm:w-4 h-3 sm:h-4 border-t-2 border-l-2 border-ink"></div>
+            <div class="absolute top-4 sm:top-8 right-4 sm:right-8 w-3 sm:w-4 h-3 sm:h-4 border-t-2 border-r-2 border-ink"></div>
+            <div class="absolute bottom-4 sm:bottom-8 left-4 sm:left-8 w-3 sm:w-4 h-3 sm:h-4 border-b-2 border-l-2 border-ink"></div>
+            <div class="absolute bottom-4 sm:bottom-8 right-4 sm:right-8 w-3 sm:w-4 h-3 sm:h-4 border-b-2 border-r-2 border-ink"></div>
+        </section>
+
+        <!-- The Gap Section -->
+        <section class="w-full bg-sticker bg-paper-texture rounded-2xl md:rounded-[2rem] border-2 border-ink shadow-brutal md:shadow-brutal-lg p-6 sm:p-10 lg:p-16">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
+                <div class="lg:col-span-5 lg:sticky lg:top-24 xl:top-32 flex flex-col gap-6">
+                    <div>
+                        <h2 class="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-black tracking-tighter mb-6 sm:mb-8 kinetic-text leading-none uppercase">THE GAP.</h2>
+                        <div class="w-full h-1 bg-ink mb-6 sm:mb-8"></div>
+                        <p class="text-ink font-bold text-lg sm:text-xl lg:text-2xl leading-snug reveal-up">
+                            A lot of people do not fit neatly into existing help systems. Some have not lost everything yet, but they are close. Some already have lost almost everything.
+                        </p>
+                    </div>
+                    
+                    <p class="text-muted text-base sm:text-lg lg:text-xl font-medium leading-relaxed reveal-up mt-2 lg:mt-4">
+                        The space between <span class="text-ink font-black bg-concrete/30 px-2 py-0.5 rounded-sm">"I'm okay"</span> and <span class="text-ink font-black bg-concrete/30 px-2 py-0.5 rounded-sm">"I've lost everything."</span> 
+                        The space where a small amount of help stops a much bigger fall. The space where dignity matters as much as the help itself.
+                    </p>
+                </div>
+                
+                <div class="lg:col-span-7 flex flex-col gap-6 sm:gap-8 text-muted text-base sm:text-lg lg:text-xl font-medium leading-relaxed">
+                    <p class="reveal-up">
+                        Immediate help matters, but QuickResets is built to go beyond the first dollar: urgent needs are met first, then advocate/service routing helps uncover and bridge the unspoken gaps — the ride, copay, paperwork, privacy, shame, trauma, or missing support — that often get mislabeled as non-compliance when the real issue is that the person was never given a workable path to follow.
+                    </p>
+                    <p class="reveal-up">
+                        Quiet outreach matters because people often need help before they are able to ask for it clearly: many do not know where to go, fear judgment or privacy loss, lack transportation or access, or need a direct bridge to shelter, health care, treatment, housing, or the right service connection. SAMHSA’s latest available NSDUH detailed tables support the unmet-need and barrier claims; USICH supports the outreach, shelter/housing, health care, treatment, and coordinated service-connection claims. (<a href="https://www.samhsa.gov/data/sites/default/files/reports/rpt56484/NSDUHDetailedTabs2024/NSDUHDetailedTabs2024/2024-nsduh-detailed-tables-sect6pe.htm" class="underline hover:text-ink transition-colors" target="_blank">SAMHSA</a>) (<a href="https://www.usich.gov/federal-strategic-plan/improve-effectiveness-homelessness-response-systems" class="underline hover:text-ink transition-colors" target="_blank">USICH</a>)
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- What People Request -->
+        <section class="w-full bg-ink text-sticker rounded-2xl md:rounded-[2rem] shadow-brutal md:shadow-brutal-lg p-6 sm:p-10 lg:p-16 relative overflow-hidden">
+            <!-- Subtle texture over dark background -->
+            <div class="absolute inset-0 opacity-10 bg-[url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noise%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noise)%22/%3E%3C/svg%3E')] pointer-events-none"></div>
+            
+            <div class="relative z-10">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 sm:mb-12 border-b border-muted/30 pb-6 sm:pb-8 reveal-up">
+                    <h2 class="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black tracking-tighter uppercase max-w-2xl">What People Request.</h2>
+                    <span class="font-bold text-crimson text-[9px] sm:text-[10px] tracking-widest mt-4 md:mt-0 uppercase">Human-Scale Needs</span>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                    <div class="bg-[#1C1C1C] border border-muted/20 p-5 sm:p-6 lg:p-8 rounded-xl hover-trigger hover:border-sticker transition-colors reveal-up">
+                        <div class="w-6 sm:w-8 h-1.5 sm:h-2 bg-crimson mb-4 sm:mb-6"></div>
+                        <h3 class="text-lg sm:text-xl font-black mb-2 sm:mb-3">A Private Ride</h3>
+                        <p class="text-xs sm:text-sm text-sticker/60 font-medium">Transportation to stay employed or access necessary care without relying on unpredictable transit.</p>
+                    </div>
+                    <div class="bg-[#1C1C1C] border border-muted/20 p-5 sm:p-6 lg:p-8 rounded-xl hover-trigger hover:border-sticker transition-colors reveal-up">
+                        <div class="w-6 sm:w-8 h-1.5 sm:h-2 bg-sticker mb-4 sm:mb-6"></div>
+                        <h3 class="text-lg sm:text-xl font-black mb-2 sm:mb-3">Safe Shelter</h3>
+                        <p class="text-xs sm:text-sm text-sticker/60 font-medium">A night off the street. Temporary housing to secure a baseline physical reset.</p>
+                    </div>
+                    <div class="bg-[#1C1C1C] border border-muted/20 p-5 sm:p-6 lg:p-8 rounded-xl hover-trigger hover:border-sticker transition-colors reveal-up">
+                        <div class="w-6 sm:w-8 h-1.5 sm:h-2 bg-sticker mb-4 sm:mb-6"></div>
+                        <h3 class="text-lg sm:text-xl font-black mb-2 sm:mb-3">A Rent Gap</h3>
+                        <p class="text-xs sm:text-sm text-sticker/60 font-medium">Filling the critical financial margin before cascading fees and eviction protocols trigger.</p>
+                    </div>
+                    <div class="bg-[#1C1C1C] border border-muted/20 p-5 sm:p-6 lg:p-8 rounded-xl hover-trigger hover:border-sticker transition-colors reveal-up">
+                        <div class="w-6 sm:w-8 h-1.5 sm:h-2 bg-concrete mb-4 sm:mb-6"></div>
+                        <h3 class="text-lg sm:text-xl font-black mb-2 sm:mb-3">Agency Routing</h3>
+                        <p class="text-xs sm:text-sm text-sticker/60 font-medium">A connection to the right agency and a tailored next step, bypassing the standard bureaucratic maze.</p>
+                    </div>
+                </div>
+
+                <div class="mt-6 sm:mt-8 flex flex-wrap gap-2 sm:gap-3 reveal-up">
+                    <span class="px-3 py-1.5 sm:px-4 sm:py-2 bg-sticker text-ink font-bold text-[10px] sm:text-xs uppercase rounded-sm">Food</span>
+                    <span class="px-3 py-1.5 sm:px-4 sm:py-2 bg-sticker text-ink font-bold text-[10px] sm:text-xs uppercase rounded-sm">A Phone</span>
+                    <span class="px-3 py-1.5 sm:px-4 sm:py-2 bg-sticker text-ink font-bold text-[10px] sm:text-xs uppercase rounded-sm">Medical Trips</span>
+                    <span class="px-3 py-1.5 sm:px-4 sm:py-2 bg-sticker text-ink font-bold text-[10px] sm:text-xs uppercase rounded-sm">A Bill Covered</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- The Dignity Rule -->
+        <section class="w-full bg-sticker bg-paper-texture rounded-2xl md:rounded-[2rem] border-2 border-ink shadow-brutal md:shadow-brutal-lg p-6 sm:p-10 lg:p-16 text-center flex flex-col items-center">
+            <div class="font-bold text-crimson tracking-widest text-[9px] sm:text-[10px] mb-6 sm:mb-8 reveal-up uppercase border border-crimson inline-block px-3 py-1.5 sm:px-4 sm:py-2 rounded-full">Directive 01</div>
+            
+            <h2 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-[4vw] font-black tracking-tighter leading-[1.1] sm:leading-[0.9] text-ink uppercase max-w-4xl lg:max-w-5xl">
+                <div class="kinetic-text">A person does not become</div>
+                <div class="kinetic-text">less worthy of help because</div>
+                <div class="kinetic-text text-muted">they are poor, sick, ashamed,</div>
+                <div class="kinetic-text text-muted">unhoused, or overwhelmed.</div>
+            </h2>
+            
+            <div class="w-1 h-12 sm:h-16 bg-ink mx-auto my-8 sm:my-12 reveal-up"></div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 text-left max-w-4xl lg:max-w-5xl w-full">
+                <div class="reveal-up border-l-4 border-ink pl-5 sm:pl-6">
+                    <h3 class="text-xl sm:text-2xl font-black text-ink mb-3 sm:mb-4 uppercase">The Bigger Mission</h3>
+                    <p class="text-muted font-medium text-sm sm:text-base leading-relaxed">
+                        Long-term mission includes strong outreach, proper crisis routing that acknowledges and aims to meet the individual’s full-picture need, temporary housing, and privacy-centered support — with the standard continuing to refine as the mission grows, while never reducing the goal of meeting someone exactly where they are in full or pretending any part of their reality is not important or relevant.
+                    </p>
+                </div>
+                <div class="reveal-up border-l-4 border-crimson pl-5 sm:pl-6">
+                    <h3 class="text-xl sm:text-2xl font-black text-ink mb-3 sm:mb-4 uppercase">Humanity Preserved</h3>
+                    <p class="text-muted font-medium text-sm sm:text-base leading-relaxed">
+                        Everyone needs the basics. Food. Safety. Shelter. Privacy. Transportation. Human contact. A path forward. QuickResets is not about deciding who deserves humanity. It aims to create a practical way for people to receive specific help while preserving autonomy, dignity, and privacy.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- How it works -->
+        <section class="w-full bg-sticker bg-paper-texture rounded-2xl md:rounded-[2rem] border-2 border-ink shadow-brutal md:shadow-brutal-lg p-6 sm:p-10 lg:p-16">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 sm:mb-12 border-b border-ink pb-6 sm:pb-8 reveal-up">
+                <h2 class="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl leading-none font-black tracking-tighter uppercase">Protocol.</h2>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6 lg:gap-8">
+                <div class="brutalist-card p-6 sm:p-8 lg:p-10 reveal-up">
+                    <div class="text-4xl sm:text-5xl font-black text-ink mb-4 sm:mb-6">01</div>
+                    <h3 class="text-xl sm:text-2xl font-black mb-3 sm:mb-4 uppercase">Deploy</h3>
+                    <p class="text-muted font-medium text-sm sm:text-base leading-relaxed">Our current stage is building the payment rail and landing page so each dollar can move cleanly, then printing the first QR codes and placing them around Phoenix Metro, Sedona, and other locations where they make sense. Quiet outreach is also part of the build, so the system can find people before they fall deeper.</p>
+                </div>
+                
+                <div class="brutalist-card p-6 sm:p-8 lg:p-10 reveal-up">
+                    <div class="text-4xl sm:text-5xl font-black text-crimson mb-4 sm:mb-6">02</div>
+                    <h3 class="text-xl sm:text-2xl font-black mb-3 sm:mb-4 uppercase">Scan & Route</h3>
+                    <p class="text-muted font-medium text-sm sm:text-base leading-relaxed">Donors give into a dignity-first support flow: someone scans a QuickResets code, gives a dollar, and that support moves through the platform toward a real person’s urgent need; QuickResets/Beacon keeps the process human, reviewed, and traceable enough to protect the donors and recipients without turning the person’s crisis into public begging or a character test.</p>
+                </div>
+                
+                <div class="brutalist-card p-6 sm:p-8 lg:p-10 reveal-up">
+                    <div class="text-4xl sm:text-5xl font-black text-ink mb-4 sm:mb-6">03</div>
+                    <h3 class="text-xl sm:text-2xl font-black mb-3 sm:mb-4 uppercase">Review & Reset</h3>
+                    <p class="text-muted font-medium text-sm sm:text-base leading-relaxed mb-4">Requests are reviewed with care: enough verification to protect donors and the support pool, without turning someone’s need into a judgment of their character.</p>
+                    <p class="text-muted font-medium text-sm sm:text-base leading-relaxed">When QuickResets cannot meet a request exactly as submitted, the goal is still to find a respectful path that can work — a smaller version of the need, direct payment to the vendor, a ride, a referral, or another practical route that protects both the person asking and the people funding the support pool.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Audience & Principle -->
+        <section class="w-full bg-concrete rounded-2xl md:rounded-[2rem] border-2 border-ink shadow-brutal md:shadow-brutal-lg overflow-hidden flex flex-col">
+            <div class="bg-crimson p-6 sm:p-10 lg:p-16 text-white border-b-2 border-ink reveal-up">
+                <h3 class="text-3xl sm:text-4xl lg:text-5xl font-black mb-5 sm:mb-6 uppercase">The One-Dollar Principle.</h3>
+                <div class="grid md:grid-cols-2 gap-6 sm:gap-8 lg:gap-16 text-base sm:text-lg font-medium">
+                    <div class="flex flex-col gap-6">
+                        <p>QuickResets is not generic charity; it is dignity-first micro-support for the moment when one specific need can decide whether someone keeps standing or falls deeper — a dollar from the donor side, a real reset from the recipient side, and a direct path toward help before or during collapse.</p>
+                    </div>
+                    <div class="flex flex-col gap-6">
+                        <p>$1 is the public ask: someone sees a QuickResets code, gives one buck, and joins a clean line of micro-support toward someone in a critical situation; $1 is intentionally enough, so donors are not pressured to prove they gave more and people in need are supported without their crisis becoming a public test of worth.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 bg-sticker bg-paper-texture">
+                <div class="p-6 sm:p-8 lg:p-10 border-b-2 md:border-b-0 md:border-r-2 border-ink reveal-up hover:bg-concrete/20 transition-colors">
+                    <h4 class="font-bold text-ink text-[9px] sm:text-[10px] tracking-widest uppercase mb-3 sm:mb-4">For Donors</h4>
+                    <h3 class="text-xl sm:text-2xl font-black text-ink mb-3 sm:mb-4">Direct Impact</h3>
+                    <p class="text-muted font-medium text-xs sm:text-sm leading-relaxed">Intended to be a simple way to help without needing to know someone personally, judge their whole life, or donate into a vague system. You will be helping with specific needs. You start by helping one person.</p>
+                </div>
+                <div class="p-6 sm:p-8 lg:p-10 border-b-2 md:border-b-0 md:border-r-2 border-ink reveal-up hover:bg-concrete/20 transition-colors">
+                    <h4 class="font-bold text-crimson text-[9px] sm:text-[10px] tracking-widest uppercase mb-3 sm:mb-4">For People Requesting</h4>
+                    <h3 class="text-xl sm:text-2xl font-black text-ink mb-3 sm:mb-4">Reducing Shame</h3>
+                    <p class="text-muted font-medium text-xs sm:text-sm leading-relaxed">You should not have to publicly expose your life to ask for a ride. You should not have to perform collapse to ask for food. The platform is intended to ask for enough info to route help. It aims to not judge you.</p>
+                </div>
+                <div class="p-6 sm:p-8 lg:p-10 reveal-up hover:bg-concrete/20 transition-colors">
+                    <h4 class="font-bold text-ink text-[9px] sm:text-[10px] tracking-widest uppercase mb-3 sm:mb-4">For Partners</h4>
+                    <h3 class="text-xl sm:text-2xl font-black text-ink mb-3 sm:mb-4">A Doorway to Help</h3>
+                    <p class="text-muted font-medium text-xs sm:text-sm leading-relaxed">A business does not have to solve the whole problem. Placing a QuickResets code is intended to give people a quiet doorway to help. A counter becomes a help point. A menu becomes a support path.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Why this exists -->
+        <section class="w-full bg-ink text-sticker rounded-2xl md:rounded-[2rem] shadow-brutal md:shadow-brutal-lg p-6 sm:p-10 lg:p-16 text-center">
+            <div class="max-w-3xl lg:max-w-4xl mx-auto">
+                <h2 class="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tighter mb-6 sm:mb-10 kinetic-text uppercase">WHY THIS EXISTS.</h2>
+                <p class="text-lg sm:text-xl lg:text-3xl text-sticker/70 font-medium leading-relaxed sm:leading-snug mb-10 sm:mb-16 reveal-up">
+                    QuickResets is being built because too many people collapse in silence. They may still look capable. They may be embarrassed. They may not fit a program. This project is intended for them.
+                </p>
+                
+                <div class="bg-[#1C1C1C] p-6 sm:p-8 lg:p-12 rounded-xl text-left inline-block reveal-up border border-muted/20 w-full">
+                    <h3 class="text-[10px] sm:text-xs font-bold text-crimson tracking-widest uppercase mb-4 sm:mb-6">Core Mission</h3>
+                    <p class="text-lg sm:text-xl text-sticker font-black mb-6 sm:mb-8 leading-snug uppercase">
+                        QuickResets aims to connect people with urgent needs to direct support through public QR codes — without judgment, humiliation, or unnecessary barriers.
+                    </p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-xs sm:text-sm font-bold text-muted tracking-wide uppercase">
+                        <div class="flex items-center gap-3"><div class="w-1.5 sm:w-2 h-1.5 sm:h-2 bg-crimson"></div> Help without humiliation</div>
+                        <div class="flex items-center gap-3"><div class="w-1.5 sm:w-2 h-1.5 sm:h-2 bg-sticker"></div> Support without judgment</div>
+                        <div class="flex items-center gap-3"><div class="w-1.5 sm:w-2 h-1.5 sm:h-2 bg-sticker"></div> Safety before collapse</div>
+                        <div class="flex items-center gap-3"><div class="w-1.5 sm:w-2 h-1.5 sm:h-2 bg-sticker"></div> Autonomy preserved</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- The Data Proving The Need -->
+        <section class="w-full bg-sticker bg-paper-texture rounded-2xl md:rounded-[2rem] border-2 border-ink shadow-brutal md:shadow-brutal-lg p-6 sm:p-10 lg:p-16 relative overflow-hidden flex flex-col items-center">
+            <div class="w-full max-w-4xl lg:max-w-5xl relative z-10">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 sm:mb-12 border-b border-ink pb-6 sm:pb-8 reveal-up">
+                    <h2 class="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black tracking-tighter uppercase max-w-2xl">The Data Proving The Need.</h2>
+                    <span class="font-bold text-crimson text-[9px] sm:text-[10px] tracking-widest mt-4 sm:mt-0 uppercase text-left sm:text-right max-w-xs leading-relaxed">
+                        Dataset 01<br>This is only the first of many that will be published.
+                    </span>
+                </div>
+                
+                <div class="w-full border-2 border-ink shadow-brutal bg-white rounded-lg sm:rounded-xl overflow-hidden reveal-up transition-transform duration-500 hover:shadow-brutal-lg hover:-translate-y-1">
+                    <iframe src="https://claude.site/public/artifacts/444af43c-5015-4e17-81ba-c49da5abf7b9/embed" title="Dataset Render" class="w-full block border-0 bg-[#E8E8E8] h-[350px] md:h-[450px]" sandbox="allow-scripts allow-same-origin" loading="lazy"></iframe>
+                </div>
+            </div>
+            
+            <!-- Decorative corner elements to reinforce physical framing -->
+            <div class="absolute top-4 sm:top-8 left-4 sm:left-8 w-3 sm:w-4 h-3 sm:h-4 border-t-2 border-l-2 border-ink"></div>
+            <div class="absolute top-4 sm:top-8 right-4 sm:right-8 w-3 sm:w-4 h-3 sm:h-4 border-t-2 border-r-2 border-ink"></div>
+        </section>
+
+        <footer class="w-full pt-12 sm:pt-16 pb-8 border-t-4 border-ink flex flex-col md:flex-row justify-between items-start md:items-end gap-6 sm:gap-8 relative z-20">
+            <div>
+                <div class="font-black text-2xl sm:text-3xl tracking-tighter text-ink mb-1 sm:mb-2">QuickResets<span class="text-crimson">.</span></div>
+                <p class="text-ink font-bold text-[9px] sm:text-[10px] tracking-widest uppercase">Public QR Codes + $1 Micro-Donations + Direct Aid.</p>
+            </div>
+            
+            <div class="flex flex-wrap gap-4 sm:gap-6 text-[9px] sm:text-[10px] font-bold tracking-widest text-ink uppercase">
+                <a href="#" class="hover:text-crimson transition-colors hover-trigger">Partner</a>
+                <a href="#" class="hover:text-crimson transition-colors hover-trigger">Request Aid</a>
+                <a href="#" class="hover:text-crimson transition-colors hover-trigger">Donate $1</a>
+            </div>
+        </footer>
+
+    </main>
+
+    <script>
+        // 1. DETERMINISTIC TIMELINE & SCROLL ORCHESTRATION (Lenis)
+        const lenis = new Lenis({
+            duration: 1.2,
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+            direction: 'vertical',
+            smooth: true,
+            smoothTouch: false,
+        });
+
+        lenis.on('scroll', ScrollTrigger.update);
+        gsap.ticker.add((time) => { lenis.raf(time * 1000); });
+        gsap.ticker.lagSmoothing(0);
+
+        // 2. PHYSICAL CURSOR SYSTEM
+        const cursor = document.getElementById('cursor');
+        const follower = document.getElementById('cursor-follower');
+        let mouseX = window.innerWidth / 2, mouseY = window.innerHeight / 2;
+        let followerX = mouseX, followerY = mouseY;
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX; mouseY = e.clientY;
+            cursor.style.left = mouseX + 'px';
+            cursor.style.top = mouseY + 'px';
+        });
+
+        gsap.ticker.add(() => {
+            followerX += (mouseX - followerX) * 0.2;
+            followerY += (mouseY - followerY) * 0.2;
+            follower.style.left = followerX + 'px';
+            follower.style.top = followerY + 'px';
+        });
+
+        document.querySelectorAll('.hover-trigger, a, button').forEach(el => {
+            el.addEventListener('mouseenter', () => document.body.classList.add('hover-active'));
+            el.addEventListener('mouseleave', () => document.body.classList.remove('hover-active'));
+        });
+
+        // 3. ROBUST TEXT SPLITTER
+        function wrapTextNodes(element) {
+            const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null, false);
+            const nodesToReplace = [];
+            while (walker.nextNode()) {
+                if (walker.currentNode.nodeValue.trim() !== '') nodesToReplace.push(walker.currentNode);
+            }
+
+            nodesToReplace.forEach(node => {
+                const text = node.nodeValue;
+                const fragment = document.createDocumentFragment();
+                const words = text.split(/(\s+)/); 
+                
+                words.forEach(word => {
+                    if (word.trim() === '') {
+                        fragment.appendChild(document.createTextNode(word));
+                    } else {
+                        const wordSpan = document.createElement('span');
+                        wordSpan.style.display = 'inline-block';
+                        wordSpan.style.whiteSpace = 'nowrap';
+                        wordSpan.className = 'split-line';
+                        
+                        const charSpan = document.createElement('span');
+                        charSpan.className = 'char';
+                        charSpan.textContent = word; // Doing word-level split for heavy impact
+                        wordSpan.appendChild(charSpan);
+                        fragment.appendChild(wordSpan);
+                    }
+                });
+                node.parentNode.replaceChild(fragment, node);
+            });
+        }
+        document.querySelectorAll('.kinetic-text').forEach(el => wrapTextNodes(el));
+
+        // 4. WEBGL GENERATIVE CONCRETE / GRIT SHADER
+        // Replaces the neon orb with a high-performance 2D noise displacement simulating physical texture
+        const initWebGL = () => {
+            const container = document.getElementById('webgl-noise');
+            const scene = new THREE.Scene();
+            const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+            
+            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: false, powerPreference: "high-performance" });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5)); // Optimization
+            container.appendChild(renderer.domElement);
+
+            const vertexShader = `
+                varying vec2 vUv;
+                void main() {
+                    vUv = uv;
+                    gl_Position = vec4(position, 1.0);
+                }
+            `;
+
+            const fragmentShader = `
+                uniform float uTime;
+                uniform float uScroll;
+                varying vec2 vUv;
+
+                // Hash function for grain
+                float hash(vec2 p) {
+                    p = fract(p * vec2(123.34, 456.21));
+                    p += dot(p, p + 45.32);
+                    return fract(p.x * p.y);
+                }
+
+                // Simplex noise (simplified 2D)
+                vec3 permute(vec3 x) { return mod(((x*34.0)+1.0)*x, 289.0); }
+                float snoise(vec2 v){
+                    const vec4 C = vec4(0.211324865405187, 0.366025403784439, -0.577350269189626, 0.024390243902439);
+                    vec2 i  = floor(v + dot(v, C.yy) );
+                    vec2 x0 = v -   i + dot(i, C.xx);
+                    vec2 i1;
+                    i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
+                    vec4 x12 = x0.xyxy + C.xxzz;
+                    x12.xy -= i1;
+                    i = mod(i, 289.0);
+                    vec3 p = permute( permute( i.y + vec3(0.0, i1.y, 1.0 )) + i.x + vec3(0.0, i1.x, 1.0 ));
+                    vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy), dot(x12.zw,x12.zw)), 0.0);
+                    m = m*m ;
+                    m = m*m ;
+                    vec3 x = 2.0 * fract(p * C.www) - 1.0;
+                    vec3 h = abs(x) - 0.5;
+                    vec3 ox = floor(x + 0.5);
+                    vec3 a0 = x - ox;
+                    m *= 1.79284291400159 - 0.85373472095314 * ( a0*a0 + h*h );
+                    vec3 g;
+                    g.x  = a0.x  * x0.x  + h.x  * x0.y;
+                    g.yz = a0.yz * x12.xz + h.yz * x12.yw;
+                    return 130.0 * dot(m, g);
+                }
+
+                void main() {
+                    vec2 uv = vUv;
+                    
+                    // Base large structure (Concrete waves)
+                    float n1 = snoise(uv * 3.0 + vec2(0.0, uScroll * -0.5 + uTime * 0.05));
+                    float n2 = snoise(uv * 6.0 - vec2(uScroll * 0.2, uTime * 0.02));
+                    
+                    // High frequency grain
+                    float grain = hash(uv * 500.0 + uTime);
+                    
+                    float pattern = (n1 * 0.6 + n2 * 0.4);
+                    pattern = smoothstep(-0.5, 0.5, pattern);
+                    
+                    // Construct brutalist concrete grit colors
+                    vec3 darkConcrete = vec3(0.06, 0.06, 0.06); // #111111 approximation
+                    vec3 lightConcrete = vec3(0.3, 0.3, 0.3);
+                    
+                    vec3 color = mix(darkConcrete, lightConcrete, pattern);
+                    color -= grain * 0.15; // Apply grit
+
+                    gl_FragColor = vec4(color, 1.0);
+                }
+            `;
+
+            const geometry = new THREE.PlaneGeometry(2, 2);
+            const material = new THREE.ShaderMaterial({
+                vertexShader,
+                fragmentShader,
+                uniforms: {
+                    uTime: { value: 0 },
+                    uScroll: { value: 0 }
+                },
+                depthWrite: false,
+                depthTest: false
+            });
+
+            const mesh = new THREE.Mesh(geometry, material);
+            scene.add(mesh);
+
+            lenis.on('scroll', (e) => {
+                const scrollProgress = e.scroll / (document.documentElement.scrollHeight - window.innerHeight);
+                material.uniforms.uScroll.value = scrollProgress;
+            });
+
+            window.addEventListener('resize', () => {
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+
+            const animate = (time) => {
+                material.uniforms.uTime.value = time * 0.001;
+                renderer.render(scene, camera);
+                requestAnimationFrame(animate);
+            };
+            requestAnimationFrame(animate);
+        };
+
+        // 5. LOADING & ANIMATION ORCHESTRATION
+        window.addEventListener('DOMContentLoaded', () => {
+            initWebGL();
+
+            const master = gsap.timeline();
+
+            let loadProgress = { val: 0 };
+            gsap.to(loadProgress, {
+                val: 100,
+                duration: 2.0,
+                ease: "power3.inOut",
+                onUpdate: () => {
+                    document.getElementById('loader-percentage').innerText = Math.round(loadProgress.val).toString().padStart(3, '0') + '%';
+                    document.getElementById('loader-fill').style.width = loadProgress.val + '%';
+                },
+                onComplete: () => {
+                    master.to('#loader', {
+                        yPercent: -100,
+                        duration: 1.0,
+                        ease: "power4.inOut"
+                    })
+                    .add('start')
+                    .to('section:first-of-type .char', {
+                        y: '0%',
+                        stagger: 0.04,
+                        duration: 1.0,
+                        ease: "power4.out"
+                    }, 'start-=0.2')
+                    .fromTo('section:first-of-type .reveal-up', {
+                        y: 30, opacity: 0
+                    }, {
+                        y: 0, opacity: 1,
+                        stagger: 0.1,
+                        duration: 1.0,
+                        ease: "power3.out"
+                    }, 'start+=0.2');
+                }
+            });
+
+            // ScrollTriggers
+            gsap.utils.toArray('section').forEach((sec, i) => {
+                if(i === 0) return; 
+                
+                const chars = sec.querySelectorAll('.char');
+                const reveals = sec.querySelectorAll('.reveal-up');
+                
+                const tl = gsap.timeline({
+                    scrollTrigger: {
+                        trigger: sec,
+                        start: "top 85%",
+                    }
+                });
+
+                if(chars.length) {
+                    tl.to(chars, { y: '0%', stagger: 0.03, duration: 0.8, ease: "power4.out" });
+                }
+                if(reveals.length) {
+                    tl.fromTo(reveals, { y: 40, opacity: 0 }, { y: 0, opacity: 1, stagger: 0.1, duration: 1.0, ease: "power3.out" }, "-=0.6");
+                }
+            });
+        });
+    </script>
+</body>
+</html>
