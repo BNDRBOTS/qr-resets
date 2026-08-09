@@ -37,18 +37,20 @@ export async function GET(req: NextRequest) {
         c.shortName.toLowerCase().includes(q),
     ).slice(0, 4);
 
-    // Get live counts for the matched categories in one query
-    let categoryCounts: { category: string; _count: { _all: number } }[] = [];
-    if (categories.length > 0) {
-      categoryCounts = await db.resource.groupBy({
-        by: ["category"],
-        _count: { _all: true },
-        where: {
-          published: true,
-          category: { in: categories.map((c) => c.slug) },
-        },
-      });
-    }
+    // Get live counts for the matched categories in one query.
+    // Let Prisma infer the generic groupBy payload. An explicit result annotation
+    // here contextually types the generic call and triggers TS2345 with Prisma 6.19.2.
+    const categoryCounts =
+      categories.length > 0
+        ? await db.resource.groupBy({
+            by: ["category"],
+            _count: { _all: true },
+            where: {
+              published: true,
+              category: { in: categories.map((c) => c.slug) },
+            },
+          })
+        : [];
     const countMap = new Map(
       categoryCounts.map((c) => [c.category, c._count._all]),
     );
