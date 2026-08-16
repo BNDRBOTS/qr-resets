@@ -3,7 +3,8 @@
 // BNDR. — Admin login page
 // ----------------------------------------------------------------------------
 // Single Credentials provider. No fallback/default credentials.
-// On success, redirects to /admin.
+// Browser DOM values are authoritative so password-manager/autofill submissions
+// cannot drift from duplicated React credential state.
 
 import { useState } from "react";
 import { signIn } from "next-auth/react";
@@ -12,7 +13,29 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { BndrLogo } from "@/components/bndr/bndr-logo";
+import {
+  performAdminSignIn,
+  readAdminLoginCredentials,
+  type AdminLoginResult,
+} from "@/lib/admin-login-client";
 import { Loader2, Lock, Mail, ShieldCheck, AlertCircle } from "lucide-react";
+import { AdminForgotPasswordForm } from "@/components/bndr/admin-forgot-password-form";
+import { AdminForgotEmailForm } from "@/components/bndr/admin-forgot-email-form";
+
+function loginErrorMessage(result: AdminLoginResult): string | null {
+  switch (result.kind) {
+    case "missing-fields":
+      return "Enter your email and password.";
+    case "invalid-credentials":
+      return "Invalid email or password.";
+    case "rate-limited":
+      return "Too many sign-in attempts. Try again in a few minutes.";
+    case "unavailable":
+      return "Sign-in is temporarily unavailable. Please try again.";
+    case "success":
+      return null;
+  }
+}
 
 export function AdminLoginForm({
   callbackUrl,
@@ -22,32 +45,50 @@ export function AdminLoginForm({
   hasError: boolean;
 }) {
   const router = useRouter();
-
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [recoveryMode, setRecoveryMode] = useState<"password" | "email" | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(
     hasError ? "Sign-in failed. Check your credentials." : null,
   );
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (loading) return;
+
     setErr(null);
-    setLoading(true);
-    const res = await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-      callbackUrl,
-    });
-    setLoading(false);
-    if (res?.error) {
-      setErr("Invalid email or password.");
+    setNotice(null);
+
+    // Read the submitted DOM values directly. Browser/password-manager autofill
+    // populates these fields even when no React change event has fired.
+    const credentials = readAdminLoginCredentials(new FormData(e.currentTarget));
+    if (!credentials) {
+      setErr(loginErrorMessage({ kind: "missing-fields" }));
       return;
     }
-    if (res?.ok) {
-      router.push(callbackUrl);
-      router.refresh();
+
+    // From this point forward an authentication request is actually in flight.
+    setLoading(true);
+    try {
+      const result = await performAdminSignIn(
+        credentials,
+        callbackUrl,
+        (options) => signIn("credentials", options),
+      );
+
+      if (result.kind === "success") {
+        router.push(result.url);
+        router.refresh();
+        return;
+      }
+
+      setErr(loginErrorMessage(result));
+    } catch {
+      // Defensive boundary: performAdminSignIn already normalizes request errors,
+      // but the form must never remain stuck if an unexpected client error occurs.
+      setErr("Sign-in is temporarily unavailable. Please try again.");
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -65,8 +106,21 @@ export function AdminLoginForm({
           </p>
         </div>
 
+        {recoveryMode === "password" ? (
+          <AdminForgotPasswordForm
+            onCancel={() => setRecoveryMode(null)}
+            onComplete={() => {
+              setRecoveryMode(null);
+              setErr(null);
+              setNotice("Password reset. Sign in with your new password.");
+            }}
+          />
+        ) : recoveryMode === "email" ? (
+          <AdminForgotEmailForm onCancel={() => setRecoveryMode(null)} />
+        ) : (
         <form
           onSubmit={handleSubmit}
+          aria-busy={loading}
           className="bndr-glass-panel space-y-4 rounded-2xl p-4 sm:p-6"
         >
           <div className="space-y-2">
@@ -77,15 +131,29 @@ export function AdminLoginForm({
               <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 id="email"
+                name="email"
                 type="email"
                 autoComplete="email"
                 required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
                 className="pl-9"
                 placeholder="admin@example.org"
                 disabled={loading}
               />
+            </div>
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={() => {
+                  if (loading) return;
+                  setErr(null);
+                  setNotice(null);
+                  setRecoveryMode("email");
+                }}
+                disabled={loading}
+                className="text-sm font-medium text-primary transition-opacity hover:opacity-80 disabled:pointer-events-none disabled:opacity-50"
+              >
+                Forgot email / username?
+              </button>
             </div>
           </div>
 
@@ -97,11 +165,10 @@ export function AdminLoginForm({
               <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 id="password"
+                name="password"
                 type="password"
                 autoComplete="current-password"
                 required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
                 className="pl-9"
                 placeholder="••••••••"
                 disabled={loading}
@@ -109,18 +176,44 @@ export function AdminLoginForm({
             </div>
           </div>
 
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={() => {
+                if (loading) return;
+                setErr(null);
+                setNotice(null);
+                setRecoveryMode("password");
+              }}
+              disabled={loading}
+              className="text-sm font-medium text-primary transition-opacity hover:opacity-80 disabled:pointer-events-none disabled:opacity-50"
+            >
+              Forgot password?
+            </button>
+          </div>
+
+          {notice && (
+            <div
+              role="status"
+              aria-live="polite"
+              className="bndr-glass-control rounded-xl border-primary/25 bg-primary/10 p-3 text-sm text-foreground"
+            >
+              {notice}
+            </div>
+          )}
+
           {err && (
-            <div className="bndr-glass-control flex items-start gap-2 rounded-xl border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
+            <div
+              role="alert"
+              aria-live="polite"
+              className="bndr-glass-control flex items-start gap-2 rounded-xl border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive"
+            >
               <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
               <span>{err}</span>
             </div>
           )}
 
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={loading || !email || !password}
-          >
+          <Button type="submit" className="w-full" disabled={loading}>
             {loading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -135,6 +228,7 @@ export function AdminLoginForm({
           </Button>
         </form>
 
+        )}
         <p className="mt-6 text-center text-xs text-muted-foreground">
           Access is restricted to authorized administrators. All sign-in
           attempts are rate-limited and logged.

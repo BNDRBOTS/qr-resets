@@ -9,8 +9,8 @@ function IconFrame({ title, children, ...props }: IconProps) {
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
+      strokeWidth="1.65"
+      strokeLinecap="round" vectorEffect="non-scaling-stroke"
       strokeLinejoin="round"
       role={title ? "img" : undefined}
       aria-hidden={title ? undefined : true}
