@@ -16,6 +16,7 @@ import {
 import type { CategorySlug, SearchResult } from "@/lib/types";
 import { toResourceShape } from "../../resources/route";
 import { createResourceRecord } from "@/lib/resource-service";
+import { ResourceIngestionError } from "@/lib/resource-ingestion";
 
 export const dynamic = "force-dynamic";
 
@@ -102,6 +103,9 @@ export async function POST(req: NextRequest) {
     const created = await createResourceRecord(parsed.data, actor);
     return NextResponse.json(toResourceShape(created), { status: 201 });
   } catch (error) {
+    if (error instanceof ResourceIngestionError) {
+      return apiError(error.code, error.message, error.code === "DUPLICATE_RESOURCE" ? 409 : 400);
+    }
     console.error("[api/admin/resources POST]", error);
     return apiError("INTERNAL", "Failed to create resource.", 500);
   }

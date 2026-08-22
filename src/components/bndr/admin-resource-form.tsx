@@ -64,6 +64,7 @@ export function AdminResourceForm({ editing, onDone }: AdminResourceFormProps) {
       : EMPTY,
   );
   const [pasteText, setPasteText] = useState("");
+  const [pasteFormat, setPasteFormat] = useState<"" | "txt" | "markdown" | "json" | "xml">("");
   const [parsing, setParsing] = useState(false);
 
   const set = <K extends keyof ResourceInput>(
@@ -72,7 +73,8 @@ export function AdminResourceForm({ editing, onDone }: AdminResourceFormProps) {
   ) => setForm((f) => ({ ...f, [key]: value }));
 
   const parseMut = useMutation({
-    mutationFn: (text: string) => parseText(text),
+    mutationFn: ({ text, format }: { text: string; format: typeof pasteFormat }) =>
+      parseText(text, format || undefined),
     onSuccess: (data) => {
       setForm((f) => ({ ...f, ...data.parsed }));
       toast.success("Parsed", {
@@ -110,7 +112,7 @@ export function AdminResourceForm({ editing, onDone }: AdminResourceFormProps) {
     }
     setParsing(true);
     try {
-      await parseMut.mutateAsync(pasteText);
+      await parseMut.mutateAsync({ text: pasteText, format: pasteFormat });
     } finally {
       setParsing(false);
     }
@@ -128,6 +130,7 @@ export function AdminResourceForm({ editing, onDone }: AdminResourceFormProps) {
   const handleReset = () => {
     setForm(EMPTY);
     setPasteText("");
+    setPasteFormat("");
   };
 
   // Live preview as a Resource-like object.
@@ -167,10 +170,27 @@ export function AdminResourceForm({ editing, onDone }: AdminResourceFormProps) {
             <Wand2 className="size-4" aria-hidden /> Smart Paste
           </Label>
           <p className="text-xs text-muted-foreground">
-            Paste unstructured text — a name, phone, email, address. We
-            extract fields heuristically (no LLM, no invented data). Review
-            before saving.
+            Paste TXT, Markdown, JSON, or XML. Structured formats use their
+            native parsers; contact regexes only locate candidates for strict
+            validation. No AI verification or invented data. Review before saving.
           </p>
+          <Select
+            value={pasteFormat || "auto"}
+            onValueChange={(value) =>
+              setPasteFormat(value === "auto" ? "" : value as typeof pasteFormat)
+            }
+          >
+            <SelectTrigger aria-label="Smart Paste input format">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="auto">Auto-detect format</SelectItem>
+              <SelectItem value="txt">TXT</SelectItem>
+              <SelectItem value="markdown">Markdown</SelectItem>
+              <SelectItem value="json">JSON</SelectItem>
+              <SelectItem value="xml">XML</SelectItem>
+            </SelectContent>
+          </Select>
           <Textarea
             id="smart-paste"
             value={pasteText}

@@ -100,6 +100,8 @@ export function Directory() {
   const hydratedRef = useRef(false);
   useEffect(() => {
     const s = parseUrlState();
+    // This one-time client hydration intentionally synchronizes URL state after SSR.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setQuery(s.query);
     setDebouncedQuery(s.query.trim());
     setCategory(s.category);
@@ -115,6 +117,7 @@ export function Directory() {
   const [recentOpen, setRecentOpen] = useState(false);
   const [advocateDashboardOpen, setAdvocateDashboardOpen] = useState(false);
   const [collectionsOpen, setCollectionsOpen] = useState(false);
+  const [renderedAt] = useState(() => Date.now());
 
   const searchInputRef = useRef<HTMLInputElement | null>(null);
   const { recent, addRecent, clearRecent } = useRecentlyViewed();
@@ -459,7 +462,7 @@ export function Directory() {
           if (!d) return true; // never contacted
           const dt = new Date(d);
           if (isNaN(dt.getTime())) return true;
-          return (Date.now() - dt.getTime()) / (1000 * 60 * 60 * 24) > 7;
+          return (renderedAt - dt.getTime()) / (1000 * 60 * 60 * 24) > 7;
         }).length}
         onOpenAdvocateDashboard={() => setAdvocateDashboardOpen(true)}
         collectionsCount={collections.collections.length}
@@ -648,7 +651,7 @@ export function Directory() {
                       if (!d) return true;
                       const dt = new Date(d);
                       if (isNaN(dt.getTime())) return true;
-                      return (Date.now() - dt.getTime()) / (1000 * 60 * 60 * 24) > 7;
+                      return (renderedAt - dt.getTime()) / (1000 * 60 * 60 * 24) > 7;
                     }}
                     getContactLogCount={(id) => contactLog.getEntries(id).length}
                     getDefaultContactMethod={defaultContactMethod.getMethod}
@@ -849,4 +852,3 @@ export function Directory() {
     </div>
   );
 }
-

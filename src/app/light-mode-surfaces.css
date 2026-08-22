@@ -51,3 +51,11 @@
   --category-meta-surface: rgba(255, 255, 255, 0.84);
   --category-meta-border: rgba(58, 49, 44, 0.14);
 }
+
+/* Sticky category rail only: use the same rendered light surface as the footer,
+   but make it opaque so scrolling resource content cannot show through it. */
+:root:not(.dark) .bndr-category-filter-bar {
+  background: color-mix(in srgb, var(--card) 30%, var(--background));
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}

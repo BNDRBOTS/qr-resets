@@ -2,6 +2,11 @@
 // database; this module contains no seed rows, fallback rows, or demo records.
 
 import { db } from "@/lib/db";
+import {
+  findExistingIdentityConflict,
+  prepareResourceCandidate,
+  ResourceIngestionError,
+} from "@/lib/resource-ingestion";
 import { normalizeResource } from "@/lib/pii";
 import type { CategorySlug, ResourceInput } from "@/lib/types";
 
@@ -16,26 +21,37 @@ export async function createResourceRecord(
   input: ResourceInput,
   actor: string,
 ) {
-  const normalized = normalizeResource(input);
+  const prepared = prepareResourceCandidate(input as unknown as Record<string, unknown>);
+  const normalized = normalizeResource(prepared.input);
+  const existing = await db.resource.findMany({
+    select: { id: true, name: true, email: true, website: true, phoneNormalized: true },
+  });
+  const conflict = findExistingIdentityConflict(prepared, existing);
+  if (conflict) {
+    throw new ResourceIngestionError(
+      "DUPLICATE_RESOURCE",
+      `An existing resource already has the same exact name/contact identity (${conflict.name}).`,
+    );
+  }
 
   return db.$transaction(async (tx) => {
     const created = await tx.resource.create({
       data: {
         name: normalized.name,
-        acronym: input.acronym,
+        acronym: prepared.input.acronym,
         description: normalized.description,
-        category: input.category,
-        subcategory: input.subcategory,
-        phoneRaw: input.phoneRaw,
-        phoneNormalized: normalized.phoneNormalized,
+        category: prepared.input.category,
+        subcategory: prepared.input.subcategory,
+        phoneRaw: prepared.input.phoneRaw,
+        phoneNormalized: prepared.phoneNormalized,
         email: normalized.email,
-        address: input.address,
+        address: prepared.input.address,
         website: normalized.website,
-        tags: input.tags,
-        priority: input.priority,
-        verified: input.verified,
-        published: input.published,
-        sourceNote: input.sourceNote,
+        tags: prepared.input.tags,
+        priority: prepared.input.priority,
+        verified: prepared.input.verified,
+        published: prepared.input.published,
+        sourceNote: prepared.input.sourceNote,
         piipassAt: new Date(),
         piipassNotes: normalized.changes.length
           ? normalized.changes.join(" | ")
@@ -51,6 +67,8 @@ export async function createResourceRecord(
         summary: `Created resource: ${created.name}`,
         details: JSON.stringify({
           changes: normalized.changes,
+          issues: prepared.issues,
+          viability: prepared.viability,
           source: "admin",
         }),
       },
@@ -90,27 +108,38 @@ export async function updateResourceRecord(
       patch.sourceNote !== undefined ? patch.sourceNote : existing.sourceNote,
   };
 
-  const normalized = normalizeResource(merged);
+  const prepared = prepareResourceCandidate(merged as unknown as Record<string, unknown>);
+  const normalized = normalizeResource(prepared.input);
+  const allResources = await db.resource.findMany({
+    select: { id: true, name: true, email: true, website: true, phoneNormalized: true },
+  });
+  const conflict = findExistingIdentityConflict(prepared, allResources, id);
+  if (conflict) {
+    throw new ResourceIngestionError(
+      "DUPLICATE_RESOURCE",
+      `Another resource already has the same exact name/contact identity (${conflict.name}).`,
+    );
+  }
 
   return db.$transaction(async (tx) => {
     const updated = await tx.resource.update({
       where: { id },
       data: {
         name: normalized.name,
-        acronym: merged.acronym,
+        acronym: prepared.input.acronym,
         description: normalized.description,
-        category: merged.category,
-        subcategory: merged.subcategory,
-        phoneRaw: merged.phoneRaw,
-        phoneNormalized: normalized.phoneNormalized,
+        category: prepared.input.category,
+        subcategory: prepared.input.subcategory,
+        phoneRaw: prepared.input.phoneRaw,
+        phoneNormalized: prepared.phoneNormalized,
         email: normalized.email,
-        address: merged.address,
+        address: prepared.input.address,
         website: normalized.website,
-        tags: merged.tags,
-        priority: merged.priority,
-        verified: merged.verified,
-        published: merged.published,
-        sourceNote: merged.sourceNote,
+        tags: prepared.input.tags,
+        priority: prepared.input.priority,
+        verified: prepared.input.verified,
+        published: prepared.input.published,
+        sourceNote: prepared.input.sourceNote,
         piipassAt: new Date(),
         piipassNotes: normalized.changes.length
           ? normalized.changes.join(" | ")
@@ -126,6 +155,8 @@ export async function updateResourceRecord(
         summary: `Updated resource: ${updated.name}`,
         details: JSON.stringify({
           changes: normalized.changes,
+          issues: prepared.issues,
+          viability: prepared.viability,
           fields: Object.keys(patch),
         }),
       },

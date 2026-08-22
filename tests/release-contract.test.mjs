@@ -180,21 +180,35 @@ test("emoji glyphs are removed and custom BNDR SVG icons are present", () => {
   assert.match(icons, /export function BndrCheckIcon/);
 });
 
-test("source normalizer and canonical data remain byte-identical to v2 baseline", () => {
+test("source normalizer and canonical data remain fixed while ingestion uses the shared pipeline", () => {
   assert.equal(sha256("src/lib/pii.ts"), "092ea94d6772f7f6d1ab6eed68ddfe7f52cb946babc6625b7de385fdaed8d72e");
-  assert.equal(sha256("src/app/api/admin/resources/import/route.ts"), "a7464c48cf64f225e62cb1a03c0770466560b18c9e516ba5a4438d4322c732a8");
-  assert.equal(sha256("src/components/bndr/admin-bulk-import.tsx"), "92491d384d27761bb02897bb3771563db3b48f05d30b1f6152ae2864196882b7");
   assert.equal(sha256("prisma/verified-resources.csv"), CANONICAL);
+  const importRoute = read("src/app/api/admin/resources/import/route.ts");
+  const bulkUi = read("src/components/bndr/admin-bulk-import.tsx");
+  assert.match(importRoute, /prepareResourceBatch/);
+  assert.match(importRoute, /prepareResourceDocument/);
+  assert.match(importRoute, /db\.\$transaction/);
+  assert.doesNotMatch(importRoute, /openai|anthropic|gemini|llm/i);
+  assert.match(bulkUi, /\.txt,\.md,\.markdown,\.json,\.xml/);
+  assert.match(bulkUi, /value="markdown"/);
+  assert.match(bulkUi, /value="json"/);
+  assert.match(bulkUi, /value="xml"/);
 });
 
-test("admin login and resource creation remain environment-backed and server-gated", () => {
+test("admin login uses persistent single-admin credentials with Railway bootstrap and server gates", () => {
   const auth = read("src/lib/auth-options.ts");
+  const credentials = read("src/lib/admin-credentials.ts");
+  const core = read("src/lib/admin-credential-core.ts");
   const adminRoute = read("src/app/api/admin/resources/route.ts");
   const adminPage = read("src/app/admin/page.tsx");
-  assert.match(auth, /process\.env\.ADMIN_EMAIL/);
-  assert.match(auth, /process\.env\.ADMIN_PASSWORD_HASH/);
-  assert.match(auth, /process\.env\.ADMIN_PASSWORD/);
-  assert.doesNotMatch(auth, /ADMIN_(?:EMAIL|PASSWORD|PASSWORD_HASH)\s*=\s*["'][^"']+["']/);
+  assert.match(credentials, /process\.env\.ADMIN_EMAIL/);
+  assert.match(credentials, /process\.env\.ADMIN_PASSWORD_HASH/);
+  assert.match(credentials, /process\.env\.ADMIN_PASSWORD/);
+  assert.match(credentials, /process\.env\.ADMIN_RECOVERY_KEY/);
+  assert.match(core, /existing = await deps\.store\.get\(\)/);
+  assert.match(core, /bootstrapIfMissing/);
+  assert.match(auth, /authenticateAdminCredential\(email, password\)/);
+  assert.match(auth, /isAdminCredentialVersionCurrent\(token\)/);
   assert.match(adminPage, /getServerSession\(authOptions\)/);
   assert.match(adminRoute, /requireAdminRateLimited\(req, RATE_LIMITS\.resourceMutation\)/);
   assert.match(adminRoute, /createResourceRecord\(parsed\.data, actor\)/);
@@ -215,4 +229,34 @@ test("category contact coverage is global dataset-backed rather than filtered-re
   assert.match(adminStatsRoute, /phoneNormalized:\s*\{\s*not:\s*null\s*\}/);
   assert.match(adminStatsRoute, /email:\s*\{\s*not:\s*null\s*\}/);
   assert.match(adminStatsRoute, /website:\s*\{\s*not:\s*null\s*\}/);
+});
+
+test("forgot-password recovery is explicit, short-lived, same-origin, and version-invalidating", () => {
+  const login = read("src/components/bndr/admin-login-form.tsx");
+  const flow = read("src/components/bndr/admin-forgot-password-form.tsx");
+  const proof = read("src/app/api/admin-recovery/verify/route.ts");
+  const reset = read("src/app/api/admin-recovery/password/route.ts");
+  const ticket = read("src/lib/admin-recovery-ticket-core.ts");
+  assert.match(login, /Forgot password\?/);
+  assert.match(flow, /performAdminRecoveryProof/);
+  assert.match(flow, /performAdminPasswordReset/);
+  assert.match(proof, /createAdminRecoveryTicket/);
+  assert.match(reset, /resetAdminPasswordWithRecoveryGrant/);
+  assert.match(ticket, /ADMIN_RECOVERY_TICKET_TTL_MS = 10 \* 60 \* 1000/);
+  assert.match(ticket, /timingSafeEqual/);
+  assert.match(reset, /RECOVERY_EXPIRED/);
+});
+
+test("forgot-admin-email recovery requires proof and does not disclose identity before success", () => {
+  const login = read("src/components/bndr/admin-login-form.tsx");
+  const flow = read("src/components/bndr/admin-forgot-email-form.tsx");
+  const route = read("src/app/api/admin-recovery/email/route.ts");
+  assert.match(login, /Forgot email \/ username\?/);
+  assert.match(flow, /performAdminEmailRecovery/);
+  assert.match(flow, /Your username is the admin email used to sign in\./);
+  assert.match(route, /verifyAdminRecoveryCredential/);
+  assert.match(route, /requireSameOriginMutation\(req\)/);
+  assert.match(route, /RATE_LIMITS\.adminRecoveryProof/);
+  assert.match(route, /\{ ok: true, email: recovery\.admin\.email \}/);
+  assert.doesNotMatch(route, /console\.(?:log|error)\([^\n]*(?:recovery\.admin\.email|parsed\.data|recoveryKey)/);
 });

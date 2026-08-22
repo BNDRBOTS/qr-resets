@@ -100,7 +100,11 @@ export function CategoryGrid({ counts, onSelect, categoryStats }: CategoryGridPr
                         {coveragePercent(coverage.withWebsite, count)}%
                       </span>
                     </div>
-                  ) : null}
+                  ) : (
+                    <span className="bndr-category-metrics bndr-category-metrics--empty text-[11px] text-muted-foreground/65">
+                      Source-backed category
+                    </span>
+                  )}
 
                   <span className="bndr-category-link inline-flex items-center gap-1.5 text-xs font-medium text-primary">
                     Explore

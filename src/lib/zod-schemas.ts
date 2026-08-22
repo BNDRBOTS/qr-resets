@@ -111,6 +111,27 @@ export const urlVerifyCommandSchema = z.object({
 });
 
 
+
+// ---- Single-admin recovery --------------------------------------------------
+export const adminRecoveryProofSchema = z.object({
+  recoveryKey: z.string().min(24).max(512),
+}).strict();
+export type AdminRecoveryProofParsed = z.infer<typeof adminRecoveryProofSchema>;
+
+export const adminPasswordResetSchema = z.object({
+  resetToken: z.string().min(1).max(4096),
+  newPassword: z.string().min(12).max(256),
+}).strict();
+export type AdminPasswordResetParsed = z.infer<typeof adminPasswordResetSchema>;
+
+// Kept as a server-core compatibility schema for the Prompt 2 foundation. The
+// browser flow does not submit the recovery key together with a new password.
+export const adminPasswordRecoverySchema = z.object({
+  recoveryKey: z.string().min(24).max(512),
+  newPassword: z.string().min(12).max(256),
+}).strict();
+export type AdminPasswordRecoveryParsed = z.infer<typeof adminPasswordRecoverySchema>;
+
 // ---- QR Resets public request -----------------------------------------------
 const qrOptionalText = (max: number) => z.string().trim().max(max).optional().default("");
 
@@ -235,6 +256,7 @@ export const BODY_LIMITS = {
   bulkImport: 8 * 1024 * 1024, // 8 MiB / up to 1,000 resources
   qrRequest: 32 * 1024, // 32 KiB
   qrAdminReview: 16 * 1024, // 16 KiB
+  adminRecovery: 8 * 1024, // 8 KiB
 } as const;
 
 // ---- Resolve command (public bulk lookup by ID) -----------------------------

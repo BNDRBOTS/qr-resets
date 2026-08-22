@@ -233,6 +233,7 @@ export function AdvocateDashboard({
   defaultMethodCount = 0,
   onClearAllDefaults,
 }: AdvocateDashboardProps) {
+  const [renderedAt] = useState(() => Date.now());
   const stats = useMemo(() => {
     const savedCount = saved.length;
     const contactedCount = saved.filter((r) => !!contacted[r.id]).length;
@@ -247,14 +248,14 @@ export function AdvocateDashboard({
       if (!d) return false;
       const dt = new Date(d);
       if (isNaN(dt.getTime())) return false;
-      return (Date.now() - dt.getTime()) / (1000 * 60 * 60 * 24) <= 7;
+      return (renderedAt - dt.getTime()) / (1000 * 60 * 60 * 24) <= 7;
     });
     const recentlyContacted30d = saved.filter((r) => {
       const d = contacted[r.id];
       if (!d) return false;
       const dt = new Date(d);
       if (isNaN(dt.getTime())) return false;
-      return (Date.now() - dt.getTime()) / (1000 * 60 * 60 * 24) <= 30;
+      return (renderedAt - dt.getTime()) / (1000 * 60 * 60 * 24) <= 30;
     });
 
     // Outreach cadence: contacts per week over the last 30 days (0 if none).
@@ -330,7 +331,7 @@ export function AdvocateDashboard({
       totalMethodContacts,
       recentContacts,
     };
-  }, [saved, notes, ratings, contacted, contactLogs]);
+  }, [saved, notes, ratings, contacted, contactLogs, renderedAt]);
 
   // ---- Outreach stats — uses the shared useOutreachStats hook so the site
   // header indicators + this dashboard stay perfectly in sync. The hook
@@ -1242,7 +1243,7 @@ export function AdvocateDashboard({
                     <div className="mb-2 flex items-center justify-between gap-2">
                       <h3 className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
                         <Target className={cn("size-3.5", goalMet ? "text-emerald-600 dark:text-emerald-400" : "text-primary")} aria-hidden />
-                        This week's goal
+                        This week&apos;s goal
                       </h3>
                       {onUpdateWeeklyGoal ? (
                         editingGoal ? (
@@ -1352,7 +1353,7 @@ export function AdvocateDashboard({
                           <div className="bndr-celebrate mt-2.5 flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/[0.08] px-3 py-2">
                             <PartyPopper className="size-4 shrink-0 text-emerald-600 dark:text-emerald-400" aria-hidden />
                             <p className="text-xs font-medium text-emerald-700 dark:text-emerald-300">
-                              Goal achieved! You've reached your weekly target.
+                              Goal achieved! You&apos;ve reached your weekly target.
                             </p>
                           </div>
                         </motion.div>

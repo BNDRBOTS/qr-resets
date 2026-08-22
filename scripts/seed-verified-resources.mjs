@@ -3,6 +3,13 @@ import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+  canonicalizeResourceCandidate,
+  findBatchDuplicate,
+  resourceIdentityKeys,
+  tolerantResourceMapping,
+  validateContactCandidates,
+} from "../src/lib/resource-ingestion-core.mjs";
 
 const EXPECTED_SOURCE_SHA256 = "5e9a8438ee652c9be5b44fb781a2ba94db9dafffddcc720c254bc291aab2d72b";
 const db = new PrismaClient();
@@ -64,6 +71,30 @@ try {
   }
   if (!Array.isArray(taxonomy) || taxonomy.length === 0) {
     throw new Error("Category taxonomy is empty or invalid.");
+  }
+
+  // The deployment seed uses the same canonical contact validators and exact
+  // identity dedupe keys as Smart Paste, manual writes, and bulk import. The
+  // hash-pinned source fields remain byte-authoritative after these gates pass.
+  const preparedSourceRows = payload.resources.map((row, index) => {
+    const mapped = tolerantResourceMapping(row);
+    const { canonical } = canonicalizeResourceCandidate(mapped);
+    const validated = validateContactCandidates(canonical);
+    if (!canonical.name || !canonical.category) {
+      throw new Error(`Source row ${index + 1} is missing a canonical name or category.`);
+    }
+    if (validated.issues.length > 0) {
+      throw new Error(`Source row ${index + 1} failed ingestion validation: ${validated.issues.join(", ")}`);
+    }
+    return {
+      identityKeys: resourceIdentityKeys(validated.canonical, validated.phoneNormalized),
+    };
+  });
+  const sourceDuplicate = findBatchDuplicate(preparedSourceRows);
+  if (sourceDuplicate) {
+    throw new Error(
+      `Source rows ${sourceDuplicate.firstIndex + 1} and ${sourceDuplicate.secondIndex + 1} share an exact identity key.`,
+    );
   }
 
   const [prior, matchingRows] = await Promise.all([

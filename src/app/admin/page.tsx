@@ -7,6 +7,7 @@
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
+import { isAdminSession } from "@/lib/admin-auth-core";
 import { AdminDashboard } from "@/components/bndr/admin-dashboard";
 import Link from "next/link";
 import { AdminSignOut } from "@/components/bndr/admin-sign-out";
@@ -16,7 +17,7 @@ export const dynamic = "force-dynamic";
 export default async function AdminPage() {
   const session = await getServerSession(authOptions);
 
-  if (!session || (session.user as { role?: string })?.role !== "admin") {
+  if (!isAdminSession(session)) {
     redirect("/admin/login");
   }
 

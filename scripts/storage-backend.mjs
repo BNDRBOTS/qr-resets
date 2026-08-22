@@ -1,4 +1,5 @@
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 
 export function storageBackend(env = process.env) {
   const raw = (env.STORAGE_BACKEND || "sqlite").trim().toLowerCase();
@@ -29,7 +30,7 @@ export function resolvedDatabaseUrl(env = process.env) {
   }
   const configured = env.DATABASE_URL?.trim();
   if (configured?.startsWith("file:")) return configured;
-  return `file:${path.join(resolvedSqliteDataDir(env), "bndr.db")}`;
+  return pathToFileURL(path.join(resolvedSqliteDataDir(env), "bndr.db")).href;
 }
 
 export function railwayPersistenceReady(env = process.env) {

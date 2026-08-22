@@ -956,6 +956,10 @@ html.dark .bndr-grain {
   -webkit-backdrop-filter: blur(10px);
 }
 
+.bndr-category-metrics--empty {
+  min-height: 1.9rem;
+  padding: 0 0.8rem;
+}
 
 .bndr-category-metric {
   display: inline-flex;

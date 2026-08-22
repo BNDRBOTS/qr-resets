@@ -16,6 +16,7 @@ import {
   updateResourceRecord,
 } from "@/lib/resource-service";
 import { toResourceShape } from "../../../resources/route";
+import { ResourceIngestionError } from "@/lib/resource-ingestion";
 
 export const dynamic = "force-dynamic";
 
@@ -69,6 +70,9 @@ export async function PUT(req: NextRequest, { params }: RouteContext) {
   } catch (error) {
     if (error instanceof ResourceNotFoundError) {
       return apiError("NOT_FOUND", "Resource not found.", 404);
+    }
+    if (error instanceof ResourceIngestionError) {
+      return apiError(error.code, error.message, error.code === "DUPLICATE_RESOURCE" ? 409 : 400);
     }
     console.error("[api/admin/resources/:id PUT]", error);
     return apiError("INTERNAL", "Failed to update resource.", 500);

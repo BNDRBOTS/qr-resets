@@ -17,6 +17,7 @@ import { motion } from "framer-motion";
  */
 export function QrHeroParticles({ count = 24 }: { count?: number }) {
   // Generate stable random positions once on mount.
+  /* eslint-disable react-hooks/purity -- mount-time decorative randomness is the intended QR visual behavior */
   const particles = useMemo(
     () =>
       Array.from({ length: count }).map((_, i) => ({
@@ -31,6 +32,7 @@ export function QrHeroParticles({ count = 24 }: { count?: number }) {
       })),
     [count],
   );
+  /* eslint-enable react-hooks/purity */
 
   return (
     <div
