@@ -30,7 +30,7 @@ Do NOT add `NEXTAUTH_SECRET`, `RATE_LIMIT_PEPPER`, or `NEXTAUTH_URL` unless you 
 
 1. Resolves `STORAGE_BACKEND` (`sqlite` by default).
 2. Refuses Railway production SQLite if no persistent volume is attached.
-3. Sets `DATABASE_URL=file:<volume>/bndr.db`.
+3. Sets `DATABASE_URL=file:///<absolute-volume-path>/bndr.db`.
 4. Creates/updates the SQLite schema with Prisma `db push` without `--accept-data-loss`; destructive schema changes therefore fail instead of being silently accepted.
 5. Idempotently seeds/upserts the canonical 114 resource rows without deleting admin-created data.
 6. Persists auth/rate-limit secrets on the volume when not explicitly supplied.

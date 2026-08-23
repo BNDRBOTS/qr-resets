@@ -149,13 +149,24 @@ export async function fetchAudit(
 
 export async function parseText(
   text: string,
-): Promise<{ parsed: Partial<ResourceInput> }> {
+  format?: "txt" | "markdown" | "json" | "xml",
+): Promise<{
+  parsed: Partial<ResourceInput>;
+  format: "txt" | "markdown" | "json" | "xml";
+  viability: "viable" | "pending" | "invalid" | "off_topic" | "identity_mismatch";
+  issues: string[];
+}> {
   const res = await fetch("/api/admin/parse", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ text }),
+    body: JSON.stringify({ text, ...(format ? { format } : {}) }),
   });
-  return jsonOrThrow<{ parsed: Partial<ResourceInput> }>(res);
+  return jsonOrThrow<{
+    parsed: Partial<ResourceInput>;
+    format: "txt" | "markdown" | "json" | "xml";
+    viability: "viable" | "pending" | "invalid" | "off_topic" | "identity_mismatch";
+    issues: string[];
+  }>(res);
 }
 
 export async function runCleanup(): Promise<{

@@ -121,6 +121,7 @@ export function SavedResourcesPanel({
   >("recent");
   const [followUpOnly, setFollowUpOnly] = useState(false);
   const [recentOnly, setRecentOnly] = useState(false);
+  const [renderedAt] = useState(() => Date.now());
   // ---- Bulk selection state ----
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkMode, setBulkMode] = useState(false);
@@ -228,7 +229,7 @@ export function SavedResourcesPanel({
     try {
       const d = new Date(dateStr + "T00:00:00");
       const days = Math.floor(
-        (Date.now() - d.getTime()) / (1000 * 60 * 60 * 24),
+        (renderedAt - d.getTime()) / (1000 * 60 * 60 * 24),
       );
       return days > FOLLOW_UP_DAYS;
     } catch {
@@ -243,7 +244,7 @@ export function SavedResourcesPanel({
     try {
       const d = new Date(dateStr + "T00:00:00");
       const days = Math.floor(
-        (Date.now() - d.getTime()) / (1000 * 60 * 60 * 24),
+        (renderedAt - d.getTime()) / (1000 * 60 * 60 * 24),
       );
       return days <= FOLLOW_UP_DAYS;
     } catch {

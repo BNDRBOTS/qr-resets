@@ -6,6 +6,7 @@
 //
 
 import { withAuth } from "next-auth/middleware";
+import { isAdminToken } from "@/lib/admin-auth-core";
 
 export default withAuth({
   pages: {
@@ -17,7 +18,7 @@ export default withAuth({
       const path = req.nextUrl.pathname;
       if (path === "/admin/login") return true;
       // All other protected paths require an admin token.
-      return token?.role === "admin";
+      return isAdminToken(token);
     },
   },
 });

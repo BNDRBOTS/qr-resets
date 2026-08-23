@@ -18,12 +18,14 @@ try {
 const adminEmail = process.env.ADMIN_EMAIL?.trim() || "";
 const adminPasswordHash = process.env.ADMIN_PASSWORD_HASH?.trim() || "";
 const adminPassword = process.env.ADMIN_PASSWORD?.trim() || "";
+const adminRecoveryKey = process.env.ADMIN_RECOVERY_KEY?.trim() || "";
 
 if (!adminEmail) failures.push("ADMIN_EMAIL is required for the single-admin tools");
 if (!adminPasswordHash && !adminPassword) failures.push("ADMIN_PASSWORD or ADMIN_PASSWORD_HASH is required for the single-admin tools");
 if (adminEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(adminEmail)) failures.push("ADMIN_EMAIL must be a valid email address");
 if (adminPasswordHash && !/^\$2[aby]\$\d{2}\$[./A-Za-z0-9]{53}$/.test(adminPasswordHash)) failures.push("ADMIN_PASSWORD_HASH must be a bcrypt hash");
 if (adminPassword && adminPassword.length < 12) failures.push("ADMIN_PASSWORD should be at least 12 characters");
+if (adminRecoveryKey && adminRecoveryKey.length < 24) failures.push("ADMIN_RECOVERY_KEY must be at least 24 characters when configured");
 
 if (backend === "postgres") {
   const databaseUrl = process.env.DATABASE_URL?.trim() || "";

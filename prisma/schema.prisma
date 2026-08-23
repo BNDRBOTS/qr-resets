@@ -88,6 +88,19 @@ model RateLimitAttempt {
   @@index([namespace, expiresAt])
 }
 
+
+model AdminCredential {
+  id                      String   @id
+  email                   String   @unique
+  passwordHash            String
+  recoveryKeyHash         String?
+  credentialVersion       Int      @default(1)
+  bootstrappedAt          DateTime @default(now())
+  passwordUpdatedAt       DateTime @default(now())
+  recoveryKeyConfiguredAt DateTime?
+  updatedAt               DateTime @updatedAt
+}
+
 model PendingResource {
   id        String   @id @default(cuid())
   name      String

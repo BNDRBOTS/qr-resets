@@ -17,6 +17,16 @@ export interface RateLimitConfig {
 
 export const RATE_LIMITS = {
   signIn: { windowMs: 15 * 60 * 1000, max: 5, namespace: "signin" },
+  adminRecoveryProof: {
+    windowMs: 30 * 60 * 1000,
+    max: 5,
+    namespace: "adminrecoveryproof",
+  },
+  adminRecoveryReset: {
+    windowMs: 15 * 60 * 1000,
+    max: 5,
+    namespace: "adminrecoveryreset",
+  },
   adminRead: { windowMs: WINDOW_MS, max: 180, namespace: "adminread" },
   resourceMutation: { windowMs: WINDOW_MS, max: 30, namespace: "resmut" },
   smartPaste: { windowMs: WINDOW_MS, max: 10, namespace: "smartpaste" },

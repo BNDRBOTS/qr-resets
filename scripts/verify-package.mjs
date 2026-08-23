@@ -32,6 +32,7 @@ const required = [
   "prisma/postgres/schema.prisma",
   "prisma/postgres/migrations/20260806000000_postgres_verified_dataset/migration.sql",
   "prisma/postgres/migrations/20260808090000_qr_resets_baseline/migration.sql",
+  "prisma/postgres/migrations/20260816113000_single_admin_credentials/migration.sql",
   "prisma/verified-resources.csv",
   "prisma/verified-resources.json",
   "prisma/category-resolution.json",
@@ -170,7 +171,7 @@ if (!bndrLogo.includes("/bndr-logo-black.png") || !existsSync(join(root, "public
 const missionConnection = readFileSync(join(root, "src/components/shared/mission-connection.tsx"), "utf8");
 if (/675 verified resources/.test(missionConnection)) fail("Stale hard-coded resource count remains in merged UI");
 const prismaSchema = readFileSync(join(root, "prisma/schema.prisma"), "utf8");
-for (const model of ["QrResetRequest", "QrRequestReview", "QrResetCase", "QrDonationEvent"]) {
+for (const model of ["AdminCredential", "QrResetRequest", "QrRequestReview", "QrResetCase", "QrDonationEvent"]) {
   if (!prismaSchema.includes(`model ${model} {`)) fail(`Missing Prisma model: ${model}`);
 }
 const qrMigration = readFileSync(join(root, "prisma/postgres/migrations/20260808090000_qr_resets_baseline/migration.sql"), "utf8");
@@ -273,10 +274,22 @@ for (const file of files.filter((file) => [".ts", ".tsx", ".js", ".mjs", ".md"].
 }
 
 const authSource = readFileSync(join(root, "src/lib/auth-options.ts"), "utf8");
-if (!authSource.includes("process.env.ADMIN_EMAIL") || !authSource.includes("process.env.ADMIN_PASSWORD_HASH") || !authSource.includes("process.env.ADMIN_PASSWORD")) {
-  fail("Admin credentials are not sourced exclusively from environment variables");
+const adminCredentialSource = readFileSync(join(root, "src/lib/admin-credentials.ts"), "utf8");
+const adminCredentialCore = readFileSync(join(root, "src/lib/admin-credential-core.ts"), "utf8");
+const adminCredentialCrypto = readFileSync(join(root, "src/lib/admin-credential-crypto.ts"), "utf8");
+if (!adminCredentialSource.includes("process.env.ADMIN_EMAIL") || !adminCredentialSource.includes("process.env.ADMIN_PASSWORD_HASH") || !adminCredentialSource.includes("process.env.ADMIN_PASSWORD")) {
+  fail("Persistent admin credentials do not preserve the Railway bootstrap path");
 }
-if (/ADMIN_(?:EMAIL|PASSWORD|PASSWORD_HASH)\s*=\s*["'][^"']+["']/.test(authSource)) {
+if (!adminCredentialSource.includes("process.env.ADMIN_RECOVERY_KEY") || !adminCredentialCore.includes("bootstrapIfMissing") || !adminCredentialCore.includes("credentialVersionMatches")) {
+  fail("Single-admin recovery/bootstrap/version foundation is incomplete");
+}
+if (!authSource.includes("authenticateAdminCredential(email, password)") || !authSource.includes("isAdminCredentialVersionCurrent(token)")) {
+  fail("NextAuth is not using persistent credentials and version checks");
+}
+if (!adminCredentialCrypto.includes("bcrypt.hash") || !adminCredentialCrypto.includes("bcrypt.compare") || !adminCredentialCrypto.includes("timingSafeEqual")) {
+  fail("Persistent admin credential cryptography is incomplete");
+}
+if (/ADMIN_(?:EMAIL|PASSWORD|PASSWORD_HASH|RECOVERY_KEY)\s*=\s*["'][^"']+["']/.test(adminCredentialSource + authSource)) {
   fail("Hard-coded admin credentials detected");
 }
 

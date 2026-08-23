@@ -1,78 +1,39 @@
 {
   "packageVersion": "1.1.4",
-  "generatedAt": "2026-08-09T13:23:50.606Z",
+  "generatedAt": "2026-08-21T23:31:56Z",
   "artifactEnvironment": {
-    "node": "v22.16.0",
-    "npm": "10.9.2"
+    "node": "v24.19.0",
+    "npm": "11.9.0",
+    "prisma": "6.19.2",
+    "next": "16.2.12"
+  },
+  "baseline": {
+    "file": "qr-resets-local-repair.zip",
+    "sha256": "0edecb5a9a02fe61c4caf1f9cc5eff9b5ef9f0b9fcf5ec28f8aff0e7f5854cc3"
   },
   "gates": [
-    {
-      "name": "package-contract",
-      "command": "node scripts/verify-package.mjs",
-      "status": "PASS",
-      "exitCode": 0,
-      "durationMs": 195,
-      "stdout": "BNDR package verification PASS\nFiles scanned: 254\nDataset rows: 114\nSource-verified flags: 103\nDataset SHA-256: 5e9a8438ee652c9be5b44fb781a2ba94db9dafffddcc720c254bc291aab2d72b",
-      "stderr": ""
-    },
-    {
-      "name": "canonical-dataset",
-      "command": "node scripts/verify-dataset.mjs",
-      "status": "PASS",
-      "exitCode": 0,
-      "durationMs": 136,
-      "stdout": "{\"ok\":true,\"rows\":114,\"sourceVerified\":103,\"sha256\":\"5e9a8438ee652c9be5b44fb781a2ba94db9dafffddcc720c254bc291aab2d72b\"}",
-      "stderr": ""
-    },
-    {
-      "name": "import-graph",
-      "command": "node scripts/verify-imports.mjs",
-      "status": "PASS",
-      "exitCode": 0,
-      "durationMs": 169,
-      "stdout": "{\n  \"ok\": true,\n  \"sourceFiles\": 185,\n  \"localImportEdges\": 466,\n  \"brokenLocalImports\": [],\n  \"undeclaredExternalRoots\": []\n}",
-      "stderr": ""
-    },
-    {
-      "name": "typescript-syntax",
-      "command": "node scripts/verify-syntax.mjs",
-      "status": "PASS",
-      "exitCode": 0,
-      "durationMs": 2464,
-      "stdout": "{\n  \"ok\": true,\n  \"files\": 187,\n  \"diagnostics\": []\n}",
-      "stderr": ""
-    },
-    {
-      "name": "dependency-free-contract-tests",
-      "command": "npm run test:contracts",
-      "status": "PASS",
-      "exitCode": 0,
-      "durationMs": 937,
-      "stdout": "> bndr-resource-directory-qr-resets@1.1.4 test:contracts\n> node --no-warnings --experimental-strip-types --test tests/*.test.mjs\n\nTAP version 13\n# Subtest: HTML output is escaped before print interpolation\nok 1 - HTML output is escaped before print interpolation\n  ---\n  duration_ms: 1.660733\n  type: 'test'\n  ...\n# Subtest: CSV cells neutralize spreadsheet formulas before quoting\nok 2 - CSV cells neutralize spreadsheet formulas before quoting\n  ---\n  duration_ms: 0.643714\n  type: 'test'\n  ...\n# Subtest: canonical dataset remains exactly 114 packaged resources\nok 3 - canonical dataset remains exactly 114 packaged resources\n  ---\n  duration_ms: 7.085809\n  type: 'test'\n  ...\n# Subtest: dual-view router keeps Resource Directory and QR Resets in one app\nok 4 - dual-view router keeps Resource Directory and QR Resets in one app\n  ---\n  duration_ms: 0.710145\n  type: 'test'\n  ...\n# Subtest: both hero halos are circular and use equal dimensions\nok 5 - both hero halos are circular and use equal dimensions\n  ---\n  duration_ms: 5.644317\n  type: 'test'\n  ...\n# Subtest: global day/night palette preserves bone, exact magenta, and existing dark blue\nok 6 - global day/night palette preserves bone, exact magenta, and existing dark blue\n  ---\n  duration_ms: 0.605355\n  type: 'test'\n  ...\n# Subtest: Railway initializes durable local storage at service start and uses real health path\nok 7 - Railway initializes durable local storage at service start and uses real health path\n  ---\n  duration_ms: 0.853761\n  type: 'test'\n  ...\n# Subtest: deployment seed is additive and canonical health check is data-backed\nok 8 - deployment seed is additive and canonical health check is data-backed\n  ---\n  duration_ms: 0.443121\n  type: 'test'\n  ...\n# Subtest: Railway config uses current railpack builder and start-time volume initialization\nok 9 - Railway config uses current railpack builder and start-time volume initialization\n  ---\n  duration_ms: 0.54444\n  type: 'test'\n  ...\n# Subtest: build is self-contained from Google font network fetches\nok 10 - build is self-contained from Google font network fetches\n  ---\n  duration_ms: 0.220312\n  type: 'test'\n  ...\n# Subtest: browser mutations are same-origin gated\nok 11 - browser mutations are same-origin gated\n  ---\n  duration_ms: 0.802958\n  type: 'test'\n  ...\n# Subtest: public pending register exposes only name and reason\nok 12 - public pending register exposes only name and reason\n  ---\n  duration_ms: 1.040743\n  type: 'test'\n  ...\n# Subtest: directory priority copy does not assert a strongest-five invariant\nok 13 - directory priority copy does not assert a strongest-five invariant\n  ---\n  duration_ms: 0.603352\n  type: 'test'\n  ...\n# Subtest: Railway-local SQLite is default while PostgreSQL/Supabase remains opt-in\nok 14 - Railway-local SQLite is default while PostgreSQL/Supabase remains opt-in\n  ---\n  duration_ms: 0.27506\n  type: 'test'\n  ...\n# Subtest: browser-side advocate state remains localStorage-backed\nok 15 - browser-side advocate state remains localStorage-backed\n  ---\n  duration_ms: 0.272945\n  type: 'test'\n  ...\n# Subtest: Railway health gates real data readiness without making admin setup a deploy prerequisite\nok 16 - Railway health gates real data readiness without making admin setup a deploy prerequisite\n  ---\n  duration_ms: 0.176576\n  type: 'test'\n  ...\n# Subtest: release verifier requires production start plus HTTP 200 health before runtime pass\nok 17 - release verifier requires production start plus HTTP 200 health before runtime pass\n  ---\n  duration_ms: 0.225269\n  type: 'test'\n  ...\n# Subtest: category and resource presentation is neutral by default\nok 18 - category and resource presentation is neutral by default\n  ---\n  duration_ms: 0.75715\n  type: 'test'\n  ...\n# Subtest: emoji glyphs are removed and custom BNDR SVG icons are present\nok 19 - emoji glyphs are removed and custom BNDR SVG icons are present\n  ---\n  duration_ms: 6.831515\n  type: 'test'\n  ...\n# Subtest: source normalizer and canonical data remain byte-identical to v2 baseline\nok 20 - source normalizer and canonical data remain byte-identical to v2 baseline\n  ---\n  duration_ms: 0.953257\n  type: 'test'\n  ...\n# Subtest: admin login and resource creation remain environment-backed and server-gated\nok 21 - admin login and resource creation remain environment-backed and server-gated\n  ---\n  duration_ms: 0.430162\n  type: 'test'\n  ...\n# Subtest: category contact coverage is global dataset-backed rather than filtered-result derived\nok 22 - category contact coverage is global dataset-backed rather than filtered-result derived\n  ---\n  duration_ms: 0.544773\n  type: 'test'\n  ...\n# Subtest: SSRF structure gate blocks http://127.0.0.1\nok 23 - SSRF structure gate blocks http://127.0.0.1\n  ---\n  duration_ms: 3.071375\n  type: 'test'\n  ...\n# Subtest: SSRF structure gate blocks http://10.0.0.1\nok 24 - SSRF structure gate blocks http://10.0.0.1\n  ---\n  duration_ms: 0.308851\n  type: 'test'\n  ...\n# Subtest: SSRF structure gate blocks http://172.16.0.1\nok 25 - SSRF structure gate blocks http://172.16.0.1\n  ---\n  duration_ms: 0.158772\n  type: 'test'\n  ...\n# Subtest: SSRF structure gate blocks http://192.168.1.1\nok 26 - SSRF structure gate blocks http://192.168.1.1\n  ---\n  duration_ms: 0.132417\n  type: 'test'\n  ...\n# Subtest: SSRF structure gate blocks http://169.254.169.254/latest/meta-data\nok 27 - SSRF structure gate blocks http://169.254.169.254/latest/meta-data\n  ---\n  duration_ms: 0.34112\n  type: 'test'\n  ...\n# Subtest: SSRF structure gate blocks http://100.100.100.200\nok 28 - SSRF structure gate blocks http://100.100.100.200\n  ---\n  duration_ms: 0.33028\n  type: 'test'\n  ...\n# Subtest: SSRF structure gate blocks http://[::1]\nok 29 - SSRF structure gate blocks http://[::1]\n  ---\n  duration_ms: 6.518291\n  type: 'test'\n  ...\n# Subtest: SSRF structure gate blocks http://[fd00:ec2::254]\nok 30 - SSRF structure gate blocks http://[fd00:ec2::254]\n  ---\n  duration_ms: 0.255443\n  type: 'test'\n  ...\n# Subtest: SSRF structure gate blocks http://localhost\nok 31 - SSRF structure gate blocks http://localhost\n  ---\n  duration_ms: 0.730539\n  type: 'test'\n  ...\n# Subtest: SSRF structure gate blocks http://metadata.google.internal\nok 32 - SSRF structure gate blocks http://metadata.google.internal\n  ---\n  duration_ms: 0.70497\n  type: 'test'\n  ...\n# Subtest: SSRF structure gate blocks http://user:password@example.com\nok 33 - SSRF structure gate blocks http://user:password@example.com\n  ---\n  duration_ms: 0.301567\n  type: 'test'\n  ...\n# Subtest: SSRF structure gate blocks ftp://example.com\nok 34 - SSRF structure gate blocks ftp://example.com\n  ---\n  duration_ms: 0.225747\n  type: 'test'\n  ...\n# Subtest: SSRF structure gate allows an ordinary public HTTPS hostname\nok 35 - SSRF structure gate allows an ordinary public HTTPS hostname\n  ---\n  duration_ms: 0.300727\n  type: 'test'\n  ...\n1..35\n# tests 35\n# suites 0\n# pass 35\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 558.225691",
-      "stderr": ""
-    },
-    {
-      "name": "typecheck",
-      "status": "BLOCKED",
-      "reason": "project dependencies are not installed in this execution tree"
-    },
-    {
-      "name": "lint",
-      "status": "BLOCKED",
-      "reason": "project dependencies are not installed in this execution tree"
-    },
-    {
-      "name": "next-production-build",
-      "status": "BLOCKED",
-      "reason": "project dependencies are not installed in this execution tree"
-    },
-    {
-      "name": "production-start-health",
-      "status": "BLOCKED",
-      "reason": "production build is unavailable because project dependencies are not installed"
-    }
+    { "name": "clean-lockfile-install", "status": "PASS", "detail": "620 packages; Prisma postinstall generated the SQLite client" },
+    { "name": "prisma-sqlite", "status": "PASS", "detail": "schema valid" },
+    { "name": "prisma-postgres", "status": "PASS", "detail": "schema valid" },
+    { "name": "package-contract", "status": "PASS", "detail": "279 files scanned; 114 resources; 103 source-verified" },
+    { "name": "canonical-dataset", "status": "PASS", "detail": "114 rows; SHA-256 5e9a8438ee652c9be5b44fb781a2ba94db9dafffddcc720c254bc291aab2d72b" },
+    { "name": "import-graph", "status": "PASS", "detail": "200 source files; 509 edges; zero broken or undeclared imports" },
+    { "name": "typescript-syntax", "status": "PASS", "detail": "201 files; zero diagnostics" },
+    { "name": "existing-contracts", "status": "PASS", "detail": "70/70" },
+    { "name": "ingestion-parity", "status": "PASS", "detail": "10/10 across TXT, Markdown, JSON, and XML; normalization, exact dedupe, viability, and publication gates" },
+    { "name": "real-seed", "status": "PASS", "detail": "114 resources persisted; 103 verified; 114 published" },
+    { "name": "typecheck", "status": "PASS", "detail": "0 errors" },
+    { "name": "lint", "status": "PASS", "detail": "0 errors; 33 pre-existing warnings retained" },
+    { "name": "next-production-build", "status": "PASS", "detail": "optimized Next.js standalone build compiled and typechecked" },
+    { "name": "production-start-health", "status": "PASS", "detail": "bound to 0.0.0.0:3217; GET /api/health returned 200 ready=true" },
+    { "name": "auth-e2e", "status": "PASS", "detail": "credentials, JWT admin session, admin page/API, recovery, prior-session revocation" },
+    { "name": "ingestion-e2e", "status": "PASS", "detail": "SmartPaste, manual create/update, bulk import, malformed and duplicate zero-mutation checks" },
+    { "name": "restart-persistence", "status": "PASS", "detail": "recovered credential and two test resources persisted after restart" },
+    { "name": "resource-card-containment", "status": "PASS", "detail": "390/768/1440 px; no viewport/card overflow; same child structure" },
+    { "name": "preservation", "status": "PASS", "detail": "ResourceCard and 114-row JSON/CSV corpus byte-identical; QR particle behavior preserved with local lint exception" }
   ],
-  "productionRuntimeVerified": false,
   "staticReleaseGatesPass": true,
-  "sourceTreeSha256": "479d7de963eee8c1c293f55a531d5d5d174751a0e7996f3a6a1a58b053131e8e"
+  "productionRuntimeVerified": true,
+  "allRequiredGatesPass": true,
+  "sourceTreeSha256": "dfc68fcdc258f9d2bc49aa4b0b7ef8defa758bf3824fbc3eaff187bae27f4b45"
 }
