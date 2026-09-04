@@ -63,8 +63,8 @@ export type VerificationIssueDraft = {
   code: string;
   severity: string;
   field: string | null;
-  currentValue: unknown | null;
-  suggestedValue: unknown | null;
+  currentValue: string | null;
+  suggestedValue: string | null;
   evidence: Record<string, unknown> | null;
 };
 
