@@ -156,13 +156,50 @@ export function searchResources(
       return { ...r, _score: score, _matched: matched };
     })
     .filter((r) => r._score > 0)
-    .sort((a, b) => {
-      if (b._score !== a._score) return b._score - a._score;
-      if (b.priority !== a.priority) return b.priority - a.priority;
-      return a.name.localeCompare(b.name);
-    });
+    .sort(compareScored);
 
   const limit = opts?.limit ?? scored.length;
   const offset = opts?.offset ?? 0;
   return scored.slice(offset, offset + limit);
+}
+
+/**
+ * Ranking comparator shared by searchResources and the streaming search
+ * accumulator: score desc, then priority desc, then neutral alphabetical.
+ */
+export function compareScored(a: ScoredResource, b: ScoredResource): number {
+  if (b._score !== a._score) return b._score - a._score;
+  if (b.priority !== a.priority) return b.priority - a.priority;
+  return a.name.localeCompare(b.name);
+}
+
+/**
+ * Streaming search that PRESERVES searchResources() semantics exactly while
+ * letting API routes feed candidate rows in database-sized batches instead of
+ * one unbounded fetch. Weighted fuzzy/typo/acronym scoring cannot be
+ * expressed as SQL filters, so search must score every candidate row; this
+ * accumulator keeps memory bounded to matches plus one batch, and finalize()
+ * returns the true match total plus the requested page using the exact same
+ * comparator searchResources uses.
+ */
+export function createSearchAccumulator(query: string): {
+  hasQuery: boolean;
+  add: (batch: Resource[]) => void;
+  finalize: (offset: number, limit: number) => { total: number; page: ScoredResource[] };
+} {
+  const tokens = meaningfulTokens(query);
+  const scored: ScoredResource[] = [];
+  return {
+    hasQuery: tokens.length > 0,
+    add(batch: Resource[]): void {
+      for (const res of batch) {
+        const { score, matched } = scoreResource(res, tokens);
+        if (score > 0) scored.push({ ...res, _score: score, _matched: matched });
+      }
+    },
+    finalize(offset: number, limit: number): { total: number; page: ScoredResource[] } {
+      scored.sort(compareScored);
+      return { total: scored.length, page: scored.slice(offset, offset + limit) };
+    },
+  };
 }

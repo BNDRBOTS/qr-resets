@@ -168,6 +168,7 @@ export async function createSnapshot(reason?: string): Promise<{
   ok: boolean;
   id: string;
   rowCount: number;
+  datasetHash?: string | null;
 }> {
   const res = await fetch("/api/admin/snapshots", {
     method: "POST",
@@ -185,12 +186,10 @@ export interface SnapshotRestoreResult {
   wouldRestore?: number;
   removed?: number;
   restored?: number;
-  restoredHash?: string;
-  expectedHash?: string;
-  exactRecoveryVerified?: boolean;
-  snapshotHash?: string;
-  currentHash?: string;
   preRestoreSnapshotId?: string;
+  datasetHash?: string;
+  hashVerified?: boolean;
+  verified?: { rowCount: number; datasetHash: string };
 }
 
 export async function restoreSnapshot(id: string, dryRun: boolean): Promise<SnapshotRestoreResult> {
@@ -394,21 +393,24 @@ export async function parseText(
   }>(res);
 }
 
-export async function runCleanup(mode: "preview" | "apply" = "preview"): Promise<{
-  dryRun: boolean;
-  mode: "preview" | "apply";
+export interface CleanupRunResult {
+  ok?: boolean;
+  dryRun?: boolean;
+  mode?: "preview" | "apply";
   reports: PIIPassReport[];
   changedCount: number;
   total: number;
+  wouldUpdate?: string[];
   snapshotId?: string | null;
-  snapshotHash?: string | null;
-}> {
+}
+
+export async function runCleanup(mode: "preview" | "apply"): Promise<CleanupRunResult> {
   const res = await fetch("/api/admin/cleanup", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ mode }),
   });
-  return jsonOrThrow(res);
+  return jsonOrThrow<CleanupRunResult>(res);
 }
 
 // ---- URL verification ------------------------------------------------------

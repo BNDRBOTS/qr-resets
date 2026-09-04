@@ -1,4 +1,4 @@
-// BNDR. API — authenticated admin resource collection
+// BNDR. API - authenticated admin resource collection
 // GET returns every publication state. POST creates a resource.
 
 import { NextRequest, NextResponse } from "next/server";
@@ -14,13 +14,17 @@ import {
   BoundedBodyError,
 } from "@/lib/zod-schemas";
 import type { CategorySlug, SearchResult } from "@/lib/types";
+import { createSearchAccumulator } from "@/lib/search";
 import { toResourceShape } from "../../resources/route";
 import { createResourceRecord } from "@/lib/resource-service";
 import { ResourceIngestionError } from "@/lib/resource-ingestion";
-import { paginateResources } from "@/lib/resource-pagination";
 import { verifyExistingResources } from "@/lib/verification-pipeline";
 
 export const dynamic = "force-dynamic";
+
+// Fixed keyset-scan batch size for the weighted-search path (see the public
+// resources route for the full rationale).
+const SEARCH_SCAN_BATCH_SIZE = 500;
 
 export async function GET(req: NextRequest) {
   const blocked = await requireAdminRateLimited(req, RATE_LIMITS.adminRead);
@@ -51,25 +55,49 @@ export async function GET(req: NextRequest) {
     if (publishedParam === "true") where.published = true;
     if (publishedParam === "false") where.published = false;
 
-    const page = await paginateResources(
-      {
-        count: () => db.resource.count({ where }),
-        fetchPage: async ({ skip, take }) => {
-          const rows = await db.resource.findMany({
-            where,
-            orderBy: [{ name: "asc" }, { id: "asc" }],
-            skip,
-            take,
-          });
-          return rows.map(toResourceShape);
-        },
-      },
-      { q, limit, offset },
-    );
+    // Same contract as the public route: browse uses true database
+    // pagination (neutral alphabetical ordering, true counts, correct beyond
+    // 500 rows); search preserves the weighted fuzzy/typo/acronym/priority
+    // semantics by scoring every candidate row streamed in fixed-size keyset
+    // batches through the shared accumulator.
+    const search = createSearchAccumulator(q);
 
+    if (!search.hasQuery) {
+      const [total, rows] = await Promise.all([
+        db.resource.count({ where }),
+        db.resource.findMany({
+          where,
+          orderBy: [{ name: "asc" }, { id: "asc" }],
+          skip: offset,
+          take: limit,
+        }),
+      ]);
+      const result: SearchResult = {
+        resources: rows.map(toResourceShape) as SearchResult["resources"],
+        total,
+        query: q,
+      };
+      return NextResponse.json(result);
+    }
+
+    let cursor: string | null = null;
+    for (;;) {
+      const batch = await db.resource.findMany({
+        where,
+        orderBy: { id: "asc" },
+        take: SEARCH_SCAN_BATCH_SIZE,
+        ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
+      });
+      if (batch.length === 0) break;
+      search.add(batch.map(toResourceShape));
+      if (batch.length < SEARCH_SCAN_BATCH_SIZE) break;
+      cursor = batch[batch.length - 1].id;
+    }
+
+    const ranked = search.finalize(offset, limit);
     const result: SearchResult = {
-      resources: page.resources as SearchResult["resources"],
-      total: page.total,
+      resources: ranked.page as SearchResult["resources"],
+      total: ranked.total,
       query: q,
     };
     return NextResponse.json(result);

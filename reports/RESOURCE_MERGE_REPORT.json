@@ -1,6 +1,6 @@
 {
-  "reportVersion": 3,
-  "generatedAt": "2026-09-04T03:43:46.148Z",
+  "reportVersion": 2,
+  "generatedAt": "2026-09-04T07:46:12.417Z",
   "task": "Evaluate verifier v4 candidate records against the canonical dataset using the app's own admission semantics. No canonical row is created, modified, or published by this evaluation.",
   "canonicalBefore": {
     "count": 114,
@@ -36,66 +36,62 @@
   },
   "environment": {
     "egressRestricted": true,
-    "policy": "Restricted egress demotes DNS/transport uncertainty only. A genuine evidenced HTTP 404/410/451 remains dead evidence. Raw verifier statuses and underlying attempts are preserved for review.",
+    "policy": "DNS/transport failures observed from a restricted-egress environment are never treated as confirmed-dead. Raw verifier statuses are preserved as evidence; effective statuses are demoted to UNREACHABLE_IN_RESTRICTED_ENVIRONMENT and records stay held for review.",
     "demotedStatusCount": 341,
     "evidence": {
-      "generatedAt": "2026-09-04T03:42:50.082115+00:00",
+      "generatedAt": "2026-09-04T01:10:53.911200+00:00",
       "method": "getent hosts against well-known control domains plus the npm registry",
       "controls": [
         {
           "domain": "example.com",
           "exitCode": 2,
           "stdout": "",
-          "stderr": "",
           "resolved": false
         },
         {
           "domain": "google.com",
           "exitCode": 2,
           "stdout": "",
-          "stderr": "",
           "resolved": false
         },
         {
           "domain": "cloudflare.com",
           "exitCode": 2,
           "stdout": "",
-          "stderr": "",
           "resolved": false
         },
         {
           "domain": "registry.npmjs.org",
           "exitCode": 2,
           "stdout": "",
-          "stderr": "",
           "resolved": false
         }
       ],
       "egressRestricted": true,
-      "interpretation": "All control domains fail DNS resolution identically; DNS/transport failures from this environment are environmental uncertainty, while genuine completed HTTP 404/410/451 responses remain usable dead-URL evidence."
+      "interpretation": "All control domains fail DNS resolution identically; therefore DNS/transport failures observed by verifier v4 from this environment are environmental and can never be treated as evidence a site is dead."
     }
   },
   "decisions": {
     "admitted": 0,
     "published": 0,
-    "held": 506,
+    "held": 505,
     "excludedNonOrganizationOrBatchDuplicate": 20,
-    "canonicalMatches": 19,
+    "canonicalMatches": 20,
     "publishStates": {
-      "held": 506,
-      "canonical_match": 19,
+      "held": 505,
+      "canonical_match": 20,
       "excluded": 20
     },
     "reasonsHistogram": {
-      "organization_status_unreachable_in_restricted_environment": 325,
-      "strong_identity_match_existing_resource": 19,
+      "organization_status_unreachable_in_restricted_environment": 324,
+      "strong_identity_match_existing_resource": 20,
       "organization_status_insufficient_source_data": 133,
       "non_organization_record": 20,
       "organization_status_unverified_contact_only": 48
     },
     "identityMatchCounts": {
-      "strong": 19,
-      "ambiguous": 56,
+      "strong": 20,
+      "ambiguous": 55,
       "none": 470
     },
     "rawOrganizationStatusCounts": {
@@ -119,6 +115,16 @@
         "identitySignals": [
           "host"
         ],
+        "overlappingCanonicalCandidates": [
+          {
+            "id": "cms8ta9vy00juomm1rbdrb3sl",
+            "name": "Patient Advocate Foundation (PAF)",
+            "signals": [
+              "host"
+            ],
+            "corroborated": false
+          }
+        ],
         "matchedCanonicalId": null,
         "matchedCanonicalName": null,
         "decision": "held",
@@ -134,6 +140,17 @@
           "name",
           "host"
         ],
+        "overlappingCanonicalCandidates": [
+          {
+            "id": "cms8ta9ob00c0omm18kalx1f0",
+            "name": "Lyme Treatment Foundation",
+            "signals": [
+              "name",
+              "host"
+            ],
+            "corroborated": true
+          }
+        ],
         "matchedCanonicalId": "cms8ta9ob00c0omm18kalx1f0",
         "matchedCanonicalName": "Lyme Treatment Foundation",
         "decision": "canonical_match",
@@ -146,8 +163,41 @@
         "name": "AHCCCS H₂O Housing & Health Opportunities Program Transitional housing subsidies (rent, deposit, utilities) for homeless individuals with chronic illness or justice involvement. Intake: 1",
         "duplicateKind": "ambiguous",
         "identitySignals": [
-          "host",
-          "phone"
+          "host"
+        ],
+        "overlappingCanonicalCandidates": [
+          {
+            "id": "cms8ta9yu00n4omm11nmf2x0p",
+            "name": "Arizona Long Term Care System",
+            "signals": [
+              "host"
+            ],
+            "corroborated": false
+          },
+          {
+            "id": "cms8ta9x800loomm13gxfkdab",
+            "name": "Arizona DES – Food, Cash and Medical Assistance",
+            "signals": [
+              "phone"
+            ],
+            "corroborated": false
+          },
+          {
+            "id": "cms8ta9zu00oiomm1jgi8h7p3",
+            "name": "AHCCCS Non-Emergency Medical Transportation",
+            "signals": [
+              "host"
+            ],
+            "corroborated": false
+          },
+          {
+            "id": "cms8taa3000ryomm1iz83fufm",
+            "name": "AHCCCS H2O Housing Program (AZ Medicaid)",
+            "signals": [
+              "host"
+            ],
+            "corroborated": false
+          }
         ],
         "matchedCanonicalId": null,
         "matchedCanonicalName": null,
@@ -165,6 +215,34 @@
           "phone",
           "host"
         ],
+        "overlappingCanonicalCandidates": [
+          {
+            "id": "cms8ta9yu00n4omm11nmf2x0p",
+            "name": "Arizona Long Term Care System",
+            "signals": [
+              "email",
+              "phone",
+              "host"
+            ],
+            "corroborated": false
+          },
+          {
+            "id": "cms8ta9zu00oiomm1jgi8h7p3",
+            "name": "AHCCCS Non-Emergency Medical Transportation",
+            "signals": [
+              "host"
+            ],
+            "corroborated": false
+          },
+          {
+            "id": "cms8taa3000ryomm1iz83fufm",
+            "name": "AHCCCS H2O Housing Program (AZ Medicaid)",
+            "signals": [
+              "host"
+            ],
+            "corroborated": false
+          }
+        ],
         "matchedCanonicalId": null,
         "matchedCanonicalName": null,
         "decision": "held",
@@ -177,6 +255,7 @@
         "name": "PAN / HealthWell / Good Days / Accessia Health Co-pay Assistance",
         "duplicateKind": "ambiguous",
         "identitySignals": [],
+        "overlappingCanonicalCandidates": [],
         "matchedCanonicalId": null,
         "matchedCanonicalName": null,
         "decision": "held",
@@ -190,6 +269,16 @@
         "duplicateKind": "ambiguous",
         "identitySignals": [
           "host"
+        ],
+        "overlappingCanonicalCandidates": [
+          {
+            "id": "cms8ta9w000jxomm132833c63",
+            "name": "2Gether-International – Disabled Founder Accelerator",
+            "signals": [
+              "host"
+            ],
+            "corroborated": false
+          }
         ],
         "matchedCanonicalId": null,
         "matchedCanonicalName": null,
@@ -205,6 +294,16 @@
         "identitySignals": [
           "host"
         ],
+        "overlappingCanonicalCandidates": [
+          {
+            "id": "cms8taa0x00p1omm1d8ml1dnb",
+            "name": "Modest Needs Foundation – Independent Living Grant",
+            "signals": [
+              "host"
+            ],
+            "corroborated": false
+          }
+        ],
         "matchedCanonicalId": null,
         "matchedCanonicalName": null,
         "decision": "held",
@@ -219,6 +318,16 @@
         "identitySignals": [
           "host"
         ],
+        "overlappingCanonicalCandidates": [
+          {
+            "id": "cms8ta9sx00gcomm13efic4qq",
+            "name": "Valley Fever Center for Excellence Fund",
+            "signals": [
+              "host"
+            ],
+            "corroborated": false
+          }
+        ],
         "matchedCanonicalId": null,
         "matchedCanonicalName": null,
         "decision": "held",
@@ -231,6 +340,7 @@
         "name": "Intake",
         "duplicateKind": "ambiguous",
         "identitySignals": [],
+        "overlappingCanonicalCandidates": [],
         "matchedCanonicalId": null,
         "matchedCanonicalName": null,
         "decision": "held",
@@ -245,6 +355,16 @@
         "identitySignals": [
           "host"
         ],
+        "overlappingCanonicalCandidates": [
+          {
+            "id": "cms8ta9sz00gfomm15t6qdfp3",
+            "name": "Disability-Owned Business Enterprise Certification",
+            "signals": [
+              "host"
+            ],
+            "corroborated": false
+          }
+        ],
         "matchedCanonicalId": null,
         "matchedCanonicalName": null,
         "decision": "held",
@@ -257,6 +377,7 @@
         "name": "USDA Single Family Housing Repair Loans & Grants (AZ)",
         "duplicateKind": "ambiguous",
         "identitySignals": [],
+        "overlappingCanonicalCandidates": [],
         "matchedCanonicalId": null,
         "matchedCanonicalName": null,
         "decision": "held",
@@ -269,6 +390,7 @@
         "name": "Maricopa County Rental Assistance",
         "duplicateKind": "ambiguous",
         "identitySignals": [],
+        "overlappingCanonicalCandidates": [],
         "matchedCanonicalId": null,
         "matchedCanonicalName": null,
         "decision": "held",
@@ -283,6 +405,24 @@
         "identitySignals": [
           "host"
         ],
+        "overlappingCanonicalCandidates": [
+          {
+            "id": "cms8ta9t200gjomm1ialyf46d",
+            "name": "Circle the City (Mobile Medical Units & Street Medicine)",
+            "signals": [
+              "host"
+            ],
+            "corroborated": false
+          },
+          {
+            "id": "cms8ta9vz00jwomm12y7adoqm",
+            "name": "Circle the City (Phoenix Medical Housing)",
+            "signals": [
+              "host"
+            ],
+            "corroborated": false
+          }
+        ],
         "matchedCanonicalId": null,
         "matchedCanonicalName": null,
         "decision": "held",
@@ -295,6 +435,7 @@
         "name": "noabuse.org",
         "duplicateKind": "ambiguous",
         "identitySignals": [],
+        "overlappingCanonicalCandidates": [],
         "matchedCanonicalId": null,
         "matchedCanonicalName": null,
         "decision": "held",
@@ -309,6 +450,17 @@
         "identitySignals": [
           "name",
           "host"
+        ],
+        "overlappingCanonicalCandidates": [
+          {
+            "id": "cms8ta9t900gtomm1jk8r79f5",
+            "name": "GoFundMe",
+            "signals": [
+              "name",
+              "host"
+            ],
+            "corroborated": true
+          }
         ],
         "matchedCanonicalId": "cms8ta9t900gtomm1jk8r79f5",
         "matchedCanonicalName": "GoFundMe",
@@ -325,6 +477,17 @@
           "name",
           "host"
         ],
+        "overlappingCanonicalCandidates": [
+          {
+            "id": "cms8ta9ta00gvomm1rwsj0ni2",
+            "name": "Lyme Warrior Medical Grants",
+            "signals": [
+              "name",
+              "host"
+            ],
+            "corroborated": true
+          }
+        ],
         "matchedCanonicalId": "cms8ta9ta00gvomm1rwsj0ni2",
         "matchedCanonicalName": "Lyme Warrior Medical Grants",
         "decision": "canonical_match",
@@ -339,6 +502,16 @@
         "identitySignals": [
           "host"
         ],
+        "overlappingCanonicalCandidates": [
+          {
+            "id": "cms8ta9ee000womm16xkvko0i",
+            "name": "Arizona Department of Child Safety",
+            "signals": [
+              "host"
+            ],
+            "corroborated": false
+          }
+        ],
         "matchedCanonicalId": null,
         "matchedCanonicalName": null,
         "decision": "held",
@@ -351,6 +524,7 @@
         "name": "United Methodist Outreach Ministries (UMOM) New Day Centers",
         "duplicateKind": "ambiguous",
         "identitySignals": [],
+        "overlappingCanonicalCandidates": [],
         "matchedCanonicalId": null,
         "matchedCanonicalName": null,
         "decision": "held",
@@ -365,6 +539,17 @@
         "identitySignals": [
           "name",
           "host"
+        ],
+        "overlappingCanonicalCandidates": [
+          {
+            "id": "cms8ta9tm00hdomm1ksicds9i",
+            "name": "AZCEND (Chandler, AZ) Emergency Financial Assistance",
+            "signals": [
+              "name",
+              "host"
+            ],
+            "corroborated": true
+          }
         ],
         "matchedCanonicalId": "cms8ta9tm00hdomm1ksicds9i",
         "matchedCanonicalName": "AZCEND (Chandler, AZ) Emergency Financial Assistance",
@@ -381,6 +566,17 @@
           "name",
           "host"
         ],
+        "overlappingCanonicalCandidates": [
+          {
+            "id": "cms8ta9tn00hfomm165yo14xo",
+            "name": "Arizona End of Life Care Partnership",
+            "signals": [
+              "name",
+              "host"
+            ],
+            "corroborated": true
+          }
+        ],
         "matchedCanonicalId": "cms8ta9tn00hfomm165yo14xo",
         "matchedCanonicalName": "Arizona End of Life Care Partnership",
         "decision": "canonical_match",
@@ -393,6 +589,7 @@
         "name": "Arizona Food Bank Network Food Bank Locator",
         "duplicateKind": "ambiguous",
         "identitySignals": [],
+        "overlappingCanonicalCandidates": [],
         "matchedCanonicalId": null,
         "matchedCanonicalName": null,
         "decision": "held",
@@ -405,6 +602,7 @@
         "name": "trynova.org",
         "duplicateKind": "ambiguous",
         "identitySignals": [],
+        "overlappingCanonicalCandidates": [],
         "matchedCanonicalId": null,
         "matchedCanonicalName": null,
         "decision": "held",
@@ -417,6 +615,7 @@
         "name": "whistlebloweraid.org",
         "duplicateKind": "ambiguous",
         "identitySignals": [],
+        "overlappingCanonicalCandidates": [],
         "matchedCanonicalId": null,
         "matchedCanonicalName": null,
         "decision": "held",
@@ -430,6 +629,16 @@
         "duplicateKind": "ambiguous",
         "identitySignals": [
           "host"
+        ],
+        "overlappingCanonicalCandidates": [
+          {
+            "id": "cms8ta9fw002xomm1wopim5uh",
+            "name": "Alliance for HOPE International",
+            "signals": [
+              "host"
+            ],
+            "corroborated": false
+          }
         ],
         "matchedCanonicalId": null,
         "matchedCanonicalName": null,
@@ -445,6 +654,16 @@
         "identitySignals": [
           "host"
         ],
+        "overlappingCanonicalCandidates": [
+          {
+            "id": "cms8ta9fn002pomm1qmtmr6pl",
+            "name": "Arizona Coalition to End Sexual and Domestic Violence (ACESDV)",
+            "signals": [
+              "host"
+            ],
+            "corroborated": false
+          }
+        ],
         "matchedCanonicalId": null,
         "matchedCanonicalName": null,
         "decision": "held",
@@ -458,6 +677,16 @@
         "duplicateKind": "ambiguous",
         "identitySignals": [
           "host"
+        ],
+        "overlappingCanonicalCandidates": [
+          {
+            "id": "cms8ta9g10032omm10w39o420",
+            "name": "Child Crisis Arizona",
+            "signals": [
+              "host"
+            ],
+            "corroborated": false
+          }
         ],
         "matchedCanonicalId": null,
         "matchedCanonicalName": null,
@@ -473,6 +702,32 @@
         "identitySignals": [
           "host"
         ],
+        "overlappingCanonicalCandidates": [
+          {
+            "id": "cms8ta9dy000fomm1k5eklxqj",
+            "name": "NCMEC Family Abduction Legal Technical Assistance",
+            "signals": [
+              "host"
+            ],
+            "corroborated": false
+          },
+          {
+            "id": "cms8ta9e0000homm1t4lq14ub",
+            "name": "NCMEC Team HOPE",
+            "signals": [
+              "host"
+            ],
+            "corroborated": false
+          },
+          {
+            "id": "cms8ta9dv000domm1fd6pl39p",
+            "name": "National Center for Missing & Exploited Children",
+            "signals": [
+              "host"
+            ],
+            "corroborated": false
+          }
+        ],
         "matchedCanonicalId": null,
         "matchedCanonicalName": null,
         "decision": "held",
@@ -486,6 +741,16 @@
         "duplicateKind": "ambiguous",
         "identitySignals": [
           "host"
+        ],
+        "overlappingCanonicalCandidates": [
+          {
+            "id": "cms8ta9u800i9omm1adokad8n",
+            "name": "Psychologytoday",
+            "signals": [
+              "host"
+            ],
+            "corroborated": false
+          }
         ],
         "matchedCanonicalId": null,
         "matchedCanonicalName": null,
@@ -501,6 +766,32 @@
         "identitySignals": [
           "host"
         ],
+        "overlappingCanonicalCandidates": [
+          {
+            "id": "cms8ta9qw00e9omm1unw3sg1j",
+            "name": "A New Leaf (DV Hotline)",
+            "signals": [
+              "host"
+            ],
+            "corroborated": false
+          },
+          {
+            "id": "cms8ta9fs002romm1ila3he02",
+            "name": "A New Leaf Domestic Violence Services",
+            "signals": [
+              "host"
+            ],
+            "corroborated": false
+          },
+          {
+            "id": "cms8ta9g50039omm1flodofsz",
+            "name": "DVSTOP / SAFEDVS",
+            "signals": [
+              "host"
+            ],
+            "corroborated": false
+          }
+        ],
         "matchedCanonicalId": null,
         "matchedCanonicalName": null,
         "decision": "held",
@@ -513,6 +804,7 @@
         "name": "Lawyers Committee for Civil Rights of the SF Bay Area (LCCRSF)",
         "duplicateKind": "ambiguous",
         "identitySignals": [],
+        "overlappingCanonicalCandidates": [],
         "matchedCanonicalId": null,
         "matchedCanonicalName": null,
         "decision": "held",
@@ -525,6 +817,7 @@
         "name": "Law Foundation of Silicon Valley Help",
         "duplicateKind": "ambiguous",
         "identitySignals": [],
+        "overlappingCanonicalCandidates": [],
         "matchedCanonicalId": null,
         "matchedCanonicalName": null,
         "decision": "held",
@@ -537,6 +830,7 @@
         "name": "Santa Clara County Bar Association Lawyer Referral Service",
         "duplicateKind": "ambiguous",
         "identitySignals": [],
+        "overlappingCanonicalCandidates": [],
         "matchedCanonicalId": null,
         "matchedCanonicalName": null,
         "decision": "held",
@@ -553,6 +847,18 @@
           "phone",
           "host"
         ],
+        "overlappingCanonicalCandidates": [
+          {
+            "id": "cms8ta9ud00igomm1anhv3d5b",
+            "name": "Bay Area Legal Aid Santa Clara Office",
+            "signals": [
+              "name",
+              "phone",
+              "host"
+            ],
+            "corroborated": true
+          }
+        ],
         "matchedCanonicalId": "cms8ta9ud00igomm1anhv3d5b",
         "matchedCanonicalName": "Bay Area Legal Aid Santa Clara Office",
         "decision": "canonical_match",
@@ -565,6 +871,7 @@
         "name": "DOJ Civil Rights Division Report a Violation (not counsel)",
         "duplicateKind": "ambiguous",
         "identitySignals": [],
+        "overlappingCanonicalCandidates": [],
         "matchedCanonicalId": null,
         "matchedCanonicalName": null,
         "decision": "held",
@@ -577,6 +884,7 @@
         "name": "Pro Bono Project Silicon Valley (Family Law)",
         "duplicateKind": "ambiguous",
         "identitySignals": [],
+        "overlappingCanonicalCandidates": [],
         "matchedCanonicalId": null,
         "matchedCanonicalName": null,
         "decision": "held",
@@ -589,6 +897,7 @@
         "name": "Federal Pro Se Program San Jose Courthouse",
         "duplicateKind": "ambiguous",
         "identitySignals": [],
+        "overlappingCanonicalCandidates": [],
         "matchedCanonicalId": null,
         "matchedCanonicalName": null,
         "decision": "held",
@@ -603,6 +912,17 @@
         "identitySignals": [
           "phone",
           "host"
+        ],
+        "overlappingCanonicalCandidates": [
+          {
+            "id": "cms8ta9l6008lomm1r54czmdn",
+            "name": "Disability Rights California",
+            "signals": [
+              "phone",
+              "host"
+            ],
+            "corroborated": false
+          }
         ],
         "matchedCanonicalId": null,
         "matchedCanonicalName": null,
@@ -619,6 +939,17 @@
           "name",
           "phone"
         ],
+        "overlappingCanonicalCandidates": [
+          {
+            "id": "cms8ta9uh00imomm1lx75v2y1",
+            "name": "CASS East Valley Men's Center",
+            "signals": [
+              "name",
+              "phone"
+            ],
+            "corroborated": true
+          }
+        ],
         "matchedCanonicalId": "cms8ta9uh00imomm1lx75v2y1",
         "matchedCanonicalName": "CASS East Valley Men's Center",
         "decision": "canonical_match",
@@ -631,6 +962,7 @@
         "name": "UMOM New Day Centers",
         "duplicateKind": "ambiguous",
         "identitySignals": [],
+        "overlappingCanonicalCandidates": [],
         "matchedCanonicalId": null,
         "matchedCanonicalName": null,
         "decision": "held",
@@ -643,6 +975,7 @@
         "name": "Association of Arizona Food Banks",
         "duplicateKind": "ambiguous",
         "identitySignals": [],
+        "overlappingCanonicalCandidates": [],
         "matchedCanonicalId": null,
         "matchedCanonicalName": null,
         "decision": "held",
@@ -653,16 +986,46 @@
       {
         "recordId": "469335646ac11bd5c8e0",
         "name": "A New Leaf (DV Hotline)",
-        "duplicateKind": "ambiguous",
+        "duplicateKind": "strong",
         "identitySignals": [
           "name",
           "phone",
           "host"
         ],
-        "matchedCanonicalId": null,
-        "matchedCanonicalName": null,
-        "decision": "held",
-        "reason": "organization_status_unreachable_in_restricted_environment",
+        "overlappingCanonicalCandidates": [
+          {
+            "id": "cms8ta9qw00e9omm1unw3sg1j",
+            "name": "A New Leaf (DV Hotline)",
+            "signals": [
+              "name",
+              "phone",
+              "host"
+            ],
+            "corroborated": true
+          },
+          {
+            "id": "cms8ta9fs002romm1ila3he02",
+            "name": "A New Leaf Domestic Violence Services",
+            "signals": [
+              "phone",
+              "host"
+            ],
+            "corroborated": false
+          },
+          {
+            "id": "cms8ta9g50039omm1flodofsz",
+            "name": "DVSTOP / SAFEDVS",
+            "signals": [
+              "phone",
+              "host"
+            ],
+            "corroborated": false
+          }
+        ],
+        "matchedCanonicalId": "cms8ta9qw00e9omm1unw3sg1j",
+        "matchedCanonicalName": "A New Leaf (DV Hotline)",
+        "decision": "canonical_match",
+        "reason": "strong_identity_match_existing_resource",
         "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
         "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
       },
@@ -674,6 +1037,18 @@
           "name",
           "phone",
           "host"
+        ],
+        "overlappingCanonicalCandidates": [
+          {
+            "id": "cms8ta9vk00j2omm1s17u276n",
+            "name": "NAMI Arizona",
+            "signals": [
+              "name",
+              "phone",
+              "host"
+            ],
+            "corroborated": true
+          }
         ],
         "matchedCanonicalId": "cms8ta9vk00j2omm1s17u276n",
         "matchedCanonicalName": "NAMI Arizona",
@@ -690,6 +1065,17 @@
           "name",
           "phone"
         ],
+        "overlappingCanonicalCandidates": [
+          {
+            "id": "cms8ta9vl00j4omm1cvvsycmf",
+            "name": "Community Bridges, Inc. (CBI)",
+            "signals": [
+              "name",
+              "phone"
+            ],
+            "corroborated": true
+          }
+        ],
         "matchedCanonicalId": "cms8ta9vl00j4omm1cvvsycmf",
         "matchedCanonicalName": "Community Bridges, Inc. (CBI)",
         "decision": "canonical_match",
@@ -705,6 +1091,17 @@
           "name",
           "phone"
         ],
+        "overlappingCanonicalCandidates": [
+          {
+            "id": "cms8ta9vn00jaomm1wq1nu5sp",
+            "name": "Alcoholics Anonymous - Phoenix Intergroup",
+            "signals": [
+              "name",
+              "phone"
+            ],
+            "corroborated": true
+          }
+        ],
         "matchedCanonicalId": "cms8ta9vn00jaomm1wq1nu5sp",
         "matchedCanonicalName": "Alcoholics Anonymous - Phoenix Intergroup",
         "decision": "canonical_match",
@@ -719,6 +1116,17 @@
         "identitySignals": [
           "phone",
           "host"
+        ],
+        "overlappingCanonicalCandidates": [
+          {
+            "id": "cms8ta9vo00jcomm11s55nrom",
+            "name": "RI International / Recovery Response Center",
+            "signals": [
+              "phone",
+              "host"
+            ],
+            "corroborated": false
+          }
         ],
         "matchedCanonicalId": null,
         "matchedCanonicalName": null,
@@ -736,6 +1144,18 @@
           "phone",
           "host"
         ],
+        "overlappingCanonicalCandidates": [
+          {
+            "id": "cms8ta9vp00jeomm1fjx0woch",
+            "name": "NATIVE HEALTH Phoenix",
+            "signals": [
+              "name",
+              "phone",
+              "host"
+            ],
+            "corroborated": true
+          }
+        ],
         "matchedCanonicalId": "cms8ta9vp00jeomm1fjx0woch",
         "matchedCanonicalName": "NATIVE HEALTH Phoenix",
         "decision": "canonical_match",
@@ -750,6 +1170,17 @@
         "identitySignals": [
           "name",
           "host"
+        ],
+        "overlappingCanonicalCandidates": [
+          {
+            "id": "cms8ta9vq00jgomm1kml1w50q",
+            "name": "Adelante Healthcare",
+            "signals": [
+              "name",
+              "host"
+            ],
+            "corroborated": true
+          }
         ],
         "matchedCanonicalId": "cms8ta9vq00jgomm1kml1w50q",
         "matchedCanonicalName": "Adelante Healthcare",
@@ -767,6 +1198,18 @@
           "phone",
           "host"
         ],
+        "overlappingCanonicalCandidates": [
+          {
+            "id": "cms8ta9vr00jiomm1maquyzls",
+            "name": "Valleywise Health (formerly MIHS)",
+            "signals": [
+              "name",
+              "phone",
+              "host"
+            ],
+            "corroborated": true
+          }
+        ],
         "matchedCanonicalId": "cms8ta9vr00jiomm1maquyzls",
         "matchedCanonicalName": "Valleywise Health (formerly MIHS)",
         "decision": "canonical_match",
@@ -781,6 +1224,17 @@
         "identitySignals": [
           "phone",
           "host"
+        ],
+        "overlappingCanonicalCandidates": [
+          {
+            "id": "cms8ta9ee000womm16xkvko0i",
+            "name": "Arizona Department of Child Safety",
+            "signals": [
+              "phone",
+              "host"
+            ],
+            "corroborated": false
+          }
         ],
         "matchedCanonicalId": null,
         "matchedCanonicalName": null,
@@ -797,6 +1251,17 @@
           "phone",
           "host"
         ],
+        "overlappingCanonicalCandidates": [
+          {
+            "id": "cms8ta9g10032omm10w39o420",
+            "name": "Child Crisis Arizona",
+            "signals": [
+              "phone",
+              "host"
+            ],
+            "corroborated": false
+          }
+        ],
         "matchedCanonicalId": null,
         "matchedCanonicalName": null,
         "decision": "held",
@@ -812,6 +1277,34 @@
           "phone",
           "host"
         ],
+        "overlappingCanonicalCandidates": [
+          {
+            "id": "cms8taa1000p5omm1k482lrav",
+            "name": "Arizona Domestic Violence Legal Assistance Project",
+            "signals": [
+              "phone",
+              "host"
+            ],
+            "corroborated": false
+          },
+          {
+            "id": "cms8ta9wc00keomm17atucjdc",
+            "name": "Arizona Domestic Violence Legal Assistance Project (DV-LAP)",
+            "signals": [
+              "phone"
+            ],
+            "corroborated": false
+          },
+          {
+            "id": "cms8ta9fd002aomm1bxp177xj",
+            "name": "Arizona Domestic Violence Legal Assistance Project / AZLawHelp",
+            "signals": [
+              "phone",
+              "host"
+            ],
+            "corroborated": false
+          }
+        ],
         "matchedCanonicalId": null,
         "matchedCanonicalName": null,
         "decision": "held",
@@ -826,6 +1319,16 @@
         "identitySignals": [
           "name"
         ],
+        "overlappingCanonicalCandidates": [
+          {
+            "id": "cms8ta9vz00jwomm12y7adoqm",
+            "name": "Circle the City (Phoenix Medical Housing)",
+            "signals": [
+              "name"
+            ],
+            "corroborated": false
+          }
+        ],
         "matchedCanonicalId": null,
         "matchedCanonicalName": null,
         "decision": "held",
@@ -838,6 +1341,7 @@
         "name": "RV for Homeless (Nonprofit RV Matching)",
         "duplicateKind": "ambiguous",
         "identitySignals": [],
+        "overlappingCanonicalCandidates": [],
         "matchedCanonicalId": null,
         "matchedCanonicalName": null,
         "decision": "held",
@@ -854,6 +1358,18 @@
           "phone",
           "host"
         ],
+        "overlappingCanonicalCandidates": [
+          {
+            "id": "cms8taa3p00s2omm1prjdda1g",
+            "name": "Community Legal Services (CLS, AZ)",
+            "signals": [
+              "name",
+              "phone",
+              "host"
+            ],
+            "corroborated": true
+          }
+        ],
         "matchedCanonicalId": "cms8taa3p00s2omm1prjdda1g",
         "matchedCanonicalName": "Community Legal Services (CLS, AZ)",
         "decision": "canonical_match",
@@ -867,6 +1383,16 @@
         "duplicateKind": "ambiguous",
         "identitySignals": [
           "name"
+        ],
+        "overlappingCanonicalCandidates": [
+          {
+            "id": "cms8ta9wc00keomm17atucjdc",
+            "name": "Arizona Domestic Violence Legal Assistance Project (DV-LAP)",
+            "signals": [
+              "name"
+            ],
+            "corroborated": false
+          }
         ],
         "matchedCanonicalId": null,
         "matchedCanonicalName": null,
@@ -882,6 +1408,16 @@
         "identitySignals": [
           "name"
         ],
+        "overlappingCanonicalCandidates": [
+          {
+            "id": "cms8ta9wh00klomm1grgbk0ai",
+            "name": "Center for Judicial Excellence (CJE)",
+            "signals": [
+              "name"
+            ],
+            "corroborated": false
+          }
+        ],
         "matchedCanonicalId": null,
         "matchedCanonicalName": null,
         "decision": "held",
@@ -895,6 +1431,24 @@
         "duplicateKind": "ambiguous",
         "identitySignals": [
           "phone"
+        ],
+        "overlappingCanonicalCandidates": [
+          {
+            "id": "cms8ta9dy000fomm1k5eklxqj",
+            "name": "NCMEC Family Abduction Legal Technical Assistance",
+            "signals": [
+              "phone"
+            ],
+            "corroborated": false
+          },
+          {
+            "id": "cms8ta9dv000domm1fd6pl39p",
+            "name": "National Center for Missing & Exploited Children",
+            "signals": [
+              "phone"
+            ],
+            "corroborated": false
+          }
         ],
         "matchedCanonicalId": null,
         "matchedCanonicalName": null,
@@ -911,6 +1465,17 @@
           "name",
           "phone"
         ],
+        "overlappingCanonicalCandidates": [
+          {
+            "id": "cms8ta9wt00kzomm1u6sy5702",
+            "name": "SAMHSA National Helpline",
+            "signals": [
+              "name",
+              "phone"
+            ],
+            "corroborated": true
+          }
+        ],
         "matchedCanonicalId": "cms8ta9wt00kzomm1u6sy5702",
         "matchedCanonicalName": "SAMHSA National Helpline",
         "decision": "canonical_match",
@@ -923,6 +1488,7 @@
         "name": "AHCCCS (Arizona Medicaid)",
         "duplicateKind": "ambiguous",
         "identitySignals": [],
+        "overlappingCanonicalCandidates": [],
         "matchedCanonicalId": null,
         "matchedCanonicalName": null,
         "decision": "held",
@@ -935,6 +1501,7 @@
         "name": "AZ Dept of Economic Security (DES)",
         "duplicateKind": "ambiguous",
         "identitySignals": [],
+        "overlappingCanonicalCandidates": [],
         "matchedCanonicalId": null,
         "matchedCanonicalName": null,
         "decision": "held",
@@ -1130,7 +1697,7 @@
   },
   "notes": [
     "Admission uses verification-core.mjs directly (admissionDecision, classifyIdentityMatch, effectiveOrganizationStatus, looksNonOrganizationRecord, deriveRecordIssues, buildCandidateSource, normalizeVerifierRecord).",
-    "Zero records auto-publish: under restricted egress no candidate can reach a corroborated VERIFIED state, and single-signal identity overlaps are ambiguous-held, never auto-merged.",
+    "Zero records auto-publish: under restricted egress no candidate can reach a corroborated VERIFIED state. Shared host/phone/email alone never auto-merges, and multiple plausible canonical matches are held as ambiguous for review, never first-matched.",
     "The full per-record evidence lives in the verifier output directory and in the admin verification review queue when staged through the app pipeline."
   ]
 }

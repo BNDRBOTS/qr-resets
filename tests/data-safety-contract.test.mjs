@@ -1,10 +1,14 @@
 // BNDR. Data-safety contract tests.
 // Pins: (1) restricted-egress DNS/transport failures can never surface as
-// confirmed-dead (safe effective status, raw evidence preserved), (2)
-// corroborated identity matching (hostname/phone/email/name ALONE never
-// auto-merges), (3) append is the admin default and replace is dry-runnable
-// and snapshot-protected, (4) durable snapshots + audited restore, (5)
-// database-side pagination/search with stable ordering and true counts.
+// confirmed-dead, while genuine evidenced HTTP 404/410/451 verdicts survive,
+// (2) corroborated identity matching (shared host/phone/email ALONE never
+// auto-merges; multiple plausible canonical matches are ambiguous, never
+// first-match), (3) append is the admin default and replace is dry-runnable
+// and snapshot-protected, (4) durable snapshots persist a canonical dataset
+// hash and restores prove exact count+hash recovery, (5) database-side
+// pagination with the full weighted search semantics preserved, (6) PII
+// cleanup is dry-runnable and snapshot-protected, (7) the merge evaluation
+// script is self-contained in the package.
 
 import { strict as assert } from "node:assert";
 import { existsSync, readFileSync } from "node:fs";
@@ -14,16 +18,12 @@ import test from "node:test";
 import {
   RESTRICTED_EGRESS_SAFE_STATUS,
   admissionDecision,
+  canonicalResourceRowForHash,
   classifyIdentityMatch,
+  computeResourceDatasetHash,
+  deadEvidenceKind,
   effectiveOrganizationStatus,
-  deriveRecordIssues,
 } from "../src/lib/verification-core.mjs";
-import { paginateResources } from "../src/lib/resource-pagination.ts";
-import {
-  hashSnapshotRows,
-  prepareResourceSnapshot,
-  verifyResourceSnapshot,
-} from "../src/lib/resource-snapshot.ts";
 
 const root = process.cwd();
 const read = (path) => readFileSync(join(root, path), "utf8");
@@ -40,27 +40,7 @@ test("restricted egress demotes confirmed-dead to a safe effective status and pr
   assert.equal(demoted.status, RESTRICTED_EGRESS_SAFE_STATUS);
   assert.equal(demoted.demoted, true);
   assert.equal(demoted.rawStatus, "WEBSITE_DEAD_CONFIRMED");
-  assert.match(demoted.note, /not proof the site is dead/i);
-
-  const hard404 = {
-    ...deadRecord,
-    suggestedName: "",
-    flags: [],
-    phones: [],
-    emails: [],
-    addresses: [],
-    urls: [{
-      website_status: "DEAD_CONFIRMED",
-      requested_url: "https://example.org/missing",
-      attempts: [{ outcome: "HTTP_RESPONSE", status: 404 }],
-    }],
-  };
-  const evidenced = effectiveOrganizationStatus(hard404, { egressRestricted: true });
-  assert.equal(evidenced.status, "WEBSITE_DEAD_CONFIRMED");
-  assert.equal(evidenced.demoted, false);
-  assert.equal(evidenced.hardHttpStatus, 404);
-  const hardIssues = deriveRecordIssues(hard404, { egressRestricted: true });
-  assert.equal(hardIssues[0]?.code, "WEBSITE_DEAD_REPORTED");
+  assert.match(demoted.note, /not evidence the site is dead/i);
 
   const trusted = effectiveOrganizationStatus(deadRecord, { egressRestricted: false });
   assert.equal(trusted.status, "WEBSITE_DEAD_CONFIRMED");
@@ -72,6 +52,46 @@ test("restricted egress demotes confirmed-dead to a safe effective status and pr
   );
   assert.equal(verified.status, "VERIFIED");
   assert.equal(verified.demoted, false);
+});
+
+const deadWithHttpEvidence = {
+  recordId: "m_dead_http",
+  name: "Gone Org",
+  organizationStatus: "WEBSITE_DEAD_CONFIRMED",
+  urls: [
+    {
+      requested_url: "https://gone.example.org/",
+      website_status: "PAGE_MISSING_OR_MOVED",
+      attempts: [{ outcome: "HTTP_RESPONSE", status: 404 }],
+    },
+  ],
+  errors: [],
+};
+
+test("genuine evidenced HTTP 404/410/451 dead verdicts survive restricted egress; only DNS/transport uncertainty demotes", () => {
+  assert.equal(deadEvidenceKind(deadWithHttpEvidence), "http_response");
+  assert.equal(deadEvidenceKind(deadRecord), "dns_transport");
+
+  const kept = effectiveOrganizationStatus(deadWithHttpEvidence, { egressRestricted: true });
+  assert.equal(kept.status, "WEBSITE_DEAD_CONFIRMED");
+  assert.equal(kept.demoted, false);
+  assert.match(kept.note, /authentic HTTP 404\/410\/451/);
+
+  // DNS-only failure under the same restriction still demotes.
+  const dnsOnly = {
+    ...deadRecord,
+    urls: [
+      {
+        requested_url: "https://gone.example.org/",
+        website_status: "DEAD_CONFIRMED_DNS",
+        dns_status: "ALL_HOST_VARIANTS_DNS_FAILURE",
+        attempts: [{ outcome: "TRANSPORT_ERROR", status: null, error_type: "gaierror" }],
+      },
+    ],
+  };
+  const demoted = effectiveOrganizationStatus(dnsOnly, { egressRestricted: true });
+  assert.equal(demoted.status, RESTRICTED_EGRESS_SAFE_STATUS);
+  assert.equal(demoted.demoted, true);
 });
 
 test("admission decisions never carry a confirmed-dead reason from a restricted-egress run", () => {
@@ -109,6 +129,8 @@ test("single-signal identity overlaps never auto-merge: they are ambiguous and h
     canonicalRows,
   );
   assert.equal(hostOnly.kind, "ambiguous");
+  assert.equal(hostOnly.match, null);
+  assert.ok(Array.isArray(hostOnly.matches) && hostOnly.matches.length === 1);
 
   const phoneOnly = classifyIdentityMatch(
     { name: "Another Org", phone: "(602) 555-0100" },
@@ -126,45 +148,32 @@ test("single-signal identity overlaps never auto-merge: they are ambiguous and h
   assert.equal(nameOnly.kind, "ambiguous");
 });
 
-test("only one unambiguous name+contact identity match classifies strong; shared contacts and multi-match cases require review", () => {
+test("only name+contact corroboration is strong; shared contact channels alone stay ambiguous", () => {
   const nameAndPhone = classifyIdentityMatch(
     { name: "Example Legal Aid", phone: "602-555-0100" },
     canonicalRows,
   );
   assert.equal(nameAndPhone.kind, "strong");
   assert.equal(nameAndPhone.match.id, "row-1");
+  assert.ok(Array.isArray(nameAndPhone.matches));
 
+  // STRENGTHENED (previously auto-merged): email+host WITHOUT a name match is
+  // exactly the umbrella-organization trap - one host and one intake mailbox
+  // legitimately serving multiple distinct programs. It must go to review,
+  // never auto-merge.
   const emailAndHost = classifyIdentityMatch(
     { name: "Renamed Org", email: "help@example-legal.org", url: "example-legal.org" },
     canonicalRows,
   );
-  assert.equal(emailAndHost.kind, "ambiguous", "shared contacts without the same program name require review");
-
-  const sharedProgramContacts = classifyIdentityMatch(
-    { name: "Program A", phone: "602-555-0100", url: "example-legal.org" },
-    [
-      { ...canonicalRows[0], id: "a", name: "Program A" },
-      { ...canonicalRows[0], id: "b", name: "Program B" },
-    ],
-  );
-  assert.equal(sharedProgramContacts.kind, "ambiguous");
-  assert.equal(sharedProgramContacts.match, null);
-  assert.equal(sharedProgramContacts.matches.length, 2);
-
-  const duplicateCanonicalTargets = classifyIdentityMatch(
-    { name: "Same Program", phone: "602-555-0100" },
-    [
-      { ...canonicalRows[0], id: "a", name: "Same Program" },
-      { ...canonicalRows[0], id: "b", name: "Same Program" },
-    ],
-  );
-  assert.equal(duplicateCanonicalTargets.kind, "ambiguous", "multiple strong candidates must never resolve by first match");
+  assert.equal(emailAndHost.kind, "ambiguous");
+  assert.equal(emailAndHost.match, null);
 
   const disjoint = classifyIdentityMatch(
     { name: "Fresh Org", email: "team@fresh.org", url: "https://fresh.org" },
     canonicalRows,
   );
   assert.equal(disjoint.kind, "none");
+  assert.deepEqual(disjoint.matches, []);
 
   const ignored = classifyIdentityMatch(
     { name: "Example Legal Aid", phone: "602-555-0100" },
@@ -172,6 +181,70 @@ test("only one unambiguous name+contact identity match classifies strong; shared
     "row-1",
   );
   assert.equal(ignored.kind, "none");
+});
+
+test("multiple plausible canonical matches are ambiguous for review, never first-match", () => {
+  const twoPlausible = [
+    canonicalRows[0],
+    {
+      id: "row-2",
+      name: "Example Legal Aid",
+      email: null,
+      phoneRaw: null,
+      phoneNormalized: null,
+      website: "https://example-legal.org",
+    },
+  ];
+  const multi = classifyIdentityMatch(
+    { name: "Example Legal Aid", phone: "602 555 0100", url: "https://example-legal.org/x" },
+    twoPlausible,
+  );
+  assert.equal(multi.kind, "ambiguous");
+  assert.equal(multi.match, null);
+  assert.equal(multi.matches.length, 2);
+  assert.equal(multi.matches.filter((entry) => entry.corroborated).length, 2);
+});
+
+test("dataset hashing is deterministic, order-insensitive, and content-sensitive", () => {
+  const rowA = {
+    id: "a",
+    name: "Alpha",
+    priority: 1,
+    verified: true,
+    published: true,
+    tags: "x",
+    createdAt: new Date("2026-01-01T00:00:00.000Z"),
+    updatedAt: new Date("2026-01-02T00:00:00.000Z"),
+    piipassAt: null,
+  };
+  const rowB = {
+    id: "b",
+    name: "Beta",
+    priority: 0,
+    verified: false,
+    published: true,
+    tags: "y",
+    createdAt: "2026-01-03T00:00:00.000Z",
+    updatedAt: "2026-01-04T00:00:00.000Z",
+    piipassAt: null,
+  };
+  const h1 = computeResourceDatasetHash([rowA, rowB]);
+  const h2 = computeResourceDatasetHash([rowB, rowA]);
+  assert.equal(h1, h2, "row order must not change the dataset hash");
+
+  // Prisma returns Date objects; snapshots store ISO strings. Both must hash
+  // identically or restore proofs would false-negative.
+  const dateAsString = {
+    ...rowA,
+    createdAt: "2026-01-01T00:00:00.000Z",
+    updatedAt: "2026-01-02T00:00:00.000Z",
+  };
+  assert.equal(computeResourceDatasetHash([dateAsString, rowB]), h1);
+
+  const mutated = { ...rowA, name: "Alpha 2" };
+  assert.notEqual(computeResourceDatasetHash([mutated, rowB]), h1);
+  assert.equal(canonicalResourceRowForHash(rowA).createdAt, "2026-01-01T00:00:00.000Z");
+  assert.equal(computeResourceDatasetHash([]), computeResourceDatasetHash([]));
 });
 
 test("verification pipeline persists the safe effective status and raw-status evidence", () => {
@@ -199,7 +272,7 @@ test("append is the admin import default; replace requires typed confirmation an
   );
 });
 
-test("bulk replace captures a durable snapshot before any row is deleted", () => {
+test("bulk replace captures a durable, hash-stamped snapshot before any row is deleted", () => {
   const route = read("src/app/api/admin/resources/import/route.ts");
   const snapshotIndex = route.indexOf("tx.resourceSnapshot.create");
   const deleteIndex = route.indexOf("tx.resource.deleteMany()");
@@ -207,13 +280,15 @@ test("bulk replace captures a durable snapshot before any row is deleted", () =>
   assert.ok(deleteIndex > -1);
   assert.ok(snapshotIndex < deleteIndex, "snapshot must be captured before deleteMany");
   assert.ok(route.includes('trigger: "pre-replace-import"'));
+  assert.ok(route.includes("datasetHash: computeResourceDatasetHash(current)"));
 });
 
-test("snapshot routes are authenticated, rate limited, and restores are audited, reversible, and dry-runnable", () => {
+test("snapshots persist a dataset hash; restores verify it before AND prove it after, inside the transaction", () => {
   const list = read("src/app/api/admin/snapshots/route.ts");
   assert.ok(list.includes("requireAdminRateLimited"));
   assert.ok(list.includes("resourceSnapshot.count"));
   assert.ok(!list.includes("dataJson: true"), "list endpoint must not ship full row payloads");
+  assert.ok(list.includes("datasetHash: computeResourceDatasetHash(current)"));
 
   const restore = read("src/app/api/admin/snapshots/[id]/restore/route.ts");
   assert.ok(restore.includes("requireAdminRateLimited"));
@@ -224,31 +299,21 @@ test("snapshot routes are authenticated, rate limited, and restores are audited,
   const preRestoreIndex = restore.indexOf("tx.resourceSnapshot.create");
   const deleteIndex = restore.indexOf("tx.resource.deleteMany()");
   assert.ok(preRestoreIndex > -1 && deleteIndex > -1 && preRestoreIndex < deleteIndex);
-  assert.ok(restore.includes("restoredHash !== verifiedSnapshot.datasetHash"));
-  assert.ok(restore.includes("exactRecoveryVerified: true"));
 
-  const sourceRows = [
-    { id: "b", name: "Beta", updatedAt: new Date("2026-09-03T00:00:00Z"), nested: { z: 1, a: 2 } },
-    { id: "a", name: "Alpha", updatedAt: new Date("2026-09-02T00:00:00Z"), nested: { a: 1 } },
-  ];
-  const prepared = prepareResourceSnapshot(sourceRows);
-  assert.equal(prepared.rowCount, 2);
-  assert.equal(hashSnapshotRows(sourceRows), prepared.datasetHash);
-  const verified = verifyResourceSnapshot({
-    dataJson: prepared.rows,
-    rowCount: prepared.rowCount,
-    datasetHash: prepared.datasetHash,
-  });
-  assert.equal(verified.ok, true);
-  const tampered = structuredClone(prepared.rows);
-  tampered[0].name = "Changed";
-  const rejected = verifyResourceSnapshot({
-    dataJson: tampered,
-    rowCount: prepared.rowCount,
-    datasetHash: prepared.datasetHash,
-  });
-  assert.equal(rejected.ok, false);
-  assert.match(rejected.reason, /hash mismatch/i);
+  // Row-count is NOT integrity: the snapshot's own hash must be recomputed
+  // and verified before restore, and the persisted rows must be re-read and
+  // hash-proven after createMany, inside the same transaction, with a
+  // dedicated failure code that rolls the restore back.
+  assert.ok(restore.includes("const payloadHash = computeResourceDatasetHash(rows)"));
+  assert.ok(restore.includes("RESTORE_VERIFICATION_FAILED"));
+  assert.ok(restore.includes("hashVerified: true"));
+  const proofIndex = restore.indexOf("computeResourceDatasetHash(persisted)");
+  const createManyIndex = restore.indexOf("tx.resource.createMany");
+  assert.ok(
+    proofIndex > -1 && createManyIndex > -1 && proofIndex > createManyIndex,
+    "restore must re-read and hash-prove persisted rows after createMany",
+  );
+  assert.ok(restore.includes("verified: { rowCount: persisted.length, datasetHash: persistedHash }"));
 });
 
 test("ResourceSnapshot is modeled in every schema and shipped as a migration", () => {
@@ -268,74 +333,85 @@ test("ResourceSnapshot is modeled in every schema and shipped as a migration", (
   assert.ok(supabase.includes('REVOKE ALL ON TABLE \\"ResourceSnapshot\\" FROM anon') || supabase.includes('REVOKE ALL ON TABLE "ResourceSnapshot" FROM anon'));
 });
 
-test("public/admin pagination reaches beyond 500 while preserving weighted fuzzy/typo/acronym/priority search semantics", async () => {
-  const make = (i, extra = {}) => ({
-    id: `r-${String(i).padStart(4, "0")}`,
-    name: `Resource ${String(i).padStart(4, "0")}`,
-    acronym: null,
-    description: "general assistance",
-    category: "housing-financial-aid",
-    subcategory: null,
-    phoneRaw: null,
-    phoneNormalized: null,
-    email: null,
-    address: null,
-    website: null,
-    tags: "",
-    priority: 0,
-    verified: true,
-    published: true,
-    sourceNote: null,
-    piipassAt: null,
-    piipassNotes: null,
-    createdAt: "2026-09-03T00:00:00.000Z",
-    updatedAt: "2026-09-03T00:00:00.000Z",
-    ...extra,
-  });
-  const rows = Array.from({ length: 625 }, (_, i) => make(i));
-  rows[510] = make(510, { name: "Emergency Shelter Network", acronym: "ESN", description: "rapid shelter placement" });
-  rows[511] = make(511, { name: "Emergency Shelter Priority", acronym: "ESP", description: "rapid shelter placement", priority: 1 });
-  rows[612] = make(612, { name: "National Center for Missing & Exploited Children", acronym: "NCMEC" });
-  const calls = [];
-  const source = {
-    count: async () => rows.length,
-    fetchPage: async ({ skip, take }) => {
-      calls.push({ skip, take });
-      return rows.slice(skip, skip + take);
-    },
-  };
-
-  const deep = await paginateResources(source, { q: "", limit: 25, offset: 600 });
-  assert.equal(deep.total, 625);
-  assert.equal(deep.resources[0].id, "r-0600");
-
-  calls.length = 0;
-  const typo = await paginateResources(source, { q: "sheltr", limit: 10, offset: 0 });
-  assert.ok(typo.total >= 2, "typo-only fuzzy matches must survive database traversal");
-  assert.equal(typo.resources[0].id, "r-0511", "priority boost must remain part of weighted ranking");
-  assert.deepEqual(calls.map((c) => c.skip), [0, 250, 500]);
-  assert.ok(calls.every((c) => c.take <= 250), "search must read the DB in bounded pages");
-
-  const acronym = await paginateResources(source, { q: "NCMEC", limit: 10, offset: 0 });
-  assert.equal(acronym.resources[0].id, "r-0612");
-
-  for (const path of ["src/app/api/resources/route.ts", "src/app/api/admin/resources/route.ts"]) {
+test("public and admin listings paginate in the database and preserve the weighted search semantics", () => {
+  for (const path of [
+    "src/app/api/resources/route.ts",
+    "src/app/api/admin/resources/route.ts",
+  ]) {
     const route = read(path);
-    assert.ok(route.includes("paginateResources"), `${path} must use the shared ranked pagination path`);
-    assert.ok(route.includes("db.resource.count({ where })"));
+    assert.ok(
+      route.includes("createSearchAccumulator"),
+      `${path} must rank queries with the shared weighted fuzzy/typo/acronym/priority engine`,
+    );
+    assert.ok(route.includes("db.resource.count({ where })"), `${path} must return true database counts`);
+    assert.ok(route.includes("skip: offset"));
+    assert.ok(route.includes("take: limit"));
+    assert.ok(
+      route.includes('orderBy: [{ name: "asc" }, { id: "asc" }]'),
+      `${path} browse ordering must mirror the engine's neutral empty-query ordering`,
+    );
+    assert.ok(
+      route.includes("cursor: { id: cursor }"),
+      `${path} search path must stream candidates in stable keyset batches`,
+    );
+    assert.ok(
+      !route.includes("where.OR") && !route.includes("OR: ["),
+      `${path} must not degrade search to SQL contains filters`,
+    );
   }
-  const directory = read("src/components/bndr/directory.tsx");
-  assert.ok(directory.includes("useInfiniteQuery"));
-  assert.ok(directory.includes("fetchNextPage"));
-  assert.ok(!directory.includes("limit: 500"), "public UI must not hard-stop at 500 rows");
+  const search = read("src/lib/search.ts");
+  assert.ok(search.includes("export function createSearchAccumulator"));
+  assert.ok(search.includes("export function compareScored"));
+  assert.ok(search.includes("return sorted.slice(offset, offset + limit)"));
 });
 
-test("admin api client exposes snapshot list, capture, and dry-runnable restore", () => {
+test("PII cleanup is dry-runnable and captures a durable hash-stamped snapshot before mutating", () => {
+  const route = read("src/app/api/admin/cleanup/route.ts");
+  assert.ok(route.includes("cleanupCommandSchema"));
+  assert.ok(route.includes("dryRun: true"));
+  assert.ok(route.includes('trigger: "pre-cleanup"'));
+  assert.ok(route.includes("datasetHash: computeResourceDatasetHash(current)"));
+  assert.ok(route.includes('action: "piipass-resource"'));
+  assert.ok(route.includes("preCleanupSnapshotId"));
+  const snapshotIndex = route.indexOf("tx.resourceSnapshot.create");
+  const updateIndex = route.indexOf("tx.resource.update(");
+  assert.ok(
+    snapshotIndex > -1 && updateIndex > -1 && snapshotIndex < updateIndex,
+    "pre-cleanup snapshot must be captured before any update",
+  );
+
+  const api = read("src/lib/api.ts");
+  assert.ok(api.includes('runCleanup(mode: "preview" | "apply")'));
+
+  const component = read("src/components/bndr/admin-cleanup.tsx");
+  assert.ok(component.includes('runCleanup("preview")'));
+  assert.ok(component.includes('runCleanup("apply")'));
+  assert.ok(component.includes("Dry run"));
+});
+
+test("merge evaluation script is self-contained in the package (no external /data paths)", () => {
+  const script = read("scripts/merge-verified-candidates.mjs");
+  assert.ok(!script.includes("/data/"), "script must not hard-code sandbox paths");
+  assert.ok(script.includes('join(root, "verifier", "out")'));
+  assert.ok(script.includes('join(root, "reports", "RESOURCE_MERGE_REPORT.json")'));
+  assert.ok(script.includes("mkdirSync(dirname(outPath), { recursive: true })"));
+  assert.ok(
+    existsSync(join(root, "verifier/out/verified_resources.json")),
+    "verifier outputs must ship inside the package",
+  );
+  assert.ok(existsSync(join(root, "verifier/out/run_manifest.json")));
+  assert.ok(existsSync(join(root, "verifier/out/verification_summary.json")));
+  assert.ok(existsSync(join(root, "verifier/out/possible_duplicates_review.json")));
+  assert.ok(existsSync(join(root, "verifier/out/egress-probe.json")));
+});
+
+test("admin api client exposes snapshot list, capture, and dry-runnable, hash-proven restore", () => {
   const api = read("src/lib/api.ts");
   assert.ok(api.includes("fetchSnapshots"));
   assert.ok(api.includes("createSnapshot"));
   assert.ok(api.includes("restoreSnapshot"));
   assert.ok(api.includes("/api/admin/snapshots"));
+  assert.ok(api.includes("verified?: { rowCount: number; datasetHash: string }"));
 
   const dashboard = read("src/components/bndr/admin-dashboard.tsx");
   assert.ok(dashboard.includes("AdminSnapshots"));

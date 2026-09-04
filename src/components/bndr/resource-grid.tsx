@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { SearchX, RotateCcw, Loader2, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,9 +15,7 @@ interface ResourceGridProps {
   loading?: boolean;
   totalCount: number;
   directoryTotal: number;
-  hasMore?: boolean;
-  loadingMore?: boolean;
-  onLoadMore?: () => void;
+  pageSize?: number;
   onReset: () => void;
   onOpen: (r: Resource) => void;
   isSaved?: (id: string) => boolean;
@@ -99,9 +98,7 @@ export function ResourceGrid({
   loading,
   totalCount,
   directoryTotal,
-  hasMore = false,
-  loadingMore = false,
-  onLoadMore,
+  pageSize = 24,
   onReset,
   onOpen,
   isSaved,
@@ -116,7 +113,11 @@ export function ResourceGrid({
   getDefaultContactMethod,
   onSuggestionClick,
 }: ResourceGridProps) {
-  const shown = resources;
+  // visibleCount is internal state. Parent remounts this component by
+  // changing its `key` prop when filters change, which resets this state.
+  const [visibleCount, setVisibleCount] = useState(pageSize);
+  const shown = resources.slice(0, visibleCount);
+  const hasMore = resources.length > visibleCount;
 
   if (loading) {
     return (
@@ -218,9 +219,8 @@ export function ResourceGrid({
         </p>
         {hasMore ? (
           <RevealMoreButton
-            onClick={() => onLoadMore?.()}
+            onClick={() => setVisibleCount((c) => c + pageSize)}
             remaining={totalCount - shown.length}
-            loading={loadingMore}
           />
         ) : null}
       </div>
@@ -235,17 +235,26 @@ export function ResourceGrid({
 function RevealMoreButton({
   onClick,
   remaining,
-  loading,
 }: {
   onClick: () => void;
   remaining: number;
-  loading: boolean;
 }) {
+  const [loading, setLoading] = useState(false);
+
+  const handleClick = () => {
+    setLoading(true);
+    // Simulate a brief loading delay for visual feedback, then reveal.
+    setTimeout(() => {
+      onClick();
+      setLoading(false);
+    }, 300);
+  };
+
   return (
     <Button
       variant="outline"
       size="lg"
-      onClick={onClick}
+      onClick={handleClick}
       disabled={loading}
       className="group rounded-full border-border hover:border-primary/50 hover:text-primary"
     >
@@ -256,7 +265,7 @@ function RevealMoreButton({
         </>
       ) : (
         <>
-          {remaining > 0 ? `Load more (${remaining} remaining)` : "Load more"}
+          Reveal {remaining > 0 ? `${remaining} more` : "more"}
           <ChevronDown className="ml-2 h-4 w-4 transition-transform group-hover:translate-y-0.5" aria-hidden />
         </>
       )}

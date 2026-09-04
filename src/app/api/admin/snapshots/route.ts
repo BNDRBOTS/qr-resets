@@ -10,7 +10,7 @@ import { db } from "@/lib/db";
 import { getAdminSession, requireAdminRateLimited, apiError } from "@/lib/require-admin";
 import { RATE_LIMITS } from "@/lib/rate-limit";
 import { readBoundedJson, BODY_LIMITS, BoundedBodyError } from "@/lib/zod-schemas";
-import { prepareResourceSnapshot } from "@/lib/resource-snapshot";
+import { computeResourceDatasetHash } from "@/lib/verification-core.mjs";
 
 export const dynamic = "force-dynamic";
 
@@ -75,30 +75,39 @@ export async function POST(req: NextRequest) {
 
     const snapshot = await db.$transaction(async (tx) => {
       const current = await tx.resource.findMany();
-      const prepared = prepareResourceSnapshot(current);
       const created = await tx.resourceSnapshot.create({
         data: {
           actor,
           reason: parsed.data.reason ?? "Manual snapshot",
           trigger: "manual",
-          rowCount: prepared.rowCount,
-          datasetHash: prepared.datasetHash,
-          dataJson: prepared.rows as unknown as object,
+          rowCount: current.length,
+          datasetHash: computeResourceDatasetHash(current),
+          dataJson: current as unknown as object,
         },
       });
       await tx.auditLog.create({
         data: {
           action: "snapshot-create",
           actor,
-          summary: `Captured resource snapshot (${prepared.rowCount} rows)`,
-          details: JSON.stringify({ snapshotId: created.id, rowCount: prepared.rowCount, datasetHash: prepared.datasetHash }),
+          summary: `Captured resource snapshot (${current.length} rows)`,
+          details: JSON.stringify({
+            snapshotId: created.id,
+            rowCount: current.length,
+            datasetHash: created.datasetHash,
+          }),
         },
       });
       return created;
     });
 
     return NextResponse.json(
-      { ok: true, id: snapshot.id, rowCount: snapshot.rowCount, datasetHash: snapshot.datasetHash, createdAt: snapshot.createdAt },
+      {
+        ok: true,
+        id: snapshot.id,
+        rowCount: snapshot.rowCount,
+        datasetHash: snapshot.datasetHash,
+        createdAt: snapshot.createdAt,
+      },
       { status: 201 },
     );
   } catch (error) {
