@@ -9,13 +9,21 @@ export default function GlobalError({ reset }: { reset: () => void }) {
         <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
           No empty or successful state is being substituted for the failure.
         </p>
-        <button
-          type="button"
-          onClick={reset}
-          className="mt-6 rounded-full bg-foreground px-5 py-2.5 text-sm font-semibold text-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-        >
-          Retry
-        </button>
+        <div className="mt-6 flex flex-wrap gap-3">
+          <button
+            type="button"
+            onClick={reset}
+            className="rounded-full bg-foreground px-5 py-2.5 text-sm font-semibold text-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          >
+            Retry
+          </button>
+          <a
+            href="/"
+            className="rounded-full border border-border bg-card px-5 py-2.5 text-sm font-semibold text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          >
+            ← Back to Directory
+          </a>
+        </div>
       </div>
     </main>
   );

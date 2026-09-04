@@ -16,7 +16,7 @@ import {
   CheckCircle2,
   AlertTriangle,
   FileJson,
-  HeartHandshake,
+  BadgeCheck,
 } from "lucide-react";
 import {
   Tabs,
@@ -57,7 +57,8 @@ import { AdminAuditLog } from "./admin-audit-log";
 import { AdminCleanup } from "./admin-cleanup";
 import { AdminLinkAudit } from "./admin-link-audit";
 import { AdminBulkImport } from "./admin-bulk-import";
-import { AdminQrRequests } from "./admin-qr-requests";
+import { AdminSnapshots } from "./admin-snapshots";
+import { AdminVerification } from "./admin-verification";
 
 const CAT_SHORT: Record<CategorySlug, string> = Object.fromEntries(
   CATEGORIES.map((c) => [c.slug, c.shortName]),
@@ -365,8 +366,8 @@ export function AdminDashboard() {
               Admin dashboard
             </h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Manage resources, Reset requests, the PII pipeline, and the audit
-              trail. Every administrative change is recorded.
+              Manage resources, verification, the PII pipeline, and the audit
+              trail. QR Resets remains a prototype preview in this release.
             </p>
           </div>
         </div>
@@ -454,8 +455,8 @@ export function AdminDashboard() {
             <TabsTrigger value="import" className="gap-1.5">
               <FileJson className="size-4" aria-hidden /> Import
             </TabsTrigger>
-            <TabsTrigger value="qr-requests" className="gap-1.5">
-              <HeartHandshake className="size-4" aria-hidden /> QR Requests
+            <TabsTrigger value="verification" className="gap-1.5">
+              <BadgeCheck className="size-4" aria-hidden /> Verification
             </TabsTrigger>
             <TabsTrigger value="audit" className="gap-1.5">
               <History className="size-4" aria-hidden /> Audit Log
@@ -477,18 +478,22 @@ export function AdminDashboard() {
           </TabsContent>
 
           <TabsContent value="import">
-            <AdminBulkImport
-              onDone={() => {
-                qc.invalidateQueries({ queryKey: ["admin-resources"] });
-                qc.invalidateQueries({ queryKey: ["admin-stats"] });
-                qc.invalidateQueries({ queryKey: ["audit"] });
-                qc.invalidateQueries({ queryKey: ["url-verification"] });
-              }}
-            />
+            <div className="space-y-5">
+              <AdminBulkImport
+                onDone={() => {
+                  qc.invalidateQueries({ queryKey: ["admin-resources"] });
+                  qc.invalidateQueries({ queryKey: ["admin-stats"] });
+                  qc.invalidateQueries({ queryKey: ["audit"] });
+                  qc.invalidateQueries({ queryKey: ["url-verification"] });
+                  qc.invalidateQueries({ queryKey: ["verification"] });
+                }}
+              />
+              <AdminSnapshots />
+            </div>
           </TabsContent>
 
-          <TabsContent value="qr-requests">
-            <AdminQrRequests />
+          <TabsContent value="verification">
+            <AdminVerification />
           </TabsContent>
 
           <TabsContent value="audit">

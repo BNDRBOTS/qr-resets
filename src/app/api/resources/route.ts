@@ -4,9 +4,10 @@
 // /api/admin/resources and require a verified admin session.
 
 import { NextRequest, NextResponse } from "next/server";
+import type { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
-import { searchResources } from "@/lib/search";
 import { cleanArtifacts } from "@/lib/pii";
+import { paginateResources } from "@/lib/resource-pagination";
 import { apiError } from "@/lib/require-admin";
 import { searchParamsSchema } from "@/lib/zod-schemas";
 import type { CategorySlug, SearchResult } from "@/lib/types";
@@ -99,28 +100,35 @@ export async function GET(req: NextRequest) {
     }
 
     const { q, category, priorityOnly, limit, offset } = parsed.data;
-    const where: {
-      category?: string;
-      priority?: { gte: number };
-      published: boolean;
-    } = { published: true };
+    const where: Prisma.ResourceWhereInput = { published: true };
 
     if (category && category !== "all") where.category = category;
     if (priorityOnly) where.priority = { gte: 1 };
 
-    const rows = await db.resource.findMany({ where });
-    const resources = rows.map(toResourceShape);
-    const scored = searchResources(resources, q, { limit, offset });
-    const total = q.trim()
-      ? searchResources(resources, q).length
-      : resources.length;
+    const page = await paginateResources(
+      {
+        count: () => db.resource.count({ where }),
+        fetchPage: async ({ skip, take }) => {
+          const rows = await db.resource.findMany({
+            where,
+            // Neutral deterministic database traversal. Search queries are
+            // globally re-ranked by the original weighted scorer after all
+            // filtered rows have been read in bounded DB pages.
+            orderBy: [{ name: "asc" }, { id: "asc" }],
+            skip,
+            take,
+          });
+          return rows.map(toResourceShape);
+        },
+      },
+      { q, limit, offset },
+    );
 
     const result: SearchResult = {
-      resources: scored as SearchResult["resources"],
-      total,
+      resources: page.resources as SearchResult["resources"],
+      total: page.total,
       query: q,
     };
-
     return NextResponse.json(result);
   } catch (error) {
     console.error("[api/resources GET]", error);

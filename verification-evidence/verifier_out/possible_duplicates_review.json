@@ -1,0 +1,454 @@
+[
+  {
+    "record_a": "caf81c7e3e3750f2b659",
+    "record_b": "f9334b962cae3760f681",
+    "name_a": "PAN / HealthWell / Good Days / Accessia Health Co-pay Assistance",
+    "name_b": "PAN",
+    "name_similarity": 0.125,
+    "shared_evidence": [
+      "exact_url",
+      "host"
+    ],
+    "reason": "Possible duplicate held separate: auto-merge threshold not met or compound/conflicting evidence present."
+  },
+  {
+    "record_a": "caf81c7e3e3750f2b659",
+    "record_b": "6ae6d263be7e4c5fcf5b",
+    "name_a": "PAN / HealthWell / Good Days / Accessia Health Co-pay Assistance",
+    "name_b": "HealthWell",
+    "name_similarity": 0.9,
+    "shared_evidence": [
+      "exact_url",
+      "host"
+    ],
+    "reason": "Possible duplicate held separate: auto-merge threshold not met or compound/conflicting evidence present."
+  },
+  {
+    "record_a": "caf81c7e3e3750f2b659",
+    "record_b": "7c3b7947ebefa7884ff6",
+    "name_a": "PAN / HealthWell / Good Days / Accessia Health Co-pay Assistance",
+    "name_b": "Good Days",
+    "name_similarity": 0.9,
+    "shared_evidence": [
+      "exact_url",
+      "host"
+    ],
+    "reason": "Possible duplicate held separate: auto-merge threshold not met or compound/conflicting evidence present."
+  },
+  {
+    "record_a": "caf81c7e3e3750f2b659",
+    "record_b": "17ec041a05d4016d25ad",
+    "name_a": "PAN / HealthWell / Good Days / Accessia Health Co-pay Assistance",
+    "name_b": "Accessia Health",
+    "name_similarity": 0.9,
+    "shared_evidence": [
+      "exact_url",
+      "host"
+    ],
+    "reason": "Possible duplicate held separate: auto-merge threshold not met or compound/conflicting evidence present."
+  },
+  {
+    "record_a": "480eac3c7577df77c10f",
+    "record_b": "72320bbbd55ee3f8a20b",
+    "name_a": "Arizona Food Bank Network Food Bank Locator",
+    "name_b": "Association of Arizona Food Banks",
+    "name_similarity": 0.415,
+    "shared_evidence": [
+      "exact_url",
+      "host"
+    ],
+    "reason": "Possible duplicate held separate: auto-merge threshold not met or compound/conflicting evidence present."
+  },
+  {
+    "record_a": "1a186ff10295c7cfa96c",
+    "record_b": "8b98548e9784c3cf186e",
+    "name_a": "trynova.org",
+    "name_b": "National Organization for Victim Assistance (NOVA) Free crisis intervention, case management, and advocacy for survivors of all crime types. https",
+    "name_similarity": 0.085,
+    "shared_evidence": [
+      "exact_url",
+      "host"
+    ],
+    "reason": "Possible duplicate held separate: auto-merge threshold not met or compound/conflicting evidence present."
+  },
+  {
+    "record_a": "b6fc470bc65fb9612877",
+    "record_b": "618e98a79ac2a558b500",
+    "name_a": "whistlebloweraid.org",
+    "name_b": "whistleblowers.org",
+    "name_similarity": 0.738,
+    "shared_evidence": [
+      "exact_url",
+      "host"
+    ],
+    "reason": "Possible duplicate held separate: auto-merge threshold not met or compound/conflicting evidence present."
+  },
+  {
+    "record_a": "ec4dcbe4d9450c0c36cc",
+    "record_b": "9626c390652ab07c6748",
+    "name_a": "Arizona Law Help / LegalLEARN",
+    "name_b": "Intake: https://www.azlawhelp.org/ | (602) 279",
+    "name_similarity": 0.288,
+    "shared_evidence": [
+      "exact_url",
+      "host"
+    ],
+    "reason": "Possible duplicate held separate: auto-merge threshold not met or compound/conflicting evidence present."
+  },
+  {
+    "record_a": "adc4f51d37b31511233b",
+    "record_b": "ee49d92f00a50dd8021f",
+    "name_a": "RV for Homeless (Nonprofit RV Matching)",
+    "name_b": "Intake: Call (657) 298",
+    "name_similarity": 0.051,
+    "shared_evidence": [
+      "exact_url",
+      "host"
+    ],
+    "reason": "Possible duplicate held separate: auto-merge threshold not met or compound/conflicting evidence present."
+  },
+  {
+    "record_a": "52169247abe4133610db",
+    "record_b": "006613fff7003ce6f20b",
+    "name_a": "r/VanLife 1.4 M members sharing all things van life—plenty of “Realistic VanLife for people with chronic pain” posts and build",
+    "name_b": "r/VanLife & r/vandwellers Search “Phoenix” in these subreddits for posts on trades",
+    "name_similarity": 0.34,
+    "shared_evidence": [
+      "exact_url",
+      "host"
+    ],
+    "reason": "Possible duplicate held separate: auto-merge threshold not met or compound/conflicting evidence present."
+  },
+  {
+    "record_a": "55b51b85a10c54f33cc9",
+    "record_b": "ac419a59d418ac3668e5",
+    "name_a": "AHCCCS H₂O Housing & Health Opportunities Program Transitional housing subsidies (rent, deposit, utilities) for homeless individuals with chronic illness or justice involvement. Intake: 1",
+    "name_b": "AHCCCS (Arizona Medicaid)",
+    "name_similarity": 0.121,
+    "shared_evidence": [
+      "phone"
+    ],
+    "reason": "Possible duplicate held separate: auto-merge threshold not met or compound/conflicting evidence present."
+  },
+  {
+    "record_a": "55b51b85a10c54f33cc9",
+    "record_b": "d82e1447bfd37ad25479",
+    "name_a": "AHCCCS H₂O Housing & Health Opportunities Program Transitional housing subsidies (rent, deposit, utilities) for homeless individuals with chronic illness or justice involvement. Intake: 1",
+    "name_b": "AZ Dept of Economic Security (DES)",
+    "name_similarity": 0.116,
+    "shared_evidence": [
+      "phone"
+    ],
+    "reason": "Possible duplicate held separate: auto-merge threshold not met or compound/conflicting evidence present."
+  },
+  {
+    "record_a": "55b51b85a10c54f33cc9",
+    "record_b": "b665e5fb80810015985f",
+    "name_a": "AHCCCS H₂O Housing & Health Opportunities Program Transitional housing subsidies (rent, deposit, utilities) for homeless individuals with chronic illness or justice involvement. Intake: 1",
+    "name_b": "Food, Cash, Medical (DES)",
+    "name_similarity": 0.079,
+    "shared_evidence": [
+      "phone"
+    ],
+    "reason": "Possible duplicate held separate: auto-merge threshold not met or compound/conflicting evidence present."
+  },
+  {
+    "record_a": "ac419a59d418ac3668e5",
+    "record_b": "d82e1447bfd37ad25479",
+    "name_a": "AHCCCS (Arizona Medicaid)",
+    "name_b": "AZ Dept of Economic Security (DES)",
+    "name_similarity": 0.209,
+    "shared_evidence": [
+      "phone"
+    ],
+    "reason": "Possible duplicate held separate: auto-merge threshold not met or compound/conflicting evidence present."
+  },
+  {
+    "record_a": "ac419a59d418ac3668e5",
+    "record_b": "b665e5fb80810015985f",
+    "name_a": "AHCCCS (Arizona Medicaid)",
+    "name_b": "Food, Cash, Medical (DES)",
+    "name_similarity": 0.327,
+    "shared_evidence": [
+      "phone"
+    ],
+    "reason": "Possible duplicate held separate: auto-merge threshold not met or compound/conflicting evidence present."
+  },
+  {
+    "record_a": "d82e1447bfd37ad25479",
+    "record_b": "b665e5fb80810015985f",
+    "name_a": "AZ Dept of Economic Security (DES)",
+    "name_b": "Food, Cash, Medical (DES)",
+    "name_similarity": 0.28,
+    "shared_evidence": [
+      "phone"
+    ],
+    "reason": "Possible duplicate held separate: auto-merge threshold not met or compound/conflicting evidence present."
+  },
+  {
+    "record_a": "4bc98530238522d24e08",
+    "record_b": "6c53000f7ec24b93a0eb",
+    "name_a": "Arizona Long Term Care System (ALTCS)",
+    "name_b": "AHCCCS",
+    "name_similarity": 0.14,
+    "shared_evidence": [
+      "host",
+      "phone"
+    ],
+    "reason": "Possible duplicate held separate: auto-merge threshold not met or compound/conflicting evidence present."
+  },
+  {
+    "record_a": "e2c0774cabee9999878c",
+    "record_b": "93ab927552bca508b0fe",
+    "name_a": "Lawyers Committee for Civil Rights of the SF Bay Area (LCCRSF)",
+    "name_b": "Law Foundation of Silicon Valley Help",
+    "name_similarity": 0.208,
+    "shared_evidence": [
+      "phone"
+    ],
+    "reason": "Possible duplicate held separate: auto-merge threshold not met or compound/conflicting evidence present."
+  },
+  {
+    "record_a": "c517c77095f3e08ea10a",
+    "record_b": "7e0ae3daf6de7c7e7606",
+    "name_a": "Santa Clara County Bar Association Lawyer Referral Service",
+    "name_b": "Bay Area Legal Aid Santa Clara Office",
+    "name_similarity": 0.304,
+    "shared_evidence": [
+      "phone"
+    ],
+    "reason": "Possible duplicate held separate: auto-merge threshold not met or compound/conflicting evidence present."
+  },
+  {
+    "record_a": "7f75c1a4b36494309ef6",
+    "record_b": "77d35314ca34d303b6ae",
+    "name_a": "DOJ Civil Rights Division Report a Violation (not counsel)",
+    "name_b": "Pro Bono Project Silicon Valley (Family Law)",
+    "name_similarity": 0.22,
+    "shared_evidence": [
+      "phone"
+    ],
+    "reason": "Possible duplicate held separate: auto-merge threshold not met or compound/conflicting evidence present."
+  },
+  {
+    "record_a": "c86d62ad81bb85016b47",
+    "record_b": "5e7f79cf1bd8fe2b0e35",
+    "name_a": "Federal Pro Se Program San Jose Courthouse",
+    "name_b": "Disability Rights California Get Help",
+    "name_similarity": 0.109,
+    "shared_evidence": [
+      "phone"
+    ],
+    "reason": "Possible duplicate held separate: auto-merge threshold not met or compound/conflicting evidence present."
+  },
+  {
+    "record_a": "469335646ac11bd5c8e0",
+    "record_b": "32e8d7ce3538a17a696a",
+    "name_a": "A New Leaf (DV Hotline)",
+    "name_b": "Safe Access for DV Services (SAFEDVS)",
+    "name_similarity": 0.246,
+    "shared_evidence": [
+      "phone"
+    ],
+    "reason": "Possible duplicate held separate: auto-merge threshold not met or compound/conflicting evidence present."
+  },
+  {
+    "record_a": "1af993eb0c6f7b9425ec",
+    "record_b": "aa32d12798d379a437f6",
+    "name_a": "Community Legal Services (CLS, AZ)",
+    "name_b": "Community Legal Services (low-income legal aid)",
+    "name_similarity": 0.629,
+    "shared_evidence": [
+      "phone"
+    ],
+    "reason": "Possible duplicate held separate: auto-merge threshold not met or compound/conflicting evidence present."
+  },
+  {
+    "record_a": "1af993eb0c6f7b9425ec",
+    "record_b": "bce7fbadcc283e9d1483",
+    "name_a": "Community Legal Services (CLS, AZ)",
+    "name_b": "Intake: https://clsaz.org/ | (602) 258",
+    "name_similarity": 0.236,
+    "shared_evidence": [
+      "host",
+      "phone"
+    ],
+    "reason": "Possible duplicate held separate: auto-merge threshold not met or compound/conflicting evidence present."
+  },
+  {
+    "record_a": "aa32d12798d379a437f6",
+    "record_b": "bce7fbadcc283e9d1483",
+    "name_a": "Community Legal Services (low-income legal aid)",
+    "name_b": "Intake: https://clsaz.org/ | (602) 258",
+    "name_similarity": 0.146,
+    "shared_evidence": [
+      "phone"
+    ],
+    "reason": "Possible duplicate held separate: auto-merge threshold not met or compound/conflicting evidence present."
+  },
+  {
+    "record_a": "22a4a645317a288b5133",
+    "record_b": "204f5031f5a8160fd188",
+    "name_a": "Defenders of Children (Phoenix)",
+    "name_b": "Intake: https://defendersofchildren.org/ | (602) 710",
+    "name_similarity": 0.451,
+    "shared_evidence": [
+      "phone"
+    ],
+    "reason": "Possible duplicate held separate: auto-merge threshold not met or compound/conflicting evidence present."
+  },
+  {
+    "record_a": "204f5031f5a8160fd188",
+    "record_b": "554cf5543f81cab6ab17",
+    "name_a": "Intake: https://defendersofchildren.org/ | (602) 710",
+    "name_b": "Defenders of Children (Phoenix) — direct legal services (child abuse/family violence victims)",
+    "name_similarity": 0.288,
+    "shared_evidence": [
+      "phone"
+    ],
+    "reason": "Possible duplicate held separate: auto-merge threshold not met or compound/conflicting evidence present."
+  },
+  {
+    "record_a": "4d751cddb73aa1484ff8",
+    "record_b": "a5bf76ef83a498d7e251",
+    "name_a": "Warm Line (peer support, adults 18+)",
+    "name_b": "Central AZ",
+    "name_similarity": 0.137,
+    "shared_evidence": [
+      "phone"
+    ],
+    "reason": "Possible duplicate held separate: auto-merge threshold not met or compound/conflicting evidence present."
+  },
+  {
+    "record_a": "7c114946fceb1efd7e94",
+    "record_b": "4dc6ae5955e890a48810",
+    "name_a": "AZ Warm Line (HOPE)",
+    "name_b": "Southern AZ",
+    "name_similarity": 0.2,
+    "shared_evidence": [
+      "phone"
+    ],
+    "reason": "Possible duplicate held separate: auto-merge threshold not met or compound/conflicting evidence present."
+  },
+  {
+    "record_a": "4bc98530238522d24e08",
+    "record_b": "e1c675bfa3825d6a7617",
+    "name_a": "Arizona Long Term Care System (ALTCS)",
+    "name_b": "Tribal ALTCS Same ALTCS services delivered through case management by participating tribes for American Indian members. Intake",
+    "name_similarity": 0.106,
+    "shared_evidence": [
+      "email"
+    ],
+    "reason": "Possible duplicate held separate: auto-merge threshold not met or compound/conflicting evidence present."
+  },
+  {
+    "record_a": "7374ff7437e48c7849c4",
+    "record_b": "e1c675bfa3825d6a7617",
+    "name_a": "Arizona Long Term Care System (ALTCS) Medicaid‐funded long‐term care for Arizonans who are aged, blind, or have a physical/developmental disability requiring nursing",
+    "name_b": "Tribal ALTCS Same ALTCS services delivered through case management by participating tribes for American Indian members. Intake",
+    "name_similarity": 0.24,
+    "shared_evidence": [
+      "email"
+    ],
+    "reason": "Possible duplicate held separate: auto-merge threshold not met or compound/conflicting evidence present."
+  },
+  {
+    "record_a": "55b51b85a10c54f33cc9",
+    "record_b": "6c53000f7ec24b93a0eb",
+    "name_a": "AHCCCS H₂O Housing & Health Opportunities Program Transitional housing subsidies (rent, deposit, utilities) for homeless individuals with chronic illness or justice involvement. Intake: 1",
+    "name_b": "AHCCCS",
+    "name_similarity": 0.9,
+    "shared_evidence": [
+      "host"
+    ],
+    "reason": "Possible duplicate held separate: auto-merge threshold not met or compound/conflicting evidence present."
+  },
+  {
+    "record_a": "3fca478c7e7c802a40a7",
+    "record_b": "6c53000f7ec24b93a0eb",
+    "name_a": "AHCCCS Housing Programs Permanent supportive housing and transition services for Medicaid members with serious mental illness or substance use disorders. Website",
+    "name_b": "AHCCCS",
+    "name_similarity": 0.9,
+    "shared_evidence": [
+      "host"
+    ],
+    "reason": "Possible duplicate held separate: auto-merge threshold not met or compound/conflicting evidence present."
+  },
+  {
+    "record_a": "6b011bac045398bb6784",
+    "record_b": "6b011bac045398bb6784",
+    "name_a": "Details & Intake: https://acf.hhs.gov/ofa/programs/responsible-fatherhood (acf.gov) II. Protection & Advocacy (P&A) Disability Grants Each state’s Protection & Advocacy (P&A) system is funded through these formula grants. Applicants are typically the designated P&A agency in each state—often a nonprofit legal services organization. Program CFDA No. Purpose Intake Website / Contact PADD",
+    "name_b": "Details & Intake: https://acf.hhs.gov/ofa/programs/responsible-fatherhood (acf.gov) II. Protection & Advocacy (P&A) Disability Grants Each state’s Protection & Advocacy (P&A) system is funded through these formula grants. Applicants are typically the designated P&A agency in each state—often a nonprofit legal services organization. Program CFDA No. Purpose Intake Website / Contact PADD",
+    "name_similarity": 1.0,
+    "shared_evidence": [
+      "host"
+    ],
+    "reason": "Possible duplicate held separate: auto-merge threshold not met or compound/conflicting evidence present."
+  },
+  {
+    "record_a": "7615a01e731b69175e5e",
+    "record_b": "4b5b0baa712d5bebfd87",
+    "name_a": "Maricopa County Rental Assistance",
+    "name_b": "Maricopa County Rental Assistance Deposit and monthly rental aid for low",
+    "name_similarity": 0.9,
+    "shared_evidence": [
+      "host"
+    ],
+    "reason": "Possible duplicate held separate: auto-merge threshold not met or compound/conflicting evidence present."
+  },
+  {
+    "record_a": "1c4544185d0e41854371",
+    "record_b": "207c9d404dbd15829560",
+    "name_a": "USDA Single Family Housing Repair Loans & Grants (AZ)",
+    "name_b": "USDA Single Family Housing Repair Loans & Grants (AZ) Loans up to $40 000 and grants up to $10 000 to repair, improve, or remove health/safety hazards in owner",
+    "name_similarity": 0.9,
+    "shared_evidence": [
+      "host"
+    ],
+    "reason": "Possible duplicate held separate: auto-merge threshold not met or compound/conflicting evidence present."
+  },
+  {
+    "record_a": "f51ed70d43e125425b88",
+    "record_b": "7ccdbc0fd3ec77b9eae3",
+    "name_a": "noabuse.org",
+    "name_b": "Chrysalis 360° trauma; Intake: https://noabuse.org/our",
+    "name_similarity": 0.9,
+    "shared_evidence": [
+      "host"
+    ],
+    "reason": "Possible duplicate held separate: auto-merge threshold not met or compound/conflicting evidence present."
+  },
+  {
+    "record_a": "607ad5071d95f8e12e5a",
+    "record_b": "a85e471b1b910a3ab716",
+    "name_a": "United Methodist Outreach Ministries (UMOM) New Day Centers",
+    "name_b": "UMOM New Day Centers",
+    "name_similarity": 0.9,
+    "shared_evidence": [
+      "host"
+    ],
+    "reason": "Possible duplicate held separate: auto-merge threshold not met or compound/conflicting evidence present."
+  },
+  {
+    "record_a": "b74fe26d020fdfe6fdc4",
+    "record_b": "b74fe26d020fdfe6fdc4",
+    "name_a": "Community & Slack/Discord Channels Community Focus Access Link #nocode (Makerpad Discord) Real",
+    "name_b": "Community & Slack/Discord Channels Community Focus Access Link #nocode (Makerpad Discord) Real",
+    "name_similarity": 1.0,
+    "shared_evidence": [
+      "host"
+    ],
+    "reason": "Possible duplicate held separate: auto-merge threshold not met or compound/conflicting evidence present."
+  },
+  {
+    "record_a": "90af270bcfc6ff38ef16",
+    "record_b": "e7a76e13801d830685b1",
+    "name_a": "Intake",
+    "name_b": "Intake",
+    "name_similarity": 1.0,
+    "shared_evidence": [
+      "exact_name"
+    ],
+    "reason": "Possible duplicate held separate: auto-merge threshold not met or compound/conflicting evidence present."
+  }
+]

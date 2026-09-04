@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { GrainOverlay } from "@/components/bndr/grain-overlay";
 import { SiteHeader } from "@/components/bndr/site-header";
 import { Hero } from "@/components/bndr/hero";
@@ -100,6 +100,8 @@ export function Directory() {
   const hydratedRef = useRef(false);
   useEffect(() => {
     const s = parseUrlState();
+    // This one-time client hydration intentionally synchronizes URL state after SSR.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setQuery(s.query);
     setDebouncedQuery(s.query.trim());
     setCategory(s.category);
@@ -115,6 +117,7 @@ export function Directory() {
   const [recentOpen, setRecentOpen] = useState(false);
   const [advocateDashboardOpen, setAdvocateDashboardOpen] = useState(false);
   const [collectionsOpen, setCollectionsOpen] = useState(false);
+  const [renderedAt] = useState(() => Date.now());
 
   const searchInputRef = useRef<HTMLInputElement | null>(null);
   const { recent, addRecent, clearRecent } = useRecentlyViewed();
@@ -213,16 +216,31 @@ export function Directory() {
     return () => window.removeEventListener("popstate", onPop);
   }, []);
 
-  const { data, isLoading, isFetching, isError, refetch } = useQuery({
+  const PUBLIC_PAGE_SIZE = 100;
+  const {
+    data,
+    isLoading,
+    isFetching,
+    isFetchingNextPage,
+    isError,
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+  } = useInfiniteQuery({
     queryKey: ["resources", debouncedQuery, category, priorityOnly],
-    queryFn: () =>
+    initialPageParam: 0,
+    queryFn: ({ pageParam }) =>
       fetchResources({
         q: debouncedQuery,
         category,
         priorityOnly,
-        limit: 500,
-        offset: 0,
+        limit: PUBLIC_PAGE_SIZE,
+        offset: pageParam,
       }),
+    getNextPageParam: (lastPage, pages) => {
+      const loaded = pages.reduce((sum, page) => sum + page.resources.length, 0);
+      return loaded < lastPage.total ? loaded : undefined;
+    },
   });
 
   const { data: stats } = useQuery({
@@ -230,8 +248,8 @@ export function Directory() {
     queryFn: fetchStats,
   });
 
-  const resources = data?.resources ?? [];
-  const totalCount = data?.total ?? 0;
+  const resources = data?.pages.flatMap((page) => page.resources) ?? [];
+  const totalCount = data?.pages[0]?.total ?? 0;
 
   // Per-category counts for the pill bar.
   const categoryCounts = useMemo(() => {
@@ -459,7 +477,7 @@ export function Directory() {
           if (!d) return true; // never contacted
           const dt = new Date(d);
           if (isNaN(dt.getTime())) return true;
-          return (Date.now() - dt.getTime()) / (1000 * 60 * 60 * 24) > 7;
+          return (renderedAt - dt.getTime()) / (1000 * 60 * 60 * 24) > 7;
         }).length}
         onOpenAdvocateDashboard={() => setAdvocateDashboardOpen(true)}
         collectionsCount={collections.collections.length}
@@ -632,7 +650,9 @@ export function Directory() {
                     loading={isLoading || (isFetching && resources.length === 0)}
                     totalCount={totalCount}
                     directoryTotal={stats?.totalResources ?? 0}
-                    pageSize={500}
+                    hasMore={hasNextPage}
+                    loadingMore={isFetchingNextPage}
+                    onLoadMore={() => void fetchNextPage()}
                     onReset={clearSearch}
                     onOpen={handleOpen}
                     isSaved={isSaved}
@@ -648,7 +668,7 @@ export function Directory() {
                       if (!d) return true;
                       const dt = new Date(d);
                       if (isNaN(dt.getTime())) return true;
-                      return (Date.now() - dt.getTime()) / (1000 * 60 * 60 * 24) > 7;
+                      return (renderedAt - dt.getTime()) / (1000 * 60 * 60 * 24) > 7;
                     }}
                     getContactLogCount={(id) => contactLog.getEntries(id).length}
                     getDefaultContactMethod={defaultContactMethod.getMethod}
@@ -849,4 +869,3 @@ export function Directory() {
     </div>
   );
 }
-

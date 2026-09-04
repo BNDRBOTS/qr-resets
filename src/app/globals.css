@@ -365,6 +365,21 @@
   transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
 }
 
+/* Shared Radix overlays use fixed positioning. The generic glass panel rule
+   above is intentionally relative for ordinary cards/panels, so restore the
+   overlay primitives' fixed positioning after that rule wins the cascade. */
+.bndr-glass-panel[data-slot="dialog-content"],
+.bndr-glass-panel[data-slot="sheet-content"] {
+  position: fixed;
+}
+
+/* The generic glass-child stacking rule also makes direct children relative;
+   shared overlay close controls must remain anchored to their panels. */
+.bndr-glass-panel[data-slot="dialog-content"] > [data-slot="dialog-close"],
+.bndr-glass-panel[data-slot="sheet-content"] > [data-slot="sheet-close"] {
+  position: absolute;
+}
+
 .bndr-glass-panel:hover,
 .bndr-card:hover,
 .bndr-card-priority:hover {
@@ -379,6 +394,14 @@
   box-shadow: 0 9px 26px var(--surface-shadow-soft-color);
   backdrop-filter: blur(16px) saturate(130%);
   -webkit-backdrop-filter: blur(16px) saturate(130%);
+}
+
+/* Match the already-correct light sticky rail behavior in dark mode without
+   changing the page background/glow: opaque navy surface, no content bleed. */
+.dark .bndr-category-filter-bar {
+  background: color-mix(in oklch, var(--background) 88%, var(--primary) 12%);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 .bndr-glass-control {
@@ -956,6 +979,10 @@ html.dark .bndr-grain {
   -webkit-backdrop-filter: blur(10px);
 }
 
+.bndr-category-metrics--empty {
+  min-height: 1.9rem;
+  padding: 0 0.8rem;
+}
 
 .bndr-category-metric {
   display: inline-flex;

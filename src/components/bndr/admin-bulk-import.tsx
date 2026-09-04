@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { importResources } from "@/lib/api";
 
 type ImportMode = "append" | "replace";
+type ImportFormat = "auto" | "txt" | "markdown" | "json" | "xml";
 
 function parseCount(text: string): number | null {
   try {
@@ -23,9 +24,14 @@ function parseCount(text: string): number | null {
 export function AdminBulkImport({ onDone }: { onDone: () => void }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [json, setJson] = useState("");
-  const [mode, setMode] = useState<ImportMode>("replace");
+  const [format, setFormat] = useState<ImportFormat>("auto");
+  const [filename, setFilename] = useState("");
+  // Append (non-destructive, verification-gated) is the default; replace is
+  // an explicit opt-in destructive action with typed confirmation + snapshot.
+  const [mode, setMode] = useState<ImportMode>("append");
   const [confirmation, setConfirmation] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [previewing, setPreviewing] = useState(false);
   const count = useMemo(() => parseCount(json), [json]);
 
   async function loadFile(file: File | undefined) {
@@ -34,19 +40,21 @@ export function AdminBulkImport({ onDone }: { onDone: () => void }) {
       toast.error("File is larger than 8 MiB.");
       return;
     }
+    setFilename(file.name);
+    const extension = file.name.toLowerCase().split(".").pop();
+    if (extension === "json" || extension === "xml" || extension === "txt") {
+      setFormat(extension);
+    } else if (extension === "md" || extension === "markdown") {
+      setFormat("markdown");
+    } else {
+      setFormat("auto");
+    }
     setJson(await file.text());
   }
 
   async function submit() {
-    let parsed: unknown;
-    try {
-      parsed = JSON.parse(json);
-    } catch {
-      toast.error("The import is not valid JSON.");
-      return;
-    }
-    if (!parsed || typeof parsed !== "object" || !Array.isArray((parsed as { resources?: unknown }).resources)) {
-      toast.error("The JSON must contain a resources array.");
+    if (!json.trim()) {
+      toast.error("Paste or upload resource content first.");
       return;
     }
     if (mode === "replace" && confirmation !== "REPLACE") {
@@ -55,7 +63,9 @@ export function AdminBulkImport({ onDone }: { onDone: () => void }) {
     }
 
     const payload = {
-      ...(parsed as Record<string, unknown>),
+      content: json,
+      ...(format === "auto" ? {} : { format }),
+      ...(filename ? { filename } : {}),
       mode,
       confirmReplace: mode === "replace",
     };
@@ -66,7 +76,7 @@ export function AdminBulkImport({ onDone }: { onDone: () => void }) {
       toast.success(
         mode === "replace"
           ? `Replaced ${result.removed} rows with ${result.inserted} validated rows.`
-          : `Imported ${result.inserted} validated rows.`,
+          : `Staged ${result.staged ?? 0} rows for automatic verification. Track review and publication in the Verification tab.`,
       );
       setConfirmation("");
       onDone();
@@ -79,6 +89,36 @@ export function AdminBulkImport({ onDone }: { onDone: () => void }) {
     }
   }
 
+  async function preview() {
+    if (!json.trim()) {
+      toast.error("Paste or upload resource content first.");
+      return;
+    }
+    const payload = {
+      content: json,
+      ...(format === "auto" ? {} : { format }),
+      ...(filename ? { filename } : {}),
+      mode,
+      confirmReplace: mode === "replace",
+      dryRun: true,
+    };
+    setPreviewing(true);
+    try {
+      const result = await importResources(payload);
+      toast.info(
+        mode === "replace"
+          ? `Dry run: would remove ${result.wouldRemove ?? 0} current rows and insert ${result.wouldInsert ?? 0} rows. Nothing was written.`
+          : `Dry run: would stage ${result.wouldStage ?? 0} rows for automatic verification. Nothing was written.`,
+      );
+    } catch (error) {
+      toast.error("Dry run failed", {
+        description: error instanceof Error ? error.message : "Unknown error",
+      });
+    } finally {
+      setPreviewing(false);
+    }
+  }
+
   return (
     <div className="max-w-4xl space-y-5">
       <div className="rounded-xl border border-border/70 bg-card/35 p-5">
@@ -86,19 +126,21 @@ export function AdminBulkImport({ onDone }: { onDone: () => void }) {
           <div>
             <h3 className="text-lg font-semibold text-foreground">Bulk resource import</h3>
             <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-              Upload or paste the audited JSON. Every row is validated before a
-              transaction starts. New rows default to unpublished and unverified
-              unless those fields are explicitly true.
+              Upload or paste TXT, Markdown, JSON, or XML. Every row passes the
+              same parser, canonicalizer, validators, dedupe gate, and viability
+              gate before one transaction starts.
             </p>
           </div>
           <Button asChild variant="outline" size="sm">
+            {/* A normal anchor is required here so the API response downloads as a file. */}
+            {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
             <a href="/api/admin/resources/export">
               <Download className="size-4" aria-hidden /> Download current backup
             </a>
           </Button>
         </div>
 
-        <div className="mt-5 grid gap-4 sm:grid-cols-2">
+        <div className="mt-5 grid gap-4 sm:grid-cols-3">
           <div className="space-y-2">
             <Label htmlFor="import-mode">Import mode</Label>
             <select
@@ -107,17 +149,32 @@ export function AdminBulkImport({ onDone }: { onDone: () => void }) {
               onChange={(event) => setMode(event.target.value as ImportMode)}
               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground"
             >
-              <option value="replace">Replace every resource</option>
               <option value="append">Append to current resources</option>
+              <option value="replace">Replace every resource</option>
             </select>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="resource-file">JSON file</Label>
+            <Label htmlFor="import-format">Input format</Label>
+            <select
+              id="import-format"
+              value={format}
+              onChange={(event) => setFormat(event.target.value as ImportFormat)}
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground"
+            >
+              <option value="auto">Auto-detect</option>
+              <option value="txt">TXT</option>
+              <option value="markdown">Markdown</option>
+              <option value="json">JSON</option>
+              <option value="xml">XML</option>
+            </select>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="resource-file">Resource file</Label>
             <Input
               ref={inputRef}
               id="resource-file"
               type="file"
-              accept="application/json,.json"
+              accept=".txt,.md,.markdown,.json,.xml,text/plain,text/markdown,application/json,application/xml,text/xml"
               onChange={(event) => loadFile(event.target.files?.[0])}
             />
           </div>
@@ -125,16 +182,16 @@ export function AdminBulkImport({ onDone }: { onDone: () => void }) {
 
         <div className="mt-4 space-y-2">
           <div className="flex items-center justify-between gap-2">
-            <Label htmlFor="resource-json">Import JSON</Label>
+            <Label htmlFor="resource-json">Resource input</Label>
             <span className="text-xs text-muted-foreground">
-              {count == null ? "No valid resources array detected" : `${count} row${count === 1 ? "" : "s"} detected`}
+              {count == null ? `${format === "auto" ? "Auto-detect" : format.toUpperCase()} input` : `${count} JSON row${count === 1 ? "" : "s"} detected`}
             </span>
           </div>
           <Textarea
             id="resource-json"
             value={json}
             onChange={(event) => setJson(event.target.value)}
-            placeholder={'{"resources": []}'}
+            placeholder={'Paste TXT, Markdown, JSON, or XML resource records'}
             className="min-h-72 font-mono text-xs"
             spellCheck={false}
           />
@@ -156,8 +213,17 @@ export function AdminBulkImport({ onDone }: { onDone: () => void }) {
         <div className="mt-5 flex flex-wrap items-center gap-3">
           <Button
             type="button"
+            variant="outline"
+            onClick={preview}
+            disabled={previewing || submitting || !json.trim()}
+          >
+            {previewing ? <Loader2 className="size-4 animate-spin" aria-hidden /> : null}
+            Dry run
+          </Button>
+          <Button
+            type="button"
             onClick={submit}
-            disabled={submitting || count == null || count < 1 || (mode === "replace" && confirmation !== "REPLACE")}
+            disabled={submitting || !json.trim() || (mode === "replace" && confirmation !== "REPLACE")}
           >
             {submitting ? (
               <Loader2 className="size-4 animate-spin" aria-hidden />

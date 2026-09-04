@@ -1,0 +1,6 @@
+# Optional accuracy/coverage enhancements. bootstrap.py checks versions first and
+# installs only missing/outdated packages.
+openpyxl>=3.1,<4
+phonenumbers>=8.13,<10
+dnspython>=2.6,<3
+certifi>=2024.8.30

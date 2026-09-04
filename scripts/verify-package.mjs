@@ -32,6 +32,7 @@ const required = [
   "prisma/postgres/schema.prisma",
   "prisma/postgres/migrations/20260806000000_postgres_verified_dataset/migration.sql",
   "prisma/postgres/migrations/20260808090000_qr_resets_baseline/migration.sql",
+  "prisma/postgres/migrations/20260816113000_single_admin_credentials/migration.sql",
   "prisma/verified-resources.csv",
   "prisma/verified-resources.json",
   "prisma/category-resolution.json",
@@ -153,11 +154,14 @@ const directoryHero = readFileSync(join(root, "src/components/bndr/hero.tsx"), "
 if (!directoryHero.includes("h-[70vmin] w-[70vmin]") || directoryHero.includes("h-[60vmin] w-[90vmin]")) {
   fail("Resource Directory hero halo is not a true 70vmin circle");
 }
-if (!qrSite.includes("<Logo size={128}") || !qrSite.includes('fetch("/api/qr/requests"')) {
-  fail("QR hero logo/request persistence wiring is incomplete");
+if (!qrSite.includes("<Logo size={128}")) {
+  fail("QR hero logo wiring is incomplete");
 }
-if (!qrSite.includes("NEXT_PUBLIC_QR_DONATE_MONTHLY_URL") || !qrSite.includes("Payment link not configured yet")) {
-  fail("QR payment-link safe-disable contract is incomplete");
+if (qrSite.includes('fetch("/api/qr/requests"') || !qrSite.includes("Nothing entered here is submitted, transmitted, or stored")) {
+  fail("QR request form is not structurally demo-only");
+}
+if (qrSite.includes("NEXT_PUBLIC_QR_DONATE_") || !qrSite.includes("QR Resets is not accepting or processing donations yet")) {
+  fail("QR donation controls are not structurally demo-only");
 }
 const sharedLogo = readFileSync(join(root, "src/components/shared/logo.tsx"), "utf8");
 if (!sharedLogo.includes("BndrLogo") || sharedLogo.includes("QR_LOGO_URL")) {
@@ -170,7 +174,7 @@ if (!bndrLogo.includes("/bndr-logo-black.png") || !existsSync(join(root, "public
 const missionConnection = readFileSync(join(root, "src/components/shared/mission-connection.tsx"), "utf8");
 if (/675 verified resources/.test(missionConnection)) fail("Stale hard-coded resource count remains in merged UI");
 const prismaSchema = readFileSync(join(root, "prisma/schema.prisma"), "utf8");
-for (const model of ["QrResetRequest", "QrRequestReview", "QrResetCase", "QrDonationEvent"]) {
+for (const model of ["AdminCredential", "QrResetRequest", "QrRequestReview", "QrResetCase", "QrDonationEvent"]) {
   if (!prismaSchema.includes(`model ${model} {`)) fail(`Missing Prisma model: ${model}`);
 }
 const qrMigration = readFileSync(join(root, "prisma/postgres/migrations/20260808090000_qr_resets_baseline/migration.sql"), "utf8");
@@ -187,7 +191,9 @@ if (healthRoute.includes("dbReady && datasetReady && persistence && admin")) {
   fail("Admin credentials must not be a Railway deployment health prerequisite");
 }
 const adminDashboard = readFileSync(join(root, "src/components/bndr/admin-dashboard.tsx"), "utf8");
-if (!adminDashboard.includes("<AdminQrRequests />")) fail("Admin QR request review UI is not wired");
+if (adminDashboard.includes("<AdminQrRequests />") || adminDashboard.includes('value="qr-requests"')) {
+  fail("Operational QR request review UI must remain disabled in prototype mode");
+}
 
 for (const doc of ["PRODUCTION_QA.md", "MERGE_MANIFEST.json", "RAILWAY_DEPLOY.md"]) {
   if (!existsSync(join(root, doc))) fail(`Missing release document: ${doc}`);
@@ -214,6 +220,13 @@ const requireAdmin = readFileSync(join(root, "src/lib/require-admin.ts"), "utf8"
 if (!requireAdmin.includes("requireSameOriginMutation(req)")) fail("Admin mutation gate does not enforce same-origin requests");
 const qrRequestRoute = readFileSync(join(root, "src/app/api/qr/requests/route.ts"), "utf8");
 if (!qrRequestRoute.includes("requireSameOriginMutation(req)")) fail("Public QR request mutation does not enforce same-origin requests");
+const qrDonationRoute = readFileSync(join(root, "src/app/api/qr/donations/webhook/route.ts"), "utf8");
+if (qrRequestRoute.includes("db.qrResetRequest") || qrDonationRoute.includes("db.qrDonationEvent")) {
+  fail("Prototype QR request/donation routes must perform zero database mutation");
+}
+if (!qrRequestRoute.includes("demoOnly: true") || !qrDonationRoute.includes("demoOnly: true")) {
+  fail("Prototype QR request/donation server boundaries must be explicit");
+}
 
 const publicPending = readFileSync(join(root, "src/app/api/pending/route.ts"), "utf8");
 const publicPendingSelect = publicPending.match(/select:\s*\{([^}]*)\}/)?.[1] ?? "";
@@ -258,8 +271,13 @@ const resourceCardSource = readFileSync(join(root, "src/components/bndr/resource
 if (/md:col-span-2|lg:col-span-3/.test(resourceCardSource) || /tags\.slice\(0,\s*isPriority/.test(resourceCardSource)) {
   fail("Priority resources still receive disproportionate card footprint/content treatment");
 }
-if (directorySource.includes("FeaturedSpotlight") || !directorySource.includes("pageSize={500}")) {
-  fail("Directory still applies a universal featured spotlight or does not render the complete result set");
+if (
+  directorySource.includes("FeaturedSpotlight") ||
+  !directorySource.includes("useInfiniteQuery") ||
+  !directorySource.includes("fetchNextPage") ||
+  directorySource.includes("limit: 500")
+) {
+  fail("Directory pagination is not server-backed beyond the historical 500-row hard stop");
 }
 const defaultSearchSource = readFileSync(join(root, "src/lib/search.ts"), "utf8");
 if (!defaultSearchSource.includes("a.name.localeCompare(b.name)")) {
@@ -273,10 +291,22 @@ for (const file of files.filter((file) => [".ts", ".tsx", ".js", ".mjs", ".md"].
 }
 
 const authSource = readFileSync(join(root, "src/lib/auth-options.ts"), "utf8");
-if (!authSource.includes("process.env.ADMIN_EMAIL") || !authSource.includes("process.env.ADMIN_PASSWORD_HASH") || !authSource.includes("process.env.ADMIN_PASSWORD")) {
-  fail("Admin credentials are not sourced exclusively from environment variables");
+const adminCredentialSource = readFileSync(join(root, "src/lib/admin-credentials.ts"), "utf8");
+const adminCredentialCore = readFileSync(join(root, "src/lib/admin-credential-core.ts"), "utf8");
+const adminCredentialCrypto = readFileSync(join(root, "src/lib/admin-credential-crypto.ts"), "utf8");
+if (!adminCredentialSource.includes("process.env.ADMIN_EMAIL") || !adminCredentialSource.includes("process.env.ADMIN_PASSWORD_HASH") || !adminCredentialSource.includes("process.env.ADMIN_PASSWORD")) {
+  fail("Persistent admin credentials do not preserve the Railway bootstrap path");
 }
-if (/ADMIN_(?:EMAIL|PASSWORD|PASSWORD_HASH)\s*=\s*["'][^"']+["']/.test(authSource)) {
+if (!adminCredentialSource.includes("process.env.ADMIN_RECOVERY_KEY") || !adminCredentialCore.includes("bootstrapIfMissing") || !adminCredentialCore.includes("credentialVersionMatches")) {
+  fail("Single-admin recovery/bootstrap/version foundation is incomplete");
+}
+if (!authSource.includes("authenticateAdminCredential(email, password)") || !authSource.includes("isAdminCredentialVersionCurrent(token)")) {
+  fail("NextAuth is not using persistent credentials and version checks");
+}
+if (!adminCredentialCrypto.includes("bcrypt.hash") || !adminCredentialCrypto.includes("bcrypt.compare") || !adminCredentialCrypto.includes("timingSafeEqual")) {
+  fail("Persistent admin credential cryptography is incomplete");
+}
+if (/ADMIN_(?:EMAIL|PASSWORD|PASSWORD_HASH|RECOVERY_KEY)\s*=\s*["'][^"']+["']/.test(adminCredentialSource + authSource)) {
   fail("Hard-coded admin credentials detected");
 }
 

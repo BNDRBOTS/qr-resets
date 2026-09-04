@@ -500,7 +500,7 @@ export function ContactLogTimeline({
       {!hasEntries && !showForm ? (
         <p className="mt-1.5 flex items-center gap-1 text-[10px] text-muted-foreground/60">
           <Clock className="size-2.5" aria-hidden />
-          Click "Log" to record your first contact with {resourceName}.
+          Click &quot;Log&quot; to record your first contact with {resourceName}.
         </p>
       ) : null}
     </div>

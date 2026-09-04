@@ -1,0 +1,95 @@
+{
+  "generated_at": "2026-09-03T20:01:10+00:00",
+  "verifier_version": "4.0.0",
+  "python": "3.13.14 (main, Jul 15 2026, 00:00:00) [GCC 11.5.0 20240719 (Red Hat 11.5.0-5)]",
+  "platform": "Linux-6.18.40-x86_64-with-glibc2.34",
+  "dependencies": {
+    "openpyxl": {
+      "available": true,
+      "version": "3.1.5"
+    },
+    "phonenumbers": {
+      "available": false,
+      "version": ""
+    },
+    "dnspython": {
+      "available": false,
+      "version": ""
+    },
+    "certifi": {
+      "available": true,
+      "version": "2026.7.22"
+    }
+  },
+  "settings": {
+    "network": true,
+    "workers": 8,
+    "timeout_seconds": 9.0,
+    "retries": 2,
+    "cache_ttl_hours": 72,
+    "search_fallback": true
+  },
+  "inputs": [
+    {
+      "path": "/vercel/sandbox/data/handoff_pkg/QR_RESETS_FABLE_ONE_UPLOAD_2026-09-03/support/master_resource_extract (1).json",
+      "exists": true,
+      "bytes": 360815,
+      "modified_epoch": 1788458043.0,
+      "sha256": "41e6b95fb3e37c06b5fb3d6ea43320fb86e1a66c5c34fc59c22154eaba0859dc"
+    }
+  ],
+  "completed_at": "2026-09-03T20:04:11+00:00",
+  "elapsed_seconds": 181.338,
+  "summary": {
+    "generated_at": "2026-09-03T20:04:11+00:00",
+    "verifier_version": "4.0.0",
+    "network_enabled": true,
+    "raw_records_loaded": 559,
+    "records_after_strong_dedup": 545,
+    "records_output": 545,
+    "organization_status_counts": {
+      "WEBSITE_DEAD_CONFIRMED": 341,
+      "INSUFFICIENT_SOURCE_DATA": 153,
+      "UNVERIFIED_CONTACT_ONLY": 51
+    },
+    "website_status_counts": {
+      "DEAD_CONFIRMED_DNS": 472
+    },
+    "parse_issue_count": 0,
+    "ambiguous_duplicate_pairs": 40,
+    "record_error_count": 0,
+    "top_flags": {
+      "no_parseable_email_in_source_or_context": 536,
+      "search_fallback_no_candidates": 504,
+      "no_parseable_phone_in_source_or_context": 429,
+      "no_website_in_source_or_context": 204,
+      "contains_must_get_placeholders": 102,
+      "name_looks_compound_or_malformed": 41,
+      "name_is_url_like": 16,
+      "phone_matches_url_numeric_id_quarantined": 16,
+      "deduplicated_strong_identity": 13,
+      "multiple_domains_compound_record": 9,
+      "source_url_contains_unescaped_whitespace": 6,
+      "source_phone_unparseable": 3
+    },
+    "elapsed_seconds": 181.338,
+    "dependencies": {
+      "openpyxl": {
+        "available": true,
+        "version": "3.1.5"
+      },
+      "phonenumbers": {
+        "available": false,
+        "version": ""
+      },
+      "dnspython": {
+        "available": false,
+        "version": ""
+      },
+      "certifi": {
+        "available": true,
+        "version": "2026.7.22"
+      }
+    }
+  }
+}

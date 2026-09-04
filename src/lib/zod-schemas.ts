@@ -80,8 +80,10 @@ export const searchParamsSchema = z.object({
   q: z.string().trim().max(200).default(""),
   category: z.union([categorySlugSchema, z.literal("all")]).default("all"),
   priorityOnly: z.coerce.boolean().default(false),
-  // The frontend currently bulk-fetches up to 1,000 rows and slices client-side.
-  // The cap bounds response size while supporting the directory.
+  // Listings use bounded database pages with stable ordering and true counts.
+  // Weighted fuzzy search is globally ranked by the shared search engine after
+  // bounded database traversal. Deeper rows are reached by offset paging, so
+  // datasets larger than 500 rows stay fully accessible.
   limit: z.coerce.number().int().min(1).max(1000).default(24),
   offset: z.coerce.number().int().min(0).max(100000).default(0),
 });
@@ -110,6 +112,27 @@ export const urlVerifyCommandSchema = z.object({
   limit: z.number().int().min(1).max(50).default(10),
 });
 
+
+
+// ---- Single-admin recovery --------------------------------------------------
+export const adminRecoveryProofSchema = z.object({
+  recoveryKey: z.string().min(24).max(512),
+}).strict();
+export type AdminRecoveryProofParsed = z.infer<typeof adminRecoveryProofSchema>;
+
+export const adminPasswordResetSchema = z.object({
+  resetToken: z.string().min(1).max(4096),
+  newPassword: z.string().min(12).max(256),
+}).strict();
+export type AdminPasswordResetParsed = z.infer<typeof adminPasswordResetSchema>;
+
+// Kept as a server-core compatibility schema for the Prompt 2 foundation. The
+// browser flow does not submit the recovery key together with a new password.
+export const adminPasswordRecoverySchema = z.object({
+  recoveryKey: z.string().min(24).max(512),
+  newPassword: z.string().min(12).max(256),
+}).strict();
+export type AdminPasswordRecoveryParsed = z.infer<typeof adminPasswordRecoverySchema>;
 
 // ---- QR Resets public request -----------------------------------------------
 const qrOptionalText = (max: number) => z.string().trim().max(max).optional().default("");
@@ -235,6 +258,8 @@ export const BODY_LIMITS = {
   bulkImport: 8 * 1024 * 1024, // 8 MiB / up to 1,000 resources
   qrRequest: 32 * 1024, // 32 KiB
   qrAdminReview: 16 * 1024, // 16 KiB
+  adminRecovery: 8 * 1024, // 8 KiB
+  verificationImport: 32 * 1024 * 1024, // 32 MiB; recovery/interchange verifier-v4 artifacts
 } as const;
 
 // ---- Resolve command (public bulk lookup by ID) -----------------------------

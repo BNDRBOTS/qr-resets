@@ -1,0 +1,1136 @@
+{
+  "reportVersion": 3,
+  "generatedAt": "2026-09-04T03:43:46.148Z",
+  "task": "Evaluate verifier v4 candidate records against the canonical dataset using the app's own admission semantics. No canonical row is created, modified, or published by this evaluation.",
+  "canonicalBefore": {
+    "count": 114,
+    "csvSha256": "5e9a8438ee652c9be5b44fb781a2ba94db9dafffddcc720c254bc291aab2d72b",
+    "jsonSha256": "bf6152067ed67d46f96f1d866443d66fa5efcdce73446e443e9560603642a2af"
+  },
+  "candidates": {
+    "rawRecordsLoaded": 559,
+    "recordsAfterVerifierStrongDedupe": 545,
+    "recordsEvaluated": 545,
+    "ambiguousPairsFlaggedByVerifier": 40,
+    "inputFile": [
+      {
+        "path": "/vercel/sandbox/data/handoff_pkg/QR_RESETS_FABLE_ONE_UPLOAD_2026-09-03/support/master_resource_extract (1).json",
+        "exists": true,
+        "bytes": 360815,
+        "modified_epoch": 1788458043,
+        "sha256": "41e6b95fb3e37c06b5fb3d6ea43320fb86e1a66c5c34fc59c22154eaba0859dc"
+      }
+    ]
+  },
+  "verifier": {
+    "version": "4.0.0",
+    "networkEnabled": true,
+    "elapsedSeconds": 181.338,
+    "parseIssueCount": 0,
+    "recordErrorCount": 0,
+    "orgStatusCountsRaw": {
+      "WEBSITE_DEAD_CONFIRMED": 341,
+      "INSUFFICIENT_SOURCE_DATA": 153,
+      "UNVERIFIED_CONTACT_ONLY": 51
+    }
+  },
+  "environment": {
+    "egressRestricted": true,
+    "policy": "Restricted egress demotes DNS/transport uncertainty only. A genuine evidenced HTTP 404/410/451 remains dead evidence. Raw verifier statuses and underlying attempts are preserved for review.",
+    "demotedStatusCount": 341,
+    "evidence": {
+      "generatedAt": "2026-09-04T03:42:50.082115+00:00",
+      "method": "getent hosts against well-known control domains plus the npm registry",
+      "controls": [
+        {
+          "domain": "example.com",
+          "exitCode": 2,
+          "stdout": "",
+          "stderr": "",
+          "resolved": false
+        },
+        {
+          "domain": "google.com",
+          "exitCode": 2,
+          "stdout": "",
+          "stderr": "",
+          "resolved": false
+        },
+        {
+          "domain": "cloudflare.com",
+          "exitCode": 2,
+          "stdout": "",
+          "stderr": "",
+          "resolved": false
+        },
+        {
+          "domain": "registry.npmjs.org",
+          "exitCode": 2,
+          "stdout": "",
+          "stderr": "",
+          "resolved": false
+        }
+      ],
+      "egressRestricted": true,
+      "interpretation": "All control domains fail DNS resolution identically; DNS/transport failures from this environment are environmental uncertainty, while genuine completed HTTP 404/410/451 responses remain usable dead-URL evidence."
+    }
+  },
+  "decisions": {
+    "admitted": 0,
+    "published": 0,
+    "held": 506,
+    "excludedNonOrganizationOrBatchDuplicate": 20,
+    "canonicalMatches": 19,
+    "publishStates": {
+      "held": 506,
+      "canonical_match": 19,
+      "excluded": 20
+    },
+    "reasonsHistogram": {
+      "organization_status_unreachable_in_restricted_environment": 325,
+      "strong_identity_match_existing_resource": 19,
+      "organization_status_insufficient_source_data": 133,
+      "non_organization_record": 20,
+      "organization_status_unverified_contact_only": 48
+    },
+    "identityMatchCounts": {
+      "strong": 19,
+      "ambiguous": 56,
+      "none": 470
+    },
+    "rawOrganizationStatusCounts": {
+      "WEBSITE_DEAD_CONFIRMED": 341,
+      "INSUFFICIENT_SOURCE_DATA": 153,
+      "UNVERIFIED_CONTACT_ONLY": 51
+    },
+    "effectiveOrganizationStatusCounts": {
+      "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT": 341,
+      "INSUFFICIENT_SOURCE_DATA": 153,
+      "UNVERIFIED_CONTACT_ONLY": 51
+    }
+  },
+  "duplicateDecisions": {
+    "count": 112,
+    "sample": [
+      {
+        "recordId": "0a90f29974c7b3a7a180",
+        "name": "Patient Advocate Foundation (PAF) – Emergency Financial Aid",
+        "duplicateKind": "ambiguous",
+        "identitySignals": [
+          "host"
+        ],
+        "matchedCanonicalId": null,
+        "matchedCanonicalName": null,
+        "decision": "held",
+        "reason": "organization_status_unreachable_in_restricted_environment",
+        "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+        "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+      },
+      {
+        "recordId": "53423e63465dcb43486d",
+        "name": "Lyme Treatment Foundation",
+        "duplicateKind": "strong",
+        "identitySignals": [
+          "name",
+          "host"
+        ],
+        "matchedCanonicalId": "cms8ta9ob00c0omm18kalx1f0",
+        "matchedCanonicalName": "Lyme Treatment Foundation",
+        "decision": "canonical_match",
+        "reason": "strong_identity_match_existing_resource",
+        "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+        "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+      },
+      {
+        "recordId": "55b51b85a10c54f33cc9",
+        "name": "AHCCCS H₂O Housing & Health Opportunities Program Transitional housing subsidies (rent, deposit, utilities) for homeless individuals with chronic illness or justice involvement. Intake: 1",
+        "duplicateKind": "ambiguous",
+        "identitySignals": [
+          "host",
+          "phone"
+        ],
+        "matchedCanonicalId": null,
+        "matchedCanonicalName": null,
+        "decision": "held",
+        "reason": "organization_status_unreachable_in_restricted_environment",
+        "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+        "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+      },
+      {
+        "recordId": "m_29429c1fdb0265f5d0",
+        "name": "Arizona Long Term Care System (ALTCS)",
+        "duplicateKind": "ambiguous",
+        "identitySignals": [
+          "email",
+          "phone",
+          "host"
+        ],
+        "matchedCanonicalId": null,
+        "matchedCanonicalName": null,
+        "decision": "held",
+        "reason": "organization_status_unreachable_in_restricted_environment",
+        "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+        "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+      },
+      {
+        "recordId": "caf81c7e3e3750f2b659",
+        "name": "PAN / HealthWell / Good Days / Accessia Health Co-pay Assistance",
+        "duplicateKind": "ambiguous",
+        "identitySignals": [],
+        "matchedCanonicalId": null,
+        "matchedCanonicalName": null,
+        "decision": "held",
+        "reason": "organization_status_unreachable_in_restricted_environment",
+        "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+        "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+      },
+      {
+        "recordId": "9657c8471bb3b3e66dbe",
+        "name": "2Gether International",
+        "duplicateKind": "ambiguous",
+        "identitySignals": [
+          "host"
+        ],
+        "matchedCanonicalId": null,
+        "matchedCanonicalName": null,
+        "decision": "held",
+        "reason": "organization_status_unreachable_in_restricted_environment",
+        "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+        "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+      },
+      {
+        "recordId": "675359422eb005854a47",
+        "name": "Modest Needs Foundation Grants $750",
+        "duplicateKind": "ambiguous",
+        "identitySignals": [
+          "host"
+        ],
+        "matchedCanonicalId": null,
+        "matchedCanonicalName": null,
+        "decision": "held",
+        "reason": "organization_status_unreachable_in_restricted_environment",
+        "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+        "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+      },
+      {
+        "recordId": "a6597c345f501543801e",
+        "name": "Valley Fever Center for Excellence Fund Supports education, outreach, research, and emergent patient needs at the University of Arizona’s center. Intake: https://vfce.arizona.edu/about/support; Valley Fever Vaccine Project Funds clinical trials and vaccine development efforts (animal & human). Intake: https://vfce.arizona.edu/about/support",
+        "duplicateKind": "ambiguous",
+        "identitySignals": [
+          "host"
+        ],
+        "matchedCanonicalId": null,
+        "matchedCanonicalName": null,
+        "decision": "held",
+        "reason": "organization_status_unreachable_in_restricted_environment",
+        "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+        "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+      },
+      {
+        "recordId": "90af270bcfc6ff38ef16",
+        "name": "Intake",
+        "duplicateKind": "ambiguous",
+        "identitySignals": [],
+        "matchedCanonicalId": null,
+        "matchedCanonicalName": null,
+        "decision": "held",
+        "reason": "organization_status_unreachable_in_restricted_environment",
+        "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+        "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+      },
+      {
+        "recordId": "db5ff40ce43f90bbb915",
+        "name": "Disability-Owned Business Certification (DOBE)",
+        "duplicateKind": "ambiguous",
+        "identitySignals": [
+          "host"
+        ],
+        "matchedCanonicalId": null,
+        "matchedCanonicalName": null,
+        "decision": "held",
+        "reason": "organization_status_unreachable_in_restricted_environment",
+        "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+        "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+      },
+      {
+        "recordId": "1c4544185d0e41854371",
+        "name": "USDA Single Family Housing Repair Loans & Grants (AZ)",
+        "duplicateKind": "ambiguous",
+        "identitySignals": [],
+        "matchedCanonicalId": null,
+        "matchedCanonicalName": null,
+        "decision": "held",
+        "reason": "organization_status_unreachable_in_restricted_environment",
+        "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+        "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+      },
+      {
+        "recordId": "7615a01e731b69175e5e",
+        "name": "Maricopa County Rental Assistance",
+        "duplicateKind": "ambiguous",
+        "identitySignals": [],
+        "matchedCanonicalId": null,
+        "matchedCanonicalName": null,
+        "decision": "held",
+        "reason": "organization_status_unreachable_in_restricted_environment",
+        "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+        "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+      },
+      {
+        "recordId": "0ae79d213d15f97c5aed",
+        "name": "Circle the City (Phoenix Mobile Medical Units)",
+        "duplicateKind": "ambiguous",
+        "identitySignals": [
+          "host"
+        ],
+        "matchedCanonicalId": null,
+        "matchedCanonicalName": null,
+        "decision": "held",
+        "reason": "organization_status_unreachable_in_restricted_environment",
+        "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+        "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+      },
+      {
+        "recordId": "f51ed70d43e125425b88",
+        "name": "noabuse.org",
+        "duplicateKind": "ambiguous",
+        "identitySignals": [],
+        "matchedCanonicalId": null,
+        "matchedCanonicalName": null,
+        "decision": "held",
+        "reason": "organization_status_unreachable_in_restricted_environment",
+        "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+        "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+      },
+      {
+        "recordId": "61856dd015cebd1562cf",
+        "name": "GoFundMe",
+        "duplicateKind": "strong",
+        "identitySignals": [
+          "name",
+          "host"
+        ],
+        "matchedCanonicalId": "cms8ta9t900gtomm1jk8r79f5",
+        "matchedCanonicalName": "GoFundMe",
+        "decision": "canonical_match",
+        "reason": "strong_identity_match_existing_resource",
+        "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+        "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+      },
+      {
+        "recordId": "e2ca44815c6851fb0a50",
+        "name": "Lyme Warrior Medical Grants",
+        "duplicateKind": "strong",
+        "identitySignals": [
+          "name",
+          "host"
+        ],
+        "matchedCanonicalId": "cms8ta9ta00gvomm1rwsj0ni2",
+        "matchedCanonicalName": "Lyme Warrior Medical Grants",
+        "decision": "canonical_match",
+        "reason": "strong_identity_match_existing_resource",
+        "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+        "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+      },
+      {
+        "recordId": "1b0d01fea0191d615a31",
+        "name": "Arizona Department of Child Safety Kinship Stipend/Crisis Grant",
+        "duplicateKind": "ambiguous",
+        "identitySignals": [
+          "host"
+        ],
+        "matchedCanonicalId": null,
+        "matchedCanonicalName": null,
+        "decision": "held",
+        "reason": "organization_status_unreachable_in_restricted_environment",
+        "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+        "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+      },
+      {
+        "recordId": "607ad5071d95f8e12e5a",
+        "name": "United Methodist Outreach Ministries (UMOM) New Day Centers",
+        "duplicateKind": "ambiguous",
+        "identitySignals": [],
+        "matchedCanonicalId": null,
+        "matchedCanonicalName": null,
+        "decision": "held",
+        "reason": "organization_status_unreachable_in_restricted_environment",
+        "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+        "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+      },
+      {
+        "recordId": "5ebbbed77f4f85d941c0",
+        "name": "AZCEND (Chandler, AZ) Emergency Financial Assistance",
+        "duplicateKind": "strong",
+        "identitySignals": [
+          "name",
+          "host"
+        ],
+        "matchedCanonicalId": "cms8ta9tm00hdomm1ksicds9i",
+        "matchedCanonicalName": "AZCEND (Chandler, AZ) Emergency Financial Assistance",
+        "decision": "canonical_match",
+        "reason": "strong_identity_match_existing_resource",
+        "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+        "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+      },
+      {
+        "recordId": "cbb69a67b33eb38fbe25",
+        "name": "Arizona End of Life Care Partnership",
+        "duplicateKind": "strong",
+        "identitySignals": [
+          "name",
+          "host"
+        ],
+        "matchedCanonicalId": "cms8ta9tn00hfomm165yo14xo",
+        "matchedCanonicalName": "Arizona End of Life Care Partnership",
+        "decision": "canonical_match",
+        "reason": "strong_identity_match_existing_resource",
+        "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+        "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+      },
+      {
+        "recordId": "480eac3c7577df77c10f",
+        "name": "Arizona Food Bank Network Food Bank Locator",
+        "duplicateKind": "ambiguous",
+        "identitySignals": [],
+        "matchedCanonicalId": null,
+        "matchedCanonicalName": null,
+        "decision": "held",
+        "reason": "organization_status_unreachable_in_restricted_environment",
+        "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+        "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+      },
+      {
+        "recordId": "1a186ff10295c7cfa96c",
+        "name": "trynova.org",
+        "duplicateKind": "ambiguous",
+        "identitySignals": [],
+        "matchedCanonicalId": null,
+        "matchedCanonicalName": null,
+        "decision": "held",
+        "reason": "organization_status_unreachable_in_restricted_environment",
+        "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+        "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+      },
+      {
+        "recordId": "b6fc470bc65fb9612877",
+        "name": "whistlebloweraid.org",
+        "duplicateKind": "ambiguous",
+        "identitySignals": [],
+        "matchedCanonicalId": null,
+        "matchedCanonicalName": null,
+        "decision": "held",
+        "reason": "organization_status_unreachable_in_restricted_environment",
+        "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+        "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+      },
+      {
+        "recordId": "2c842a9998b3f073ad3a",
+        "name": "allianceforhope.org",
+        "duplicateKind": "ambiguous",
+        "identitySignals": [
+          "host"
+        ],
+        "matchedCanonicalId": null,
+        "matchedCanonicalName": null,
+        "decision": "held",
+        "reason": "organization_status_unreachable_in_restricted_environment",
+        "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+        "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+      },
+      {
+        "recordId": "3b3b485909027e8fbb8f",
+        "name": "acesdv.org",
+        "duplicateKind": "ambiguous",
+        "identitySignals": [
+          "host"
+        ],
+        "matchedCanonicalId": null,
+        "matchedCanonicalName": null,
+        "decision": "held",
+        "reason": "organization_status_unreachable_in_restricted_environment",
+        "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+        "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+      },
+      {
+        "recordId": "7275f5d021c1c9701653",
+        "name": "https://www.childcrisisaz.org/",
+        "duplicateKind": "ambiguous",
+        "identitySignals": [
+          "host"
+        ],
+        "matchedCanonicalId": null,
+        "matchedCanonicalName": null,
+        "decision": "held",
+        "reason": "organization_status_unreachable_in_restricted_environment",
+        "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+        "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+      },
+      {
+        "recordId": "c1fd36a55d792d9b9f4c",
+        "name": "https://www.missingkids.org/gethelpnow/support",
+        "duplicateKind": "ambiguous",
+        "identitySignals": [
+          "host"
+        ],
+        "matchedCanonicalId": null,
+        "matchedCanonicalName": null,
+        "decision": "held",
+        "reason": "organization_status_unreachable_in_restricted_environment",
+        "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+        "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+      },
+      {
+        "recordId": "1b5cee08d08a5cba1caa",
+        "name": "psychologytoday.com / us/groups/az/mesa?category=trauma-and-ptsd",
+        "duplicateKind": "ambiguous",
+        "identitySignals": [
+          "host"
+        ],
+        "matchedCanonicalId": null,
+        "matchedCanonicalName": null,
+        "decision": "held",
+        "reason": "organization_status_unreachable_in_restricted_environment",
+        "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+        "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+      },
+      {
+        "recordId": "4a1a998416ba9c8d2456",
+        "name": "https://turnanewleaf.org/services/sexual-and-domestic-violence-services/",
+        "duplicateKind": "ambiguous",
+        "identitySignals": [
+          "host"
+        ],
+        "matchedCanonicalId": null,
+        "matchedCanonicalName": null,
+        "decision": "held",
+        "reason": "organization_status_unreachable_in_restricted_environment",
+        "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+        "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+      },
+      {
+        "recordId": "e2c0774cabee9999878c",
+        "name": "Lawyers Committee for Civil Rights of the SF Bay Area (LCCRSF)",
+        "duplicateKind": "ambiguous",
+        "identitySignals": [],
+        "matchedCanonicalId": null,
+        "matchedCanonicalName": null,
+        "decision": "held",
+        "reason": "organization_status_unreachable_in_restricted_environment",
+        "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+        "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+      },
+      {
+        "recordId": "93ab927552bca508b0fe",
+        "name": "Law Foundation of Silicon Valley Help",
+        "duplicateKind": "ambiguous",
+        "identitySignals": [],
+        "matchedCanonicalId": null,
+        "matchedCanonicalName": null,
+        "decision": "held",
+        "reason": "organization_status_unreachable_in_restricted_environment",
+        "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+        "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+      },
+      {
+        "recordId": "c517c77095f3e08ea10a",
+        "name": "Santa Clara County Bar Association Lawyer Referral Service",
+        "duplicateKind": "ambiguous",
+        "identitySignals": [],
+        "matchedCanonicalId": null,
+        "matchedCanonicalName": null,
+        "decision": "held",
+        "reason": "organization_status_unreachable_in_restricted_environment",
+        "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+        "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+      },
+      {
+        "recordId": "7e0ae3daf6de7c7e7606",
+        "name": "Bay Area Legal Aid Santa Clara Office",
+        "duplicateKind": "strong",
+        "identitySignals": [
+          "name",
+          "phone",
+          "host"
+        ],
+        "matchedCanonicalId": "cms8ta9ud00igomm1anhv3d5b",
+        "matchedCanonicalName": "Bay Area Legal Aid Santa Clara Office",
+        "decision": "canonical_match",
+        "reason": "strong_identity_match_existing_resource",
+        "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+        "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+      },
+      {
+        "recordId": "7f75c1a4b36494309ef6",
+        "name": "DOJ Civil Rights Division Report a Violation (not counsel)",
+        "duplicateKind": "ambiguous",
+        "identitySignals": [],
+        "matchedCanonicalId": null,
+        "matchedCanonicalName": null,
+        "decision": "held",
+        "reason": "organization_status_unreachable_in_restricted_environment",
+        "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+        "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+      },
+      {
+        "recordId": "77d35314ca34d303b6ae",
+        "name": "Pro Bono Project Silicon Valley (Family Law)",
+        "duplicateKind": "ambiguous",
+        "identitySignals": [],
+        "matchedCanonicalId": null,
+        "matchedCanonicalName": null,
+        "decision": "held",
+        "reason": "organization_status_unreachable_in_restricted_environment",
+        "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+        "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+      },
+      {
+        "recordId": "c86d62ad81bb85016b47",
+        "name": "Federal Pro Se Program San Jose Courthouse",
+        "duplicateKind": "ambiguous",
+        "identitySignals": [],
+        "matchedCanonicalId": null,
+        "matchedCanonicalName": null,
+        "decision": "held",
+        "reason": "organization_status_unreachable_in_restricted_environment",
+        "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+        "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+      },
+      {
+        "recordId": "5e7f79cf1bd8fe2b0e35",
+        "name": "Disability Rights California Get Help",
+        "duplicateKind": "ambiguous",
+        "identitySignals": [
+          "phone",
+          "host"
+        ],
+        "matchedCanonicalId": null,
+        "matchedCanonicalName": null,
+        "decision": "held",
+        "reason": "organization_status_unreachable_in_restricted_environment",
+        "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+        "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+      },
+      {
+        "recordId": "d8ea8db8a721c418f794",
+        "name": "CASS East Valley Men's Center",
+        "duplicateKind": "strong",
+        "identitySignals": [
+          "name",
+          "phone"
+        ],
+        "matchedCanonicalId": "cms8ta9uh00imomm1lx75v2y1",
+        "matchedCanonicalName": "CASS East Valley Men's Center",
+        "decision": "canonical_match",
+        "reason": "strong_identity_match_existing_resource",
+        "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+        "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+      },
+      {
+        "recordId": "a85e471b1b910a3ab716",
+        "name": "UMOM New Day Centers",
+        "duplicateKind": "ambiguous",
+        "identitySignals": [],
+        "matchedCanonicalId": null,
+        "matchedCanonicalName": null,
+        "decision": "held",
+        "reason": "organization_status_unreachable_in_restricted_environment",
+        "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+        "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+      },
+      {
+        "recordId": "72320bbbd55ee3f8a20b",
+        "name": "Association of Arizona Food Banks",
+        "duplicateKind": "ambiguous",
+        "identitySignals": [],
+        "matchedCanonicalId": null,
+        "matchedCanonicalName": null,
+        "decision": "held",
+        "reason": "organization_status_unreachable_in_restricted_environment",
+        "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+        "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+      },
+      {
+        "recordId": "469335646ac11bd5c8e0",
+        "name": "A New Leaf (DV Hotline)",
+        "duplicateKind": "ambiguous",
+        "identitySignals": [
+          "name",
+          "phone",
+          "host"
+        ],
+        "matchedCanonicalId": null,
+        "matchedCanonicalName": null,
+        "decision": "held",
+        "reason": "organization_status_unreachable_in_restricted_environment",
+        "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+        "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+      },
+      {
+        "recordId": "5cd49dd6f0ac2c18500a",
+        "name": "NAMI Arizona",
+        "duplicateKind": "strong",
+        "identitySignals": [
+          "name",
+          "phone",
+          "host"
+        ],
+        "matchedCanonicalId": "cms8ta9vk00j2omm1s17u276n",
+        "matchedCanonicalName": "NAMI Arizona",
+        "decision": "canonical_match",
+        "reason": "strong_identity_match_existing_resource",
+        "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+        "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+      },
+      {
+        "recordId": "b2580b7262c7e787cbbf",
+        "name": "Community Bridges, Inc. (CBI)",
+        "duplicateKind": "strong",
+        "identitySignals": [
+          "name",
+          "phone"
+        ],
+        "matchedCanonicalId": "cms8ta9vl00j4omm1cvvsycmf",
+        "matchedCanonicalName": "Community Bridges, Inc. (CBI)",
+        "decision": "canonical_match",
+        "reason": "strong_identity_match_existing_resource",
+        "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+        "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+      },
+      {
+        "recordId": "f33b12521056e91b1b64",
+        "name": "Alcoholics Anonymous - Phoenix Intergroup",
+        "duplicateKind": "strong",
+        "identitySignals": [
+          "name",
+          "phone"
+        ],
+        "matchedCanonicalId": "cms8ta9vn00jaomm1wq1nu5sp",
+        "matchedCanonicalName": "Alcoholics Anonymous - Phoenix Intergroup",
+        "decision": "canonical_match",
+        "reason": "strong_identity_match_existing_resource",
+        "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+        "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+      },
+      {
+        "recordId": "da0e9a724aa99404a431",
+        "name": "RI International / Recovery Response Center (PHX)",
+        "duplicateKind": "ambiguous",
+        "identitySignals": [
+          "phone",
+          "host"
+        ],
+        "matchedCanonicalId": null,
+        "matchedCanonicalName": null,
+        "decision": "held",
+        "reason": "organization_status_unreachable_in_restricted_environment",
+        "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+        "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+      },
+      {
+        "recordId": "2abdd942dfb5a77e0d9e",
+        "name": "NATIVE HEALTH Phoenix",
+        "duplicateKind": "strong",
+        "identitySignals": [
+          "name",
+          "phone",
+          "host"
+        ],
+        "matchedCanonicalId": "cms8ta9vp00jeomm1fjx0woch",
+        "matchedCanonicalName": "NATIVE HEALTH Phoenix",
+        "decision": "canonical_match",
+        "reason": "strong_identity_match_existing_resource",
+        "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+        "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+      },
+      {
+        "recordId": "d1f214372c16a2823303",
+        "name": "Adelante Healthcare",
+        "duplicateKind": "strong",
+        "identitySignals": [
+          "name",
+          "host"
+        ],
+        "matchedCanonicalId": "cms8ta9vq00jgomm1kml1w50q",
+        "matchedCanonicalName": "Adelante Healthcare",
+        "decision": "canonical_match",
+        "reason": "strong_identity_match_existing_resource",
+        "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+        "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+      },
+      {
+        "recordId": "6ae798d55a4ee782163b",
+        "name": "Valleywise Health (formerly MIHS)",
+        "duplicateKind": "strong",
+        "identitySignals": [
+          "name",
+          "phone",
+          "host"
+        ],
+        "matchedCanonicalId": "cms8ta9vr00jiomm1maquyzls",
+        "matchedCanonicalName": "Valleywise Health (formerly MIHS)",
+        "decision": "canonical_match",
+        "reason": "strong_identity_match_existing_resource",
+        "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+        "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+      },
+      {
+        "recordId": "e43f240c0f0644cb860b",
+        "name": "Arizona Child Abuse Hotline (DCS)",
+        "duplicateKind": "ambiguous",
+        "identitySignals": [
+          "phone",
+          "host"
+        ],
+        "matchedCanonicalId": null,
+        "matchedCanonicalName": null,
+        "decision": "held",
+        "reason": "organization_status_unreachable_in_restricted_environment",
+        "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+        "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+      },
+      {
+        "recordId": "a39bdadc76266db64815",
+        "name": "Crisis Nursery (Child Crisis Arizona)",
+        "duplicateKind": "ambiguous",
+        "identitySignals": [
+          "phone",
+          "host"
+        ],
+        "matchedCanonicalId": null,
+        "matchedCanonicalName": null,
+        "decision": "held",
+        "reason": "organization_status_unreachable_in_restricted_environment",
+        "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+        "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+      },
+      {
+        "recordId": "ec4dcbe4d9450c0c36cc",
+        "name": "Arizona Law Help / LegalLEARN",
+        "duplicateKind": "ambiguous",
+        "identitySignals": [
+          "phone",
+          "host"
+        ],
+        "matchedCanonicalId": null,
+        "matchedCanonicalName": null,
+        "decision": "held",
+        "reason": "organization_status_unreachable_in_restricted_environment",
+        "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+        "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+      },
+      {
+        "recordId": "6e4f163c29bd093fe654",
+        "name": "Circle the City (Phoenix Medical Housing)",
+        "duplicateKind": "ambiguous",
+        "identitySignals": [
+          "name"
+        ],
+        "matchedCanonicalId": null,
+        "matchedCanonicalName": null,
+        "decision": "held",
+        "reason": "organization_status_unverified_contact_only",
+        "rawOrganizationStatus": "UNVERIFIED_CONTACT_ONLY",
+        "effectiveOrganizationStatus": "UNVERIFIED_CONTACT_ONLY"
+      },
+      {
+        "recordId": "adc4f51d37b31511233b",
+        "name": "RV for Homeless (Nonprofit RV Matching)",
+        "duplicateKind": "ambiguous",
+        "identitySignals": [],
+        "matchedCanonicalId": null,
+        "matchedCanonicalName": null,
+        "decision": "held",
+        "reason": "organization_status_unreachable_in_restricted_environment",
+        "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+        "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+      },
+      {
+        "recordId": "1af993eb0c6f7b9425ec",
+        "name": "Community Legal Services (CLS, AZ)",
+        "duplicateKind": "strong",
+        "identitySignals": [
+          "name",
+          "phone",
+          "host"
+        ],
+        "matchedCanonicalId": "cms8taa3p00s2omm1prjdda1g",
+        "matchedCanonicalName": "Community Legal Services (CLS, AZ)",
+        "decision": "canonical_match",
+        "reason": "strong_identity_match_existing_resource",
+        "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+        "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+      },
+      {
+        "recordId": "25eebc0e6a8ad1f4bcc7",
+        "name": "Arizona Domestic Violence Legal Assistance Project (DV-LAP)",
+        "duplicateKind": "ambiguous",
+        "identitySignals": [
+          "name"
+        ],
+        "matchedCanonicalId": null,
+        "matchedCanonicalName": null,
+        "decision": "held",
+        "reason": "organization_status_insufficient_source_data",
+        "rawOrganizationStatus": "INSUFFICIENT_SOURCE_DATA",
+        "effectiveOrganizationStatus": "INSUFFICIENT_SOURCE_DATA"
+      },
+      {
+        "recordId": "967a5b62473f3cf8e461",
+        "name": "Center for Judicial Excellence (CJE)",
+        "duplicateKind": "ambiguous",
+        "identitySignals": [
+          "name"
+        ],
+        "matchedCanonicalId": null,
+        "matchedCanonicalName": null,
+        "decision": "held",
+        "reason": "organization_status_insufficient_source_data",
+        "rawOrganizationStatus": "INSUFFICIENT_SOURCE_DATA",
+        "effectiveOrganizationStatus": "INSUFFICIENT_SOURCE_DATA"
+      },
+      {
+        "recordId": "m_f4a06fb1051b8c9770",
+        "name": "NCMEC (missingkids.org)",
+        "duplicateKind": "ambiguous",
+        "identitySignals": [
+          "phone"
+        ],
+        "matchedCanonicalId": null,
+        "matchedCanonicalName": null,
+        "decision": "held",
+        "reason": "organization_status_unverified_contact_only",
+        "rawOrganizationStatus": "UNVERIFIED_CONTACT_ONLY",
+        "effectiveOrganizationStatus": "UNVERIFIED_CONTACT_ONLY"
+      },
+      {
+        "recordId": "b0996928f2046a5adf4d",
+        "name": "SAMHSA National Helpline",
+        "duplicateKind": "strong",
+        "identitySignals": [
+          "name",
+          "phone"
+        ],
+        "matchedCanonicalId": "cms8ta9wt00kzomm1u6sy5702",
+        "matchedCanonicalName": "SAMHSA National Helpline",
+        "decision": "canonical_match",
+        "reason": "strong_identity_match_existing_resource",
+        "rawOrganizationStatus": "UNVERIFIED_CONTACT_ONLY",
+        "effectiveOrganizationStatus": "UNVERIFIED_CONTACT_ONLY"
+      },
+      {
+        "recordId": "ac419a59d418ac3668e5",
+        "name": "AHCCCS (Arizona Medicaid)",
+        "duplicateKind": "ambiguous",
+        "identitySignals": [],
+        "matchedCanonicalId": null,
+        "matchedCanonicalName": null,
+        "decision": "held",
+        "reason": "organization_status_unverified_contact_only",
+        "rawOrganizationStatus": "UNVERIFIED_CONTACT_ONLY",
+        "effectiveOrganizationStatus": "UNVERIFIED_CONTACT_ONLY"
+      },
+      {
+        "recordId": "d82e1447bfd37ad25479",
+        "name": "AZ Dept of Economic Security (DES)",
+        "duplicateKind": "ambiguous",
+        "identitySignals": [],
+        "matchedCanonicalId": null,
+        "matchedCanonicalName": null,
+        "decision": "held",
+        "reason": "organization_status_unverified_contact_only",
+        "rawOrganizationStatus": "UNVERIFIED_CONTACT_ONLY",
+        "effectiveOrganizationStatus": "UNVERIFIED_CONTACT_ONLY"
+      }
+    ]
+  },
+  "heldExamples": [
+    {
+      "recordId": "b20651b2d97b2e88033f",
+      "name": "Mesa CARES Small Business Reemergence Program",
+      "reason": "organization_status_unreachable_in_restricted_environment",
+      "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+      "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+    },
+    {
+      "recordId": "9e8507d6610b0e118b8d",
+      "name": "City of Mesa Business Export Assistance Program",
+      "reason": "organization_status_unreachable_in_restricted_environment",
+      "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+      "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+    },
+    {
+      "recordId": "a44548888a69b47a0891",
+      "name": "Intake: https://pinetoplakesideaz.gov/252/Grant",
+      "reason": "organization_status_unreachable_in_restricted_environment",
+      "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+      "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+    },
+    {
+      "recordId": "8bb4fe286dc96070001c",
+      "name": "AsBA Growing Opportunities (GO) Program",
+      "reason": "organization_status_unreachable_in_restricted_environment",
+      "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+      "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+    },
+    {
+      "recordId": "08349125afc219afc046",
+      "name": "Transform Business Grant",
+      "reason": "organization_status_unreachable_in_restricted_environment",
+      "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+      "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+    },
+    {
+      "recordId": "daab7b3f603033ba748f",
+      "name": "Halcyon Fellowship",
+      "reason": "organization_status_unreachable_in_restricted_environment",
+      "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+      "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+    },
+    {
+      "recordId": "97c67498d1fc16a91c58",
+      "name": "State Vocational Rehabilitation Grants",
+      "reason": "organization_status_unreachable_in_restricted_environment",
+      "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+      "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+    },
+    {
+      "recordId": "b2b413a7ac4cbd06c935",
+      "name": "Community Development Block Grant (CDBG) Federal funds for community revitalization, housing rehabilitation, infrastructure, and public services in rural Arizona. Intake: https://housing.az.gov/programs/community",
+      "reason": "organization_status_unreachable_in_restricted_environment",
+      "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+      "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+    },
+    {
+      "recordId": "d74d82a9ab17ad6080ba",
+      "name": "Preschool Development Grant Supports high",
+      "reason": "organization_status_unreachable_in_restricted_environment",
+      "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+      "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+    },
+    {
+      "recordId": "49d0f276732719c7f02a",
+      "name": "Arizona’s FAST (Federal And State Technology) Partnership Program",
+      "reason": "organization_status_unreachable_in_restricted_environment",
+      "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+      "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+    },
+    {
+      "recordId": "9c1976dccc083e5f17bd",
+      "name": "Arizona Advanced Manufacturing Facilities Grant (AMF)",
+      "reason": "organization_status_unreachable_in_restricted_environment",
+      "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+      "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+    },
+    {
+      "recordId": "dab20a4a89dfa909e542",
+      "name": "SBIR/STTR Resource Center",
+      "reason": "organization_status_unreachable_in_restricted_environment",
+      "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+      "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+    },
+    {
+      "recordId": "72872305d0feda09f7b9",
+      "name": "Arizona Microbusiness Loan Program",
+      "reason": "organization_status_unreachable_in_restricted_environment",
+      "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+      "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+    },
+    {
+      "recordId": "4b2c5cdc0db14dcac3cf",
+      "name": "Arizona State Trade Expansion Program (AZSTEP)",
+      "reason": "organization_status_unreachable_in_restricted_environment",
+      "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+      "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+    },
+    {
+      "recordId": "ed7d894e96b149765193",
+      "name": "Arizona Broadband Development Grant (ABDG) Program",
+      "reason": "organization_status_unreachable_in_restricted_environment",
+      "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+      "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+    },
+    {
+      "recordId": "a438483d88eedacd917b",
+      "name": "Arizona Finance Authority (AFA) Funding Opportunities",
+      "reason": "organization_status_unreachable_in_restricted_environment",
+      "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+      "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+    },
+    {
+      "recordId": "20803b3dd68bfe03ebe2",
+      "name": "U.S. Small Business Administration (SBA) Funding Programs",
+      "reason": "organization_status_unreachable_in_restricted_environment",
+      "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+      "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+    },
+    {
+      "recordId": "89c6a2688f94bef4e89d",
+      "name": "SBA Microloan Program",
+      "reason": "organization_status_unreachable_in_restricted_environment",
+      "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+      "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+    },
+    {
+      "recordId": "49691bb97fe39f71a823",
+      "name": "SOAR (SSI/SSDI Outreach, Access & Recovery) Fast-tracks disability",
+      "reason": "organization_status_unreachable_in_restricted_environment",
+      "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+      "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+    },
+    {
+      "recordId": "b6dc12be35d88713257c",
+      "name": "Ticked Off Foundation; Intake",
+      "reason": "organization_status_unreachable_in_restricted_environment",
+      "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+      "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+    },
+    {
+      "recordId": "d3d5b64796686d871dd7",
+      "name": "HOME Investment Partnerships Program Federal formula grant for affordable housing development, rental assistance, and homebuyer programs. Intake: Contact ADOH at (602) 771",
+      "reason": "organization_status_unreachable_in_restricted_environment",
+      "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+      "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+    },
+    {
+      "recordId": "m_26d75d5486d5e5c0d6",
+      "name": "Emergency Solutions Grant (ESG)",
+      "reason": "organization_status_unreachable_in_restricted_environment",
+      "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+      "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+    },
+    {
+      "recordId": "ed0e0e8902924d0f86c0",
+      "name": "Housing Opportunities for Persons with AIDS (HOPWA) Short",
+      "reason": "organization_status_unreachable_in_restricted_environment",
+      "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+      "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+    },
+    {
+      "recordId": "m_06f7c726a840309aee",
+      "name": "Section 8 Housing Choice Voucher Program",
+      "reason": "organization_status_unreachable_in_restricted_environment",
+      "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+      "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+    },
+    {
+      "recordId": "0692b2d0992f8e9d4e6b",
+      "name": "Weatherization Assistance Program Home energy",
+      "reason": "organization_status_unreachable_in_restricted_environment",
+      "rawOrganizationStatus": "WEBSITE_DEAD_CONFIRMED",
+      "effectiveOrganizationStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT"
+    }
+  ],
+  "canonicalAfter": {
+    "count": 114,
+    "csvSha256": "5e9a8438ee652c9be5b44fb781a2ba94db9dafffddcc720c254bc291aab2d72b",
+    "jsonSha256": "bf6152067ed67d46f96f1d866443d66fa5efcdce73446e443e9560603642a2af",
+    "unchanged": true,
+    "proof": "Hashes recomputed from disk after evaluation and asserted equal to the pinned canonical values; this script has no write path to the dataset files."
+  },
+  "notes": [
+    "Admission uses verification-core.mjs directly (admissionDecision, classifyIdentityMatch, effectiveOrganizationStatus, looksNonOrganizationRecord, deriveRecordIssues, buildCandidateSource, normalizeVerifierRecord).",
+    "Zero records auto-publish: under restricted egress no candidate can reach a corroborated VERIFIED state, and single-signal identity overlaps are ambiguous-held, never auto-merged.",
+    "The full per-record evidence lives in the verifier output directory and in the admin verification review queue when staged through the app pipeline."
+  ]
+}

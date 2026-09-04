@@ -5,6 +5,7 @@ import { Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/shared/logo";
 import { SiteSwitcher } from "@/components/shared/site-switcher";
+import { ThemeToggle } from "@/components/bndr/theme-toggle";
 import { QrScrollSpyPills } from "./qr-scroll-progress";
 
 /**
@@ -59,6 +60,7 @@ export function QrNav() {
             >
               <Printer className="size-4" aria-hidden />
             </Button>
+            <ThemeToggle />
             <SiteSwitcher compact />
           </div>
         </div>

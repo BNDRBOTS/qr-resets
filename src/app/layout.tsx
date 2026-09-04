@@ -9,7 +9,7 @@ import { Providers } from "@/components/providers";
 export const metadata: Metadata = {
   title: "BNDR. — Resource Directory + QR Resets",
   description:
-    "BNDR Resource Directory and QR Resets: searchable resources plus dignity-first direct-aid planning and requests.",
+    "BNDR Resource Directory plus a prototype preview of the QR Resets direct-aid concept.",
   keywords: [
     "BNDR",
     "resource directory",
@@ -52,7 +52,7 @@ export default function RootLayout({
       <body className="antialiased bg-background text-foreground">
         <ThemeProvider
           attribute="class"
-          defaultTheme="light"
+          defaultTheme="dark"
           enableSystem={false}
           disableTransitionOnChange
         >
