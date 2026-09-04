@@ -14,7 +14,7 @@ import {
 } from "@/lib/resource-ingestion";
 import { getAdminSession, requireAdminRateLimited, apiError } from "@/lib/require-admin";
 import { stageVerificationRun } from "@/lib/verification-pipeline";
-import { computeResourceDatasetHash } from "@/lib/verification-core.mjs";
+import { prepareResourceSnapshot } from "@/lib/resource-snapshot";
 import { RATE_LIMITS } from "@/lib/rate-limit";
 import {
   readBoundedJson,
@@ -191,14 +191,15 @@ export async function POST(req: NextRequest) {
         // Durable pre-destruction snapshot: full-row history with audited,
         // dry-runnable restore via /api/admin/snapshots.
         const current = await tx.resource.findMany();
+        const snapshot = prepareResourceSnapshot(current);
         await tx.resourceSnapshot.create({
           data: {
             actor,
             reason: "Automatic snapshot before bulk replace import",
             trigger: "pre-replace-import",
-            rowCount: current.length,
-            datasetHash: computeResourceDatasetHash(current),
-            dataJson: current as unknown as object,
+            rowCount: snapshot.rowCount,
+            datasetHash: snapshot.datasetHash,
+            dataJson: snapshot.rows as unknown as object,
           },
         });
       }

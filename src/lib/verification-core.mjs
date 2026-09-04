@@ -16,8 +16,6 @@
 // - admission_policy.auto_publish = false (clean VERIFIED candidates become
 //   publish-eligible; publication itself is an explicit admin gate)
 
-import { createHash } from "node:crypto";
-
 export const VERIFIER_MIN_VERSION = "4.0.0";
 export const PENDING_VERIFICATION_STATUS = "PENDING_VERIFICATION";
 export const ORG_VERIFIED = "VERIFIED";
@@ -39,6 +37,23 @@ const REACHABLE_URL_STATUSES = new Set([
   "VERIFIED_SERVER_EXISTS_ACCESS_RESTRICTED",
   "REACHABLE_PAGE_MISSING",
 ]);
+
+function hardDeadHttpEvidence(urlRecord) {
+  for (const attempt of asArray(urlRecord && urlRecord.attempts)) {
+    const status = Number(attempt && attempt.status);
+    if (status === 404 || status === 410 || status === 451) return status;
+  }
+  const directStatus = Number(urlRecord && (urlRecord.http_status ?? urlRecord.status_code));
+  return directStatus === 404 || directStatus === 410 || directStatus === 451 ? directStatus : null;
+}
+
+export function evidencedHardDeadStatus(record) {
+  for (const url of (record && record.urls) ?? []) {
+    const status = hardDeadHttpEvidence(url);
+    if (status) return status;
+  }
+  return null;
+}
 
 function asString(value) {
   return typeof value === "string" ? value : value == null ? "" : String(value);
@@ -184,20 +199,24 @@ export function deriveRecordIssues(record, options = {}) {
     const requested = asString(url.requested_url);
     const canonical = asString(url.canonical_url);
     if (DEAD_URL_STATUSES.has(status)) {
-      if (egressRestricted) {
+      const hardStatus = hardDeadHttpEvidence(url);
+      if (egressRestricted && !hardStatus) {
         push("website", "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT", "warning", requested, null, {
           status,
           reason: asString(url.status_reason),
           dnsStatus: asString(url.dns_status),
           environment:
-            "Outbound DNS/network egress was restricted during this run; DNS failure here is not evidence the site is dead.",
+            "Only DNS/transport uncertainty is demoted in restricted egress; no successful HTTP 404/410/451 response was evidenced for this URL, so this is not evidence the site is dead.",
         });
       } else {
         push("website", "WEBSITE_DEAD_REPORTED", "critical", requested, null, {
           status,
+          hardHttpStatus: hardStatus,
           reason: asString(url.status_reason),
           dnsStatus: asString(url.dns_status),
-          note: "Verifier reports strong DNS-based death. Admin confirmation is required; canonical facts are never silently overwritten.",
+          note: hardStatus
+            ? `Verifier evidence contains a genuine HTTP ${hardStatus} response; restricted DNS/transport policy does not erase that evidence.`
+            : "Verifier reports death from an unrestricted run. Admin confirmation is required; canonical facts are never silently overwritten.",
         });
       }
     } else if (status === "REACHABLE_PAGE_MISSING") {
@@ -320,64 +339,33 @@ export function buildCandidateSource(record, provenance = {}) {
 // demoted to an explicitly environmental value.
 export const RESTRICTED_EGRESS_SAFE_STATUS = "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT";
 
-// HTTP statuses that are genuine server-issued "gone/blocked" evidence: the
-// origin answered, so transport demonstrably worked for that probe.
-const HTTP_GONE_STATUSES = new Set([404, 410, 451]);
-const HTTP_EVIDENCE_WEBSITE_STATUSES = new Set([
-  "PAGE_MISSING_OR_MOVED",
-  "REACHABLE_PAGE_MISSING",
-]);
-
-/**
- * Classify the evidence behind a dead/unreachable website verdict.
- * "http_response": at least one probe received an authentic HTTP 404/410/451
- * origin response (or the verifier classified a URL as reachable-but-missing).
- * "dns_transport": every failure is DNS/timeout/TLS/connection-level
- * uncertainty with no server response at all.
- */
-export function deadEvidenceKind(record) {
-  const urls = record && Array.isArray(record.urls) ? record.urls : [];
-  for (const entry of urls) {
-    if (!entry || typeof entry !== "object") continue;
-    const websiteStatus = String(entry.website_status ?? entry.status ?? "");
-    if (HTTP_EVIDENCE_WEBSITE_STATUSES.has(websiteStatus)) return "http_response";
-    const attempts = Array.isArray(entry.attempts) ? entry.attempts : [];
-    for (const attempt of attempts) {
-      const status = attempt && typeof attempt.status === "number" ? attempt.status : null;
-      if (status !== null && HTTP_GONE_STATUSES.has(status)) return "http_response";
-    }
-  }
-  return "dns_transport";
-}
-
 export function effectiveOrganizationStatus(record, options = {}) {
   const egressRestricted = options.egressRestricted === true;
   const rawStatus = (record && record.organizationStatus) || "INCONCLUSIVE";
+  const hardHttpStatus = evidencedHardDeadStatus(record);
   if (
     egressRestricted &&
+    !hardHttpStatus &&
     (rawStatus === "WEBSITE_DEAD_CONFIRMED" || rawStatus === "WEBSITE_DEAD_REPORTED")
   ) {
-    if (deadEvidenceKind(record) === "http_response") {
-      // A server-issued 404/410/451 is authentic evidence even under
-      // restricted egress: the response itself proves transport succeeded
-      // for that probe. The dead verdict stands.
-      return {
-        status: rawStatus,
-        demoted: false,
-        rawStatus,
-        note:
-          "Dead status retained: evidence includes an authentic HTTP 404/410/451 origin response, which restricted egress cannot explain away.",
-      };
-    }
     return {
       status: RESTRICTED_EGRESS_SAFE_STATUS,
       demoted: true,
       rawStatus,
+      hardHttpStatus: null,
       note:
-        "DNS/transport failure observed from a restricted-egress environment is not evidence the site is dead. Raw verifier status preserved as evidence; re-verify from an environment with network egress.",
+        "Only DNS/transport uncertainty was evidenced in a restricted-egress environment; that is not proof the site is dead. Raw verifier status is preserved for review.",
     };
   }
-  return { status: rawStatus, demoted: false, rawStatus, note: null };
+  return {
+    status: rawStatus,
+    demoted: false,
+    rawStatus,
+    hardHttpStatus,
+    note: hardHttpStatus
+      ? `HTTP ${hardHttpStatus} was actually observed; genuine 404/410/451 evidence is retained even when other egress is restricted.`
+      : null,
+  };
 }
 
 function identityName(value) {
@@ -407,53 +395,53 @@ function identityHost(value) {
 }
 
 // Corroborated identity matching. A canonical auto-match ("strong") requires
-// the organization NAME to match PLUS at least one contact signal
-// (email/phone/host) on the SAME canonical row. Contact signals alone -
-// shared hostname, phone, or email, in any combination - NEVER auto-merge,
-// because umbrella organizations legitimately share websites and front-desk
-// numbers across distinct programs. Every plausible canonical row is
-// collected; if more than one row is corroborated, or any row overlaps
-// without corroboration, the result is "ambiguous" and held for admin
-// review - never first-match.
+// a name match PLUS at least one contact signal (email/phone/host). Shared
+// contact signals without the same program name are review-only. Any single-signal overlap -
+// hostname alone, phone alone, email alone, or name alone - is NEVER an
+// auto-merge: it is classified "ambiguous" and held for admin review.
 export function classifyIdentityMatch(candidate, existingRows, ignoreId) {
   const candName = identityName(candidate && candidate.name);
   const candEmail = identityEmail(candidate && candidate.email);
   const candPhone = identityPhone(candidate && candidate.phone);
   const candHost = identityHost(candidate && (candidate.url ?? candidate.website));
-  const matches = [];
+  const strongMatches = [];
+  const plausibleMatches = [];
+
   for (const row of existingRows ?? []) {
     if (!row) continue;
     if (ignoreId && row.id === ignoreId) continue;
     const signals = [];
     if (candName && identityName(row.name) === candName) signals.push("name");
     if (candEmail && row.email && identityEmail(row.email) === candEmail) signals.push("email");
-    if (candPhone && identityPhone(row.phoneNormalized ?? row.phoneRaw) === candPhone) {
-      signals.push("phone");
-    }
+    if (candPhone && identityPhone(row.phoneNormalized ?? row.phoneRaw) === candPhone) signals.push("phone");
     if (candHost && row.website && identityHost(row.website) === candHost) signals.push("host");
     if (!signals.length) continue;
-    // Corroborated identity requires the organization NAME plus at least one
-    // contact channel. Shared host/phone/email alone can NEVER auto-merge:
-    // umbrella organizations legitimately share hosts, front-desk phones,
-    // and intake mailboxes across genuinely different programs.
+
     const contactSignals = signals.filter((signal) => signal !== "name");
-    const corroborated = signals.includes("name") && contactSignals.length >= 1;
-    matches.push({ row, signals, corroborated });
+    const evidence = { match: row, signals };
+    plausibleMatches.push(evidence);
+
+    // A shared organizational host/phone/email can legitimately serve several
+    // distinct programs. Therefore contact overlap without the same program
+    // name is never enough for an automatic merge, even when two contact
+    // channels overlap. Strong identity requires name + contact corroboration.
+    if (signals.includes("name") && contactSignals.length >= 1) {
+      strongMatches.push(evidence);
+    }
   }
-  const corroborated = matches.filter((entry) => entry.corroborated);
-  if (corroborated.length === 1) {
-    // Exactly one corroborated canonical candidate: safe strong match.
+
+  // Never choose "the first strong match" when more than one canonical row is
+  // plausible. Multiple plausible canonical targets require review.
+  if (strongMatches.length === 1 && plausibleMatches.length === 1) {
+    return { kind: "strong", ...strongMatches[0], matches: strongMatches };
+  }
+  if (plausibleMatches.length > 0) {
     return {
-      kind: "strong",
-      match: corroborated[0].row,
-      signals: corroborated[0].signals,
-      matches,
+      kind: "ambiguous",
+      match: null,
+      signals: [...new Set(plausibleMatches.flatMap((item) => item.signals))],
+      matches: plausibleMatches,
     };
-  }
-  if (matches.length > 0) {
-    // Multiple corroborated candidates, or contact-only overlap: ambiguous.
-    // A human resolves it in review. Never first-match, never auto-merge.
-    return { kind: "ambiguous", match: null, signals: matches[0].signals, matches };
   }
   return { kind: "none", match: null, signals: [], matches: [] };
 }
@@ -518,58 +506,4 @@ export function summarizeDecisions(decisions) {
     counts[decision.publishState] = (counts[decision.publishState] ?? 0) + 1;
   }
   return counts;
-}
-
-// ---- Canonical dataset hashing (snapshot integrity proof) -------------------
-// A snapshot's datasetHash commits to the exact row contents, not just the
-// row count. Restores must re-read what the database actually persisted and
-// prove the recomputed hash (and count) match the snapshot before the
-// transaction may commit.
-
-const RESOURCE_HASH_FIELDS = [
-  "id",
-  "name",
-  "acronym",
-  "description",
-  "category",
-  "subcategory",
-  "phoneRaw",
-  "phoneNormalized",
-  "email",
-  "address",
-  "website",
-  "tags",
-  "priority",
-  "verified",
-  "published",
-  "sourceNote",
-  "piipassAt",
-  "piipassNotes",
-  "createdAt",
-  "updatedAt",
-];
-
-function hashableValue(value) {
-  if (value === undefined || value === null) return null;
-  if (value instanceof Date) return value.toISOString();
-  return value;
-}
-
-export function canonicalResourceRowForHash(row) {
-  const out = {};
-  for (const field of RESOURCE_HASH_FIELDS) {
-    out[field] = hashableValue(row ? row[field] : null);
-  }
-  return out;
-}
-
-export function computeResourceDatasetHash(rows) {
-  const canonical = (Array.isArray(rows) ? rows : [])
-    .map((row) => canonicalResourceRowForHash(row))
-    .sort((a, b) => {
-      const left = String(a.id ?? "");
-      const right = String(b.id ?? "");
-      return left < right ? -1 : left > right ? 1 : 0;
-    });
-  return createHash("sha256").update(JSON.stringify(canonical)).digest("hex");
 }

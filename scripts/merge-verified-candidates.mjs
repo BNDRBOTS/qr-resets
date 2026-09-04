@@ -4,16 +4,11 @@
 // verification-core.mjs, so admission/dedupe/safe-status semantics are
 // exactly the pipeline's (no simplified rewrite).
 //
-// Usage: node scripts/merge-verified-candidates.mjs [out.json] [verifier_out_dir] [egress-probe.json]
-//
-// Fully self-contained and portable: every default path is repo-relative
-// (reports/RESOURCE_MERGE_REPORT.json for output, verifier/out for the
-// bundled verifier v4 artifacts, verifier/out/egress-probe.json for the
-// environment probe), so the script runs as-is from inside the production
-// package with no external /data dependencies.
+// Usage: node scripts/merge-verified-candidates.mjs [out.json] [verifier_out_dir] [egress_probe.json]
+// With no arguments, every input resolves inside this production package.
 
 import { createHash } from "node:crypto";
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -29,8 +24,9 @@ import {
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, "..");
-const outPath = process.argv[2] ?? join(root, "reports", "RESOURCE_MERGE_REPORT.json");
-const verifierDir = process.argv[3] ?? join(root, "verifier", "out");
+const outPath = process.argv[2] ?? join(root, "RESOURCE_MERGE_REPORT.json");
+const verifierDir = process.argv[3] ?? join(root, "verification-evidence", "verifier_out");
+const egressProbePath = process.argv[4] ?? join(root, "verification-evidence", "egress-probe.json");
 
 const sha256 = (buf) => createHash("sha256").update(buf).digest("hex");
 const readJson = (path) => JSON.parse(readFileSync(path, "utf8"));
@@ -72,17 +68,13 @@ const dupPairs = readJson(join(verifierDir, "possible_duplicates_review.json"));
 // ---- Environment: restricted egress demotes dead-site conclusions -----------
 let egressRestricted = true;
 let egressEvidence = null;
-const probePath =
-  process.argv[4] ?? process.env.MERGE_EGRESS_PROBE ?? join(verifierDir, "egress-probe.json");
 try {
-  const probe = readJson(probePath);
+  const probe = readJson(egressProbePath);
   egressRestricted = probe.egressRestricted !== false;
   egressEvidence = probe;
 } catch {
   egressRestricted = true;
-  egressEvidence = {
-    note: "egress probe unavailable at " + probePath + "; defaulting to restricted (conservative)",
-  };
+  egressEvidence = { note: `egress probe unavailable at ${egressProbePath}; defaulting to restricted` };
 }
 
 const matcherRows = canonical.map((row) => ({
@@ -119,7 +111,7 @@ for (const raw of rawRecords) {
 
   const exclusion = looksNonOrganizationRecord(record);
   if (exclusion) excludedNonOrganization += 1;
-  const issues = deriveRecordIssues(record);
+  const issues = deriveRecordIssues(record, { egressRestricted });
   const candidate = buildCandidateSource(record);
   const identity = classifyIdentityMatch(candidate, matcherRows);
   identityCounts[identity.kind] += 1;
@@ -173,12 +165,6 @@ for (const raw of rawRecords) {
       name: record.name,
       duplicateKind,
       identitySignals: identity.signals,
-      overlappingCanonicalCandidates: (identity.matches ?? []).map((entry) => ({
-        id: entry.row.id,
-        name: entry.row.name,
-        signals: entry.signals,
-        corroborated: entry.corroborated,
-      })),
       matchedCanonicalId: identity.match ? identity.match.id : null,
       matchedCanonicalName: identity.match ? identity.match.name : null,
       decision: decision.publishState,
@@ -203,7 +189,7 @@ const excluded = publishStates.excluded ?? 0;
 const canonicalMatches = publishStates.canonical_match ?? 0;
 
 const report = {
-  reportVersion: 2,
+  reportVersion: 3,
   generatedAt: new Date().toISOString(),
   task: "Evaluate verifier v4 candidate records against the canonical dataset using the app's own admission semantics. No canonical row is created, modified, or published by this evaluation.",
   canonicalBefore: {
@@ -229,7 +215,7 @@ const report = {
   environment: {
     egressRestricted,
     policy:
-      "DNS/transport failures observed from a restricted-egress environment are never treated as confirmed-dead. Raw verifier statuses are preserved as evidence; effective statuses are demoted to UNREACHABLE_IN_RESTRICTED_ENVIRONMENT and records stay held for review.",
+      "Restricted egress demotes DNS/transport uncertainty only. A genuine evidenced HTTP 404/410/451 remains dead evidence. Raw verifier statuses and underlying attempts are preserved for review.",
     demotedStatusCount,
     evidence: egressEvidence,
   },
@@ -260,12 +246,11 @@ const report = {
   },
   notes: [
     "Admission uses verification-core.mjs directly (admissionDecision, classifyIdentityMatch, effectiveOrganizationStatus, looksNonOrganizationRecord, deriveRecordIssues, buildCandidateSource, normalizeVerifierRecord).",
-    "Zero records auto-publish: under restricted egress no candidate can reach a corroborated VERIFIED state. Shared host/phone/email alone never auto-merges, and multiple plausible canonical matches are held as ambiguous for review, never first-matched.",
+    "Zero records auto-publish: under restricted egress no candidate can reach a corroborated VERIFIED state, and single-signal identity overlaps are ambiguous-held, never auto-merged.",
     "The full per-record evidence lives in the verifier output directory and in the admin verification review queue when staged through the app pipeline.",
   ],
 };
 
-mkdirSync(dirname(outPath), { recursive: true });
 writeFileSync(outPath, JSON.stringify(report, null, 2) + "\n");
 console.log("RESOURCE_MERGE_REPORT written:", outPath);
 console.log(

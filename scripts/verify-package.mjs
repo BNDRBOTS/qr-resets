@@ -271,8 +271,13 @@ const resourceCardSource = readFileSync(join(root, "src/components/bndr/resource
 if (/md:col-span-2|lg:col-span-3/.test(resourceCardSource) || /tags\.slice\(0,\s*isPriority/.test(resourceCardSource)) {
   fail("Priority resources still receive disproportionate card footprint/content treatment");
 }
-if (directorySource.includes("FeaturedSpotlight") || !directorySource.includes("pageSize={500}")) {
-  fail("Directory still applies a universal featured spotlight or does not render the complete result set");
+if (
+  directorySource.includes("FeaturedSpotlight") ||
+  !directorySource.includes("useInfiniteQuery") ||
+  !directorySource.includes("fetchNextPage") ||
+  directorySource.includes("limit: 500")
+) {
+  fail("Directory pagination is not server-backed beyond the historical 500-row hard stop");
 }
 const defaultSearchSource = readFileSync(join(root, "src/lib/search.ts"), "utf8");
 if (!defaultSearchSource.includes("a.name.localeCompare(b.name)")) {

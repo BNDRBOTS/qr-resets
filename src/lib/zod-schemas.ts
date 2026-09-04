@@ -80,9 +80,10 @@ export const searchParamsSchema = z.object({
   q: z.string().trim().max(200).default(""),
   category: z.union([categorySlugSchema, z.literal("all")]).default("all"),
   priorityOnly: z.coerce.boolean().default(false),
-  // Listings are paginated and searched in the database (stable ordering,
-  // true counts). The cap bounds a single page; deeper rows are reached via
-  // offset paging, so datasets larger than 500 rows stay fully accessible.
+  // Listings use bounded database pages with stable ordering and true counts.
+  // Weighted fuzzy search is globally ranked by the shared search engine after
+  // bounded database traversal. Deeper rows are reached by offset paging, so
+  // datasets larger than 500 rows stay fully accessible.
   limit: z.coerce.number().int().min(1).max(1000).default(24),
   offset: z.coerce.number().int().min(0).max(100000).default(0),
 });

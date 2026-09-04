@@ -10,10 +10,30 @@ export declare const ISSUE_REVIEW_STATES: string[];
 export declare const ISSUE_SEVERITIES: string[];
 export declare const RESTRICTED_EGRESS_SAFE_STATUS: string;
 
-// Normalized url/contact entries preserve the raw verifier-v4 evidence
-// objects (website_status, status_reason, dns_status, attempts, ...).
-export type NormalizedUrlEntry = Record<string, unknown>;
-export type NormalizedContactEntry = Record<string, unknown>;
+export type VerifierUrlEntry = Record<string, unknown> & {
+  requested_url?: unknown;
+  canonical_url?: unknown;
+  website_status?: unknown;
+  status_reason?: unknown;
+  dns_status?: unknown;
+  name_similarity?: unknown;
+  attempts?: unknown;
+  http_status?: unknown;
+  status_code?: unknown;
+};
+
+export type VerifierContactEntry = Record<string, unknown> & {
+  value?: unknown;
+  status?: unknown;
+  format_status?: unknown;
+  plan_check_note?: unknown;
+  error?: unknown;
+};
+
+export type VerifierAddressEntry = Record<string, unknown> & {
+  value?: unknown;
+  text?: unknown;
+};
 
 export type NormalizedVerifierRecord = {
   recordId: string | null;
@@ -22,10 +42,10 @@ export type NormalizedVerifierRecord = {
   category: string;
   organizationStatus: string;
   organizationReason: string;
-  urls: NormalizedUrlEntry[];
-  phones: NormalizedContactEntry[];
-  emails: NormalizedContactEntry[];
-  addresses: Array<Record<string, unknown>>;
+  urls: VerifierUrlEntry[];
+  phones: VerifierContactEntry[];
+  emails: VerifierContactEntry[];
+  addresses: VerifierAddressEntry[];
   contactNames: Array<Record<string, unknown>>;
   viability: Record<string, unknown> | null;
   duplicateGroupId: string | null;
@@ -43,9 +63,9 @@ export type VerificationIssueDraft = {
   code: string;
   severity: string;
   field: string | null;
-  current: string | null;
-  suggested: string | null;
-  evidence: string | null;
+  currentValue: unknown | null;
+  suggestedValue: unknown | null;
+  evidence: Record<string, unknown> | null;
 };
 
 export type ExclusionResult = { excluded: boolean; reasons: string[] };
@@ -61,11 +81,36 @@ export type CandidateSource = {
   source: string;
 };
 
+export type ExistingIdentityRow = {
+  id?: string;
+  name?: string;
+  email?: string | null;
+  website?: string | null;
+  phoneNormalized?: string | null;
+  phoneRaw?: string | null;
+  [key: string]: unknown;
+};
+
+export type IdentityMatch<T extends ExistingIdentityRow = ExistingIdentityRow> =
+  | { kind: "strong"; match: T; signals: string[]; matches: Array<{ match: T; signals: string[] }> }
+  | { kind: "ambiguous"; match: null; signals: string[]; matches: Array<{ match: T; signals: string[] }> }
+  | { kind: "none"; match: null; signals: string[]; matches: [] };
+
+export type EffectiveOrganizationStatus = {
+  status: string;
+  demoted: boolean;
+  rawStatus: string;
+  hardHttpStatus: number | null;
+  note: string | null;
+};
+
+export type DuplicateKind = "strong" | "batch" | "ambiguous" | "none";
+
 export type AdmissionInput = {
-  record: NormalizedVerifierRecord | { organizationStatus: string };
+  record: NormalizedVerifierRecord | { organizationStatus: string; urls?: VerifierUrlEntry[] };
   issues: VerificationIssueDraft[];
   exclusion?: ExclusionResult | null;
-  duplicateKind?: "strong" | "batch" | "ambiguous" | "none";
+  duplicateKind?: DuplicateKind;
   verifierRan?: boolean;
   mappingOk?: boolean;
   egressRestricted?: boolean;
@@ -73,26 +118,9 @@ export type AdmissionInput = {
 
 export type AdmissionDecision = { publishState: string; reason: string };
 
-export type IdentityMatchEntry = {
-  row: Record<string, unknown>;
-  signals: string[];
-  corroborated: boolean;
-};
-
-export type IdentityMatchResult = {
-  kind: "strong" | "ambiguous" | "none";
-  match: Record<string, unknown> | null;
-  signals: string[];
-  matches: IdentityMatchEntry[];
-};
-
-export type EffectiveOrganizationStatus = {
-  status: string;
-  demoted: boolean;
-  rawStatus: string;
-  note: string | null;
-};
-
+export declare function evidencedHardDeadStatus(
+  record: { urls?: VerifierUrlEntry[] } | null | undefined,
+): number | null;
 export declare function normalizeVerifierRecord(raw: unknown): NormalizedVerifierRecord | null;
 export declare function hasContactEvidence(record: NormalizedVerifierRecord): boolean;
 export declare function looksNonOrganizationRecord(record: NormalizedVerifierRecord): ExclusionResult;
@@ -103,27 +131,22 @@ export declare function deriveRecordIssues(
 export declare function pickBestWebsite(record: NormalizedVerifierRecord): string;
 export declare function buildCandidateSource(
   record: NormalizedVerifierRecord,
-  provenance?: { extra?: string[] },
+  provenance?: { extra?: unknown[] },
 ): CandidateSource;
-export declare function deadEvidenceKind(record: unknown): "http_response" | "dns_transport";
 export declare function effectiveOrganizationStatus(
-  record: unknown,
+  record: { organizationStatus?: string; urls?: VerifierUrlEntry[] } | null | undefined,
   options?: { egressRestricted?: boolean },
 ): EffectiveOrganizationStatus;
-export declare function classifyIdentityMatch(
+export declare function classifyIdentityMatch<T extends ExistingIdentityRow>(
   candidate: {
-    name?: string | null;
-    email?: string | null;
-    phone?: string | null;
-    url?: string | null;
-    website?: string | null;
-  },
-  existingRows: Array<Record<string, unknown>>,
+    name?: unknown;
+    email?: unknown;
+    phone?: unknown;
+    url?: unknown;
+    website?: unknown;
+  } | null | undefined,
+  existingRows: T[] | null | undefined,
   ignoreId?: string,
-): IdentityMatchResult;
+): IdentityMatch<T>;
 export declare function admissionDecision(input: AdmissionInput): AdmissionDecision;
 export declare function summarizeDecisions(decisions: AdmissionDecision[]): Record<string, number>;
-export declare function canonicalResourceRowForHash(
-  row: Record<string, unknown>,
-): Record<string, unknown>;
-export declare function computeResourceDatasetHash(rows: unknown[]): string;

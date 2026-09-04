@@ -158,7 +158,9 @@ test("category and resource presentation is neutral by default", () => {
   assert.match(pills, /bndr-filter-pill/);
   assert.doesNotMatch(pills, /rounded-r-none|border-l-0/);
   assert.doesNotMatch(directory, /FeaturedSpotlight/);
-  assert.match(directory, /pageSize=\{500\}/);
+  assert.match(directory, /useInfiniteQuery/);
+  assert.match(directory, /fetchNextPage/);
+  assert.doesNotMatch(directory, /limit:\s*500/);
   assert.doesNotMatch(card, /md:col-span-2|lg:col-span-3/);
   assert.doesNotMatch(card, /tags\.slice\(0,\s*isPriority/);
   assert.match(search, /a\.name\.localeCompare\(b\.name\)/);

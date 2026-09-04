@@ -1,4 +1,4 @@
-// BNDR. API - public resource collection
+// BNDR. API — public resource collection
 // GET /api/resources?q=&category=&priorityOnly=&limit=&offset=
 // Public responses contain published resources only. All mutations live under
 // /api/admin/resources and require a verified admin session.
@@ -7,18 +7,12 @@ import { NextRequest, NextResponse } from "next/server";
 import type { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import { cleanArtifacts } from "@/lib/pii";
-import { createSearchAccumulator } from "@/lib/search";
+import { paginateResources } from "@/lib/resource-pagination";
 import { apiError } from "@/lib/require-admin";
 import { searchParamsSchema } from "@/lib/zod-schemas";
 import type { CategorySlug, SearchResult } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
-
-// Fixed keyset-scan batch size for the weighted-search path. Weighted
-// fuzzy/typo/acronym scoring must see every candidate row (it is not
-// expressible as SQL contains-filters), so candidates stream through in
-// bounded batches instead of one unbounded findMany().
-const SEARCH_SCAN_BATCH_SIZE = 500;
 
 export interface ResourceRow {
   id: string;
@@ -107,57 +101,32 @@ export async function GET(req: NextRequest) {
 
     const { q, category, priorityOnly, limit, offset } = parsed.data;
     const where: Prisma.ResourceWhereInput = { published: true };
+
     if (category && category !== "all") where.category = category;
     if (priorityOnly) where.priority = { gte: 1 };
 
-    // The weighted fuzzy/typo/acronym/priority engine in src/lib/search.ts is
-    // the public search contract and is preserved verbatim:
-    // - Browse (no query tokens): true database pagination with the same
-    //   neutral alphabetical ordering searchResources applies to empty
-    //   queries, plus a true database count. Pages and counts stay correct at
-    //   any dataset size (well beyond 500 rows).
-    // - Search: every candidate row is scored via the shared accumulator fed
-    //   in fixed-size keyset batches (never one unbounded fetch); ranking,
-    //   the true total, and the returned page use the exact searchResources
-    //   comparator.
-    const search = createSearchAccumulator(q);
+    const page = await paginateResources(
+      {
+        count: () => db.resource.count({ where }),
+        fetchPage: async ({ skip, take }) => {
+          const rows = await db.resource.findMany({
+            where,
+            // Neutral deterministic database traversal. Search queries are
+            // globally re-ranked by the original weighted scorer after all
+            // filtered rows have been read in bounded DB pages.
+            orderBy: [{ name: "asc" }, { id: "asc" }],
+            skip,
+            take,
+          });
+          return rows.map(toResourceShape);
+        },
+      },
+      { q, limit, offset },
+    );
 
-    if (!search.hasQuery) {
-      const [total, rows] = await Promise.all([
-        db.resource.count({ where }),
-        db.resource.findMany({
-          where,
-          orderBy: [{ name: "asc" }, { id: "asc" }],
-          skip: offset,
-          take: limit,
-        }),
-      ]);
-      const result: SearchResult = {
-        resources: rows.map(toResourceShape) as SearchResult["resources"],
-        total,
-        query: q,
-      };
-      return NextResponse.json(result);
-    }
-
-    let cursor: string | null = null;
-    for (;;) {
-      const batch = await db.resource.findMany({
-        where,
-        orderBy: { id: "asc" },
-        take: SEARCH_SCAN_BATCH_SIZE,
-        ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
-      });
-      if (batch.length === 0) break;
-      search.add(batch.map(toResourceShape));
-      if (batch.length < SEARCH_SCAN_BATCH_SIZE) break;
-      cursor = batch[batch.length - 1].id;
-    }
-
-    const ranked = search.finalize(offset, limit);
     const result: SearchResult = {
-      resources: ranked.page as SearchResult["resources"],
-      total: ranked.total,
+      resources: page.resources as SearchResult["resources"],
+      total: page.total,
       query: q,
     };
     return NextResponse.json(result);

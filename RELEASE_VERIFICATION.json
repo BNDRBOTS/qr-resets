@@ -1,39 +1,78 @@
 {
   "packageVersion": "1.1.4",
-  "generatedAt": "2026-08-21T23:31:56Z",
+  "generatedAt": "2026-09-04T07:39:31.985Z",
   "artifactEnvironment": {
-    "node": "v24.19.0",
-    "npm": "11.9.0",
-    "prisma": "6.19.2",
-    "next": "16.2.12"
-  },
-  "baseline": {
-    "file": "qr-resets-local-repair.zip",
-    "sha256": "0edecb5a9a02fe61c4caf1f9cc5eff9b5ef9f0b9fcf5ec28f8aff0e7f5854cc3"
+    "node": "v22.16.0",
+    "npm": "10.9.2"
   },
   "gates": [
-    { "name": "clean-lockfile-install", "status": "PASS", "detail": "620 packages; Prisma postinstall generated the SQLite client" },
-    { "name": "prisma-sqlite", "status": "PASS", "detail": "schema valid" },
-    { "name": "prisma-postgres", "status": "PASS", "detail": "schema valid" },
-    { "name": "package-contract", "status": "PASS", "detail": "279 files scanned; 114 resources; 103 source-verified" },
-    { "name": "canonical-dataset", "status": "PASS", "detail": "114 rows; SHA-256 5e9a8438ee652c9be5b44fb781a2ba94db9dafffddcc720c254bc291aab2d72b" },
-    { "name": "import-graph", "status": "PASS", "detail": "200 source files; 509 edges; zero broken or undeclared imports" },
-    { "name": "typescript-syntax", "status": "PASS", "detail": "201 files; zero diagnostics" },
-    { "name": "existing-contracts", "status": "PASS", "detail": "70/70" },
-    { "name": "ingestion-parity", "status": "PASS", "detail": "10/10 across TXT, Markdown, JSON, and XML; normalization, exact dedupe, viability, and publication gates" },
-    { "name": "real-seed", "status": "PASS", "detail": "114 resources persisted; 103 verified; 114 published" },
-    { "name": "typecheck", "status": "PASS", "detail": "0 errors" },
-    { "name": "lint", "status": "PASS", "detail": "0 errors; 33 pre-existing warnings retained" },
-    { "name": "next-production-build", "status": "PASS", "detail": "optimized Next.js standalone build compiled and typechecked" },
-    { "name": "production-start-health", "status": "PASS", "detail": "bound to 0.0.0.0:3217; GET /api/health returned 200 ready=true" },
-    { "name": "auth-e2e", "status": "PASS", "detail": "credentials, JWT admin session, admin page/API, recovery, prior-session revocation" },
-    { "name": "ingestion-e2e", "status": "PASS", "detail": "SmartPaste, manual create/update, bulk import, malformed and duplicate zero-mutation checks" },
-    { "name": "restart-persistence", "status": "PASS", "detail": "recovered credential and two test resources persisted after restart" },
-    { "name": "resource-card-containment", "status": "PASS", "detail": "390/768/1440 px; no viewport/card overflow; same child structure" },
-    { "name": "preservation", "status": "PASS", "detail": "ResourceCard and 114-row JSON/CSV corpus byte-identical; QR particle behavior preserved with local lint exception" }
+    {
+      "name": "package-contract",
+      "command": "node scripts/verify-package.mjs",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 395,
+      "stdout": "BNDR package verification PASS\nFiles scanned: 319\nDataset rows: 114\nSource-verified flags: 103\nDataset SHA-256: 5e9a8438ee652c9be5b44fb781a2ba94db9dafffddcc720c254bc291aab2d72b",
+      "stderr": ""
+    },
+    {
+      "name": "canonical-dataset",
+      "command": "node scripts/verify-dataset.mjs",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 180,
+      "stdout": "{\"ok\":true,\"rows\":114,\"sourceVerified\":103,\"sha256\":\"5e9a8438ee652c9be5b44fb781a2ba94db9dafffddcc720c254bc291aab2d72b\"}",
+      "stderr": ""
+    },
+    {
+      "name": "import-graph",
+      "command": "node scripts/verify-imports.mjs",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 219,
+      "stdout": "{\n  \"ok\": true,\n  \"sourceFiles\": 218,\n  \"localImportEdges\": 564,\n  \"brokenLocalImports\": [],\n  \"undeclaredExternalRoots\": []\n}",
+      "stderr": ""
+    },
+    {
+      "name": "typescript-syntax",
+      "command": "node scripts/verify-syntax.mjs",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 2888,
+      "stdout": "{\n  \"ok\": true,\n  \"files\": 218,\n  \"diagnostics\": []\n}",
+      "stderr": ""
+    },
+    {
+      "name": "dependency-free-contract-tests",
+      "command": "npm run test:contracts",
+      "status": "PASS",
+      "exitCode": 0,
+      "durationMs": 2619,
+      "stdout": "\n  duration_ms: 9.060223\n  type: 'test'\n  ...\n# Subtest: dual-view router keeps Resource Directory and QR Resets in one app\nok 57 - dual-view router keeps Resource Directory and QR Resets in one app\n  ---\n  duration_ms: 0.901328\n  type: 'test'\n  ...\n# Subtest: both hero halos are circular and use equal dimensions\nok 58 - both hero halos are circular and use equal dimensions\n  ---\n  duration_ms: 2.017242\n  type: 'test'\n  ...\n# Subtest: global day/night palette preserves bone, exact magenta, and existing dark blue\nok 59 - global day/night palette preserves bone, exact magenta, and existing dark blue\n  ---\n  duration_ms: 0.560067\n  type: 'test'\n  ...\n# Subtest: Railway initializes durable local storage at service start and uses real health path\nok 60 - Railway initializes durable local storage at service start and uses real health path\n  ---\n  duration_ms: 2.29115\n  type: 'test'\n  ...\n# Subtest: deployment seed is additive and canonical health check is data-backed\nok 61 - deployment seed is additive and canonical health check is data-backed\n  ---\n  duration_ms: 0.462509\n  type: 'test'\n  ...\n# Subtest: Railway config uses current railpack builder and start-time volume initialization\nok 62 - Railway config uses current railpack builder and start-time volume initialization\n  ---\n  duration_ms: 0.539986\n  type: 'test'\n  ...\n# Subtest: build is self-contained from Google font network fetches\nok 63 - build is self-contained from Google font network fetches\n  ---\n  duration_ms: 0.25597\n  type: 'test'\n  ...\n# Subtest: browser mutations are same-origin gated\nok 64 - browser mutations are same-origin gated\n  ---\n  duration_ms: 0.866363\n  type: 'test'\n  ...\n# Subtest: public pending register exposes only name and reason\nok 65 - public pending register exposes only name and reason\n  ---\n  duration_ms: 1.346021\n  type: 'test'\n  ...\n# Subtest: directory priority copy does not assert a strongest-five invariant\nok 66 - directory priority copy does not assert a strongest-five invariant\n  ---\n  duration_ms: 0.844463\n  type: 'test'\n  ...\n# Subtest: Railway-local SQLite is default while PostgreSQL/Supabase remains opt-in\nok 67 - Railway-local SQLite is default while PostgreSQL/Supabase remains opt-in\n  ---\n  duration_ms: 0.667866\n  type: 'test'\n  ...\n# Subtest: browser-side advocate state remains localStorage-backed\nok 68 - browser-side advocate state remains localStorage-backed\n  ---\n  duration_ms: 0.492855\n  type: 'test'\n  ...\n# Subtest: Railway health gates real data readiness without making admin setup a deploy prerequisite\nok 69 - Railway health gates real data readiness without making admin setup a deploy prerequisite\n  ---\n  duration_ms: 0.309607\n  type: 'test'\n  ...\n# Subtest: release verifier requires production start plus HTTP 200 health before runtime pass\nok 70 - release verifier requires production start plus HTTP 200 health before runtime pass\n  ---\n  duration_ms: 0.391275\n  type: 'test'\n  ...\n# Subtest: category and resource presentation is neutral by default\nok 71 - category and resource presentation is neutral by default\n  ---\n  duration_ms: 4.80242\n  type: 'test'\n  ...\n# Subtest: emoji glyphs are removed and custom BNDR SVG icons are present\nok 72 - emoji glyphs are removed and custom BNDR SVG icons are present\n  ---\n  duration_ms: 4.178465\n  type: 'test'\n  ...\n# Subtest: source normalizer and canonical data remain fixed while ingestion uses the shared pipeline\nok 73 - source normalizer and canonical data remain fixed while ingestion uses the shared pipeline\n  ---\n  duration_ms: 3.199539\n  type: 'test'\n  ...\n# Subtest: admin login uses persistent single-admin credentials with Railway bootstrap and server gates\nok 74 - admin login uses persistent single-admin credentials with Railway bootstrap and server gates\n  ---\n  duration_ms: 0.420331\n  type: 'test'\n  ...\n# Subtest: category contact coverage is global dataset-backed rather than filtered-result derived\nok 75 - category contact coverage is global dataset-backed rather than filtered-result derived\n  ---\n  duration_ms: 0.9446\n  type: 'test'\n  ...\n# Subtest: forgot-password recovery is explicit, short-lived, same-origin, and version-invalidating\nok 76 - forgot-password recovery is explicit, short-lived, same-origin, and version-invalidating\n  ---\n  duration_ms: 0.463993\n  type: 'test'\n  ...\n# Subtest: forgot-admin-email recovery requires proof and does not disclose identity before success\nok 77 - forgot-admin-email recovery requires proof and does not disclose identity before success\n  ---\n  duration_ms: 0.37545\n  type: 'test'\n  ...\n# Subtest: shared Dialog and Sheet glass surfaces retain fixed positioning and dark category rail is opaque\nok 78 - shared Dialog and Sheet glass surfaces retain fixed positioning and dark category rail is opaque\n  ---\n  duration_ms: 1.041018\n  type: 'test'\n  ...\n# Subtest: SSRF structure gate blocks http://127.0.0.1\nok 79 - SSRF structure gate blocks http://127.0.0.1\n  ---\n  duration_ms: 3.392196\n  type: 'test'\n  ...\n# Subtest: SSRF structure gate blocks http://10.0.0.1\nok 80 - SSRF structure gate blocks http://10.0.0.1\n  ---\n  duration_ms: 0.294339\n  type: 'test'\n  ...\n# Subtest: SSRF structure gate blocks http://172.16.0.1\nok 81 - SSRF structure gate blocks http://172.16.0.1\n  ---\n  duration_ms: 0.147316\n  type: 'test'\n  ...\n# Subtest: SSRF structure gate blocks http://192.168.1.1\nok 82 - SSRF structure gate blocks http://192.168.1.1\n  ---\n  duration_ms: 0.181027\n  type: 'test'\n  ...\n# Subtest: SSRF structure gate blocks http://169.254.169.254/latest/meta-data\nok 83 - SSRF structure gate blocks http://169.254.169.254/latest/meta-data\n  ---\n  duration_ms: 0.353393\n  type: 'test'\n  ...\n# Subtest: SSRF structure gate blocks http://100.100.100.200\nok 84 - SSRF structure gate blocks http://100.100.100.200\n  ---\n  duration_ms: 0.278302\n  type: 'test'\n  ...\n# Subtest: SSRF structure gate blocks http://[::1]\nok 85 - SSRF structure gate blocks http://[::1]\n  ---\n  duration_ms: 6.101509\n  type: 'test'\n  ...\n# Subtest: SSRF structure gate blocks http://[fd00:ec2::254]\nok 86 - SSRF structure gate blocks http://[fd00:ec2::254]\n  ---\n  duration_ms: 0.245449\n  type: 'test'\n  ...\n# Subtest: SSRF structure gate blocks http://localhost\nok 87 - SSRF structure gate blocks http://localhost\n  ---\n  duration_ms: 0.817242\n  type: 'test'\n  ...\n# Subtest: SSRF structure gate blocks http://metadata.google.internal\nok 88 - SSRF structure gate blocks http://metadata.google.internal\n  ---\n  duration_ms: 0.76314\n  type: 'test'\n  ...\n# Subtest: SSRF structure gate blocks http://user:password@example.com\nok 89 - SSRF structure gate blocks http://user:password@example.com\n  ---\n  duration_ms: 0.380573\n  type: 'test'\n  ...\n# Subtest: SSRF structure gate blocks ftp://example.com\nok 90 - SSRF structure gate blocks ftp://example.com\n  ---\n  duration_ms: 0.1837\n  type: 'test'\n  ...\n# Subtest: SSRF structure gate allows an ordinary public HTTPS hostname\nok 91 - SSRF structure gate allows an ordinary public HTTPS hostname\n  ---\n  duration_ms: 0.293799\n  type: 'test'\n  ...\n# Subtest: DNS-based death in a restricted environment demotes to an environment-caveated warning\nok 92 - DNS-based death in a restricted environment demotes to an environment-caveated warning\n  ---\n  duration_ms: 3.301183\n  type: 'test'\n  ...\n# Subtest: DNS-based death with open egress stays a reviewable critical issue, never an auto-exclusion\nok 93 - DNS-based death with open egress stays a reviewable critical issue, never an auto-exclusion\n  ---\n  duration_ms: 0.819643\n  type: 'test'\n  ...\n# Subtest: a reachable page with weak name similarity produces IDENTITY_UNCONFIRMED\nok 94 - a reachable page with weak name similarity produces IDENTITY_UNCONFIRMED\n  ---\n  duration_ms: 0.334412\n  type: 'test'\n  ...\n# Subtest: clean VERIFIED record becomes publish_eligible (never auto-published)\nok 95 - clean VERIFIED record becomes publish_eligible (never auto-published)\n  ---\n  duration_ms: 1.471794\n  type: 'test'\n  ...\n# Subtest: restricted egress blocks publish-eligibility even for VERIFIED records\nok 96 - restricted egress blocks publish-eligibility even for VERIFIED records\n  ---\n  duration_ms: 0.351763\n  type: 'test'\n  ...\n# Subtest: dedupe classification: strong -> canonical_match, ambiguous -> held, batch -> excluded\nok 97 - dedupe classification: strong -> canonical_match, ambiguous -> held, batch -> excluded\n  ---\n  duration_ms: 0.345843\n  type: 'test'\n  ...\n# Subtest: critical issues, mapping failures, and missing verifier runs all hold the record\nok 98 - critical issues, mapping failures, and missing verifier runs all hold the record\n  ---\n  duration_ms: 0.582431\n  type: 'test'\n  ...\n# Subtest: non-VERIFIED statuses are held with the status embedded in the reason\nok 99 - non-VERIFIED statuses are held with the status embedded in the reason\n  ---\n  duration_ms: 0.295986\n  type: 'test'\n  ...\n# Subtest: personal prose names are excluded even with contact evidence\nok 100 - personal prose names are excluded even with contact evidence\n  ---\n  duration_ms: 2.328309\n  type: 'test'\n  ...\n# Subtest: instructional no-contact prose is excluded; real organizations are not\nok 101 - instructional no-contact prose is excluded; real organizations are not\n  ---\n  duration_ms: 1.247402\n  type: 'test'\n  ...\n# Subtest: buildCandidateSource prefers suggested name and the best canonical URL\nok 102 - buildCandidateSource prefers suggested name and the best canonical URL\n  ---\n  duration_ms: 0.768299\n  type: 'test'\n  ...\n# Subtest: normalizeVerifierRecord rejects non-records and keeps integer source indexes\nok 103 - normalizeVerifierRecord rejects non-records and keeps integer source indexes\n  ---\n  duration_ms: 0.388784\n  type: 'test'\n  ...\n# Subtest: schema persists a durable verification queue (claims, heartbeats, retries, per-record rows)\nok 104 - schema persists a durable verification queue (claims, heartbeats, retries, per-record rows)\n  ---\n  duration_ms: 1.191507\n  type: 'test'\n  ...\n# Subtest: worker claims runs atomically, heartbeats, and reclaims stale processing runs\nok 105 - worker claims runs atomically, heartbeats, and reclaims stale processing runs\n  ---\n  duration_ms: 0.447202\n  type: 'test'\n  ...\n# Subtest: pipeline stages durable runs, persists per-record checkpoints, and never fabricates VERIFIED\nok 106 - pipeline stages durable runs, persists per-record checkpoints, and never fabricates VERIFIED\n  ---\n  duration_ms: 0.503028\n  type: 'test'\n  ...\n# Subtest: bundled verifier v4 ships with the app and keeps canonical semantics external\nok 107 - bundled verifier v4 ships with the app and keeps canonical semantics external\n  ---\n  duration_ms: 2.38705\n  type: 'test'\n  ...\n# Subtest: append imports stage the automatic pipeline instead of writing canonical rows\nok 108 - append imports stage the automatic pipeline instead of writing canonical rows\n  ---\n  duration_ms: 0.302206\n  type: 'test'\n  ...\n# Subtest: new resources are automatically queued for verification\nok 109 - new resources are automatically queued for verification\n  ---\n  duration_ms: 0.233677\n  type: 'test'\n  ...\n# Subtest: all verification admin routes are authenticated and rate limited\nok 110 - all verification admin routes are authenticated and rate limited\n  ---\n  duration_ms: 0.399456\n  type: 'test'\n  ...\n# Subtest: publication gate blocks unresolved critical issues and never silently overwrites\nok 111 - publication gate blocks unresolved critical issues and never silently overwrites\n  ---\n  duration_ms: 0.310372\n  type: 'test'\n  ...\n# Subtest: artifact upload is recovery/interchange only, not the primary workflow\nok 112 - artifact upload is recovery/interchange only, not the primary workflow\n  ---\n  duration_ms: 0.502962\n  type: 'test'\n  ...\n# Subtest: admin dashboard exposes the Verification tab\nok 113 - admin dashboard exposes the Verification tab\n  ---\n  duration_ms: 0.290156\n  type: 'test'\n  ...\n1..113\n# tests 113\n# suites 0\n# pass 113\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 2098.609848",
+      "stderr": ""
+    },
+    {
+      "name": "typecheck",
+      "status": "BLOCKED",
+      "reason": "project dependencies are not installed in this execution tree"
+    },
+    {
+      "name": "lint",
+      "status": "BLOCKED",
+      "reason": "project dependencies are not installed in this execution tree"
+    },
+    {
+      "name": "next-production-build",
+      "status": "BLOCKED",
+      "reason": "project dependencies are not installed in this execution tree"
+    },
+    {
+      "name": "production-start-health",
+      "status": "BLOCKED",
+      "reason": "production build is unavailable because project dependencies are not installed"
+    }
   ],
+  "productionRuntimeVerified": false,
   "staticReleaseGatesPass": true,
-  "productionRuntimeVerified": true,
-  "allRequiredGatesPass": true,
-  "sourceTreeSha256": "dfc68fcdc258f9d2bc49aa4b0b7ef8defa758bf3824fbc3eaff187bae27f4b45"
+  "sourceTreeSha256": "1a82246a2f08f4394088f2eaec688d28504729b9e23be1054eb7518edcca5622"
 }

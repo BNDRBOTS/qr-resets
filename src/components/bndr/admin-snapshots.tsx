@@ -54,10 +54,7 @@ export function AdminSnapshots() {
     setCreating(true);
     try {
       const result = await createSnapshot("Manual snapshot from admin");
-      const hashNote = result.datasetHash
-        ? `, hash ${result.datasetHash.slice(0, 12)}`
-        : "";
-      toast.success(`Snapshot captured (${result.rowCount} rows${hashNote}).`);
+      toast.success(`Snapshot captured (${result.rowCount} rows).`);
       await refresh();
     } catch (error) {
       toast.error("Snapshot failed", {
@@ -76,22 +73,17 @@ export function AdminSnapshots() {
       const confirmed = window.confirm(
         `Restore snapshot from ${new Date(snapshot.createdAt).toLocaleString()}?\n\n` +
           `Dry run: ${preview.wouldRemove ?? 0} current rows would be replaced with ` +
-          `${preview.wouldRestore ?? 0} snapshot rows (snapshot hash ` +
-          `${preview.datasetHash ? preview.datasetHash.slice(0, 12) : "unknown"} verified).\n\n` +
-          "A pre-restore snapshot of the current rows is captured automatically, " +
-          "the restored rows are re-read and hash-proven before commit, and the " +
-          "restore is written to the audit log.",
+          `${preview.wouldRestore ?? 0} snapshot rows.\n\n` +
+          "A pre-restore snapshot of the current rows is captured automatically " +
+          "and the restore is written to the audit log.",
       );
       if (!confirmed) {
         toast.info("Restore cancelled after dry run. Nothing was written.");
         return;
       }
       const result = await restoreSnapshot(snapshot.id, false);
-      const proof = result.verified
-        ? ` Verified: ${result.verified.rowCount} rows, hash ${result.verified.datasetHash.slice(0, 12)}.`
-        : "";
       toast.success(
-        `Restored ${result.restored ?? 0} rows (replaced ${result.removed ?? 0}).${proof} Audit log updated.`,
+        `Restored ${result.restored ?? 0} rows (replaced ${result.removed ?? 0}). Audit log updated.`,
       );
       await refresh();
     } catch (error) {
