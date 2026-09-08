@@ -5,7 +5,6 @@ import {
   Phone,
   Mail,
   Globe,
-  MapPin,
   ExternalLink,
   Navigation,
   Printer,
@@ -43,7 +42,7 @@ import {
   type Resource,
   type CategorySlug,
 } from "@/lib/types";
-import { formatPhoneDisplay } from "@/lib/pii";
+import { decodeUrlForDisplay, formatPhoneDisplay } from "@/lib/pii";
 import { NoteEditor } from "./note-editor";
 import { StarRating } from "./star-rating";
 import { ContactDateEditor } from "./contact-date-editor";
@@ -55,7 +54,6 @@ const CATEGORY_NAME: Record<CategorySlug, string> = Object.fromEntries(
   CATEGORIES.map((c) => [c.slug, c.name]),
 ) as Record<CategorySlug, string>;
 
-/** Icon + label for the default-contact-method badge in the header. */
 const DEFAULT_METHOD_ICONS: Record<ContactMethod, typeof Phone> = {
   phone: Phone,
   email: Mail,
@@ -64,6 +62,7 @@ const DEFAULT_METHOD_ICONS: Record<ContactMethod, typeof Phone> = {
   text: MessageCircle,
   other: HelpCircle,
 };
+
 const DEFAULT_METHOD_LABELS: Record<ContactMethod, string> = {
   phone: "Phone",
   email: "Email",
@@ -91,14 +90,19 @@ interface ResourceDetailDialogProps {
   contactedDate?: string;
   onSetContacted?: (id: string, dateStr: string) => void;
   onClearContacted?: (id: string) => void;
-  // Contact-log timeline (multiple dates)
   contactLogEntries?: ContactLogEntry[];
-  onAddContactLog?: (resourceId: string, date: string, note?: string, method?: ContactMethod) => void;
+  onAddContactLog?: (
+    resourceId: string,
+    date: string,
+    note?: string,
+    method?: ContactMethod,
+  ) => void;
   onRemoveContactLog?: (resourceId: string, entryId: string) => void;
-  /** Saved default contact method for this resource (auto-selects in the form). */
   defaultContactMethod?: ContactMethod;
-  /** Persist/clear the default contact method for a resource. */
-  onSetDefaultContactMethod?: (resourceId: string, method: ContactMethod | null) => void;
+  onSetDefaultContactMethod?: (
+    resourceId: string,
+    method: ContactMethod | null,
+  ) => void;
 }
 
 function phones(normalized: string | null): string[] {
@@ -141,15 +145,13 @@ export function ResourceDetailDialog({
 }: ResourceDetailDialogProps) {
   const [copied, setCopied] = useState(false);
   if (!resource) return null;
+
   const r = resource;
   const allPhones = phones(r.phoneNormalized);
   const phoneDisplay = allPhones.map(formatPhoneDisplay);
   const maps = mapsHref(r);
 
   const handlePrint = () => {
-    // Turn 1 Scope C.2 — Use the shared safe print-document builder.
-    // No resource field, source note, user note, or contact log can become
-    // HTML markup (all fields are HTML-escaped by buildPrintDocument).
     const printWin = window.open("", "_blank", "width=720,height=900");
     if (!printWin) {
       toast.error("Pop-up blocked — allow pop-ups to print");
@@ -170,7 +172,6 @@ export function ResourceDetailDialog({
     printWin.document.write(html);
     printWin.document.close();
     printWin.focus();
-    // The builder already injects window.print() on load.
   };
 
   const handleShare = async () => {
@@ -191,10 +192,15 @@ export function ResourceDetailDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bndr-resource-detail max-h-[88vh] gap-0 overflow-hidden p-0 sm:max-w-2xl">
-        {/* Header strip */}
-        <div className="relative border-b border-border/60 bg-card/40 px-6 pt-6 pb-5">
-          {/* Badge row — category / priority / acronym only (no action icons). */}
+      <DialogContent
+        className="bndr-resource-detail max-h-[88vh] gap-0 overflow-hidden p-0 sm:max-w-2xl"
+        style={{
+          background: "var(--popover)",
+          backdropFilter: "none",
+          WebkitBackdropFilter: "none",
+        }}
+      >
+        <div className="relative border-b border-border/60 bg-card/40 px-6 pb-5 pt-6">
           <div className="flex flex-wrap items-center gap-2">
             {r.acronym ? (
               <Badge
@@ -215,13 +221,16 @@ export function ResourceDetailDialog({
             {defaultContactMethod ? (
               <Badge className="border border-primary/40 bg-primary/10 text-primary">
                 {(() => {
-                  const Icon = DEFAULT_METHOD_ICONS[defaultContactMethod] ?? HelpCircle;
+                  const Icon =
+                    DEFAULT_METHOD_ICONS[defaultContactMethod] ?? HelpCircle;
                   return <Icon className="size-3" aria-hidden />;
                 })()}
-                {DEFAULT_METHOD_LABELS[defaultContactMethod] ?? defaultContactMethod}
+                {DEFAULT_METHOD_LABELS[defaultContactMethod] ??
+                  defaultContactMethod}
               </Badge>
             ) : null}
           </div>
+
           <DialogHeader className="mt-3 space-y-1">
             <DialogTitle className="text-balance text-2xl font-bold leading-tight text-foreground">
               {r.name}
@@ -230,9 +239,7 @@ export function ResourceDetailDialog({
               Full details for {r.name}
             </DialogDescription>
           </DialogHeader>
-          {/* Action row — dedicated, full-width row of icon+label buttons.
-              Moved here from the badge row so the title gets its own clean
-              line and the buttons have comfortable touch targets. */}
+
           <div className="mt-4 flex flex-wrap items-center gap-2 print:hidden">
             {onToggleSave ? (
               <TooltipProvider delayDuration={150}>
@@ -243,7 +250,9 @@ export function ResourceDetailDialog({
                       variant="outline"
                       size="sm"
                       onClick={() => onToggleSave(r)}
-                      aria-label={isSaved ? "Remove from saved" : "Save resource"}
+                      aria-label={
+                        isSaved ? "Remove from saved" : "Save resource"
+                      }
                       aria-pressed={isSaved}
                       className={
                         "gap-1.5 " +
@@ -266,6 +275,7 @@ export function ResourceDetailDialog({
                 </Tooltip>
               </TooltipProvider>
             ) : null}
+
             {onToggleCompare ? (
               <TooltipProvider delayDuration={150}>
                 <Tooltip>
@@ -275,7 +285,11 @@ export function ResourceDetailDialog({
                       variant="outline"
                       size="sm"
                       onClick={() => onToggleCompare(r)}
-                      aria-label={isComparing ? "Remove from comparison" : "Add to compare"}
+                      aria-label={
+                        isComparing
+                          ? "Remove from comparison"
+                          : "Add to compare"
+                      }
                       aria-pressed={isComparing}
                       className={
                         "gap-1.5 " +
@@ -293,11 +307,14 @@ export function ResourceDetailDialog({
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent side="bottom">
-                    {isComparing ? "Remove from comparison" : "Add to compare"}
+                    {isComparing
+                      ? "Remove from comparison"
+                      : "Add to compare"}
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
             ) : null}
+
             <TooltipProvider delayDuration={150}>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -309,13 +326,20 @@ export function ResourceDetailDialog({
                     aria-label="Share resource"
                     className="gap-1.5 bg-background/50 text-muted-foreground hover:border-primary/40 hover:text-primary"
                   >
-                    {copied ? <Check className="size-4 text-primary" aria-hidden /> : <Share2 className="size-4" aria-hidden />}
+                    {copied ? (
+                      <Check className="size-4 text-primary" aria-hidden />
+                    ) : (
+                      <Share2 className="size-4" aria-hidden />
+                    )}
                     {copied ? "Copied" : "Share"}
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent side="bottom">Share / copy details</TooltipContent>
+                <TooltipContent side="bottom">
+                  Share / copy details
+                </TooltipContent>
               </Tooltip>
             </TooltipProvider>
+
             <TooltipProvider delayDuration={150}>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -331,7 +355,9 @@ export function ResourceDetailDialog({
                     Print
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent side="bottom">Print this resource</TooltipContent>
+                <TooltipContent side="bottom">
+                  Print this resource
+                </TooltipContent>
               </Tooltip>
             </TooltipProvider>
           </div>
@@ -339,14 +365,7 @@ export function ResourceDetailDialog({
 
         <ScrollArea className="max-h-[60vh]">
           <div className="space-y-6 px-6 py-5">
-            {/* Description */}
-            {r.description ? (
-              <p className="text-sm leading-relaxed text-foreground/90">
-                {r.description}
-              </p>
-            ) : null}
-
-            {/* Contact actions */}
+            {/* Contact is intentionally first: exterior cards no longer expose contact details. */}
             <div className="space-y-2">
               <h4 className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
                 Contact
@@ -358,74 +377,78 @@ export function ResourceDetailDialog({
                         key={i}
                         asChild
                         variant="outline"
-                        className="justify-start gap-2 hover:border-primary/40 hover:text-primary"
+                        className="h-auto min-h-10 justify-start gap-2 whitespace-normal text-left hover:border-primary/40 hover:text-primary"
                       >
                         <a href={`tel:${allPhones[i]}`}>
-                          <Phone className="size-4" aria-hidden /> Call · {p}
+                          <Phone className="size-4 shrink-0" aria-hidden />
+                          <span className="min-w-0 break-words">Call · {p}</span>
                         </a>
                       </Button>
                     ))
                   : null}
+
                 {r.email ? (
                   <Button
                     asChild
                     variant="outline"
-                    className="justify-start gap-2 hover:border-primary/40 hover:text-primary"
+                    className="h-auto min-h-10 justify-start gap-2 whitespace-normal text-left hover:border-primary/40 hover:text-primary"
                   >
                     <a href={`mailto:${r.email}`}>
-                      <Mail className="size-4" aria-hidden /> Email
+                      <Mail className="size-4 shrink-0" aria-hidden />
+                      <span className="min-w-0 break-all">{r.email}</span>
                     </a>
                   </Button>
                 ) : null}
+
                 {r.website ? (
                   <Button
                     asChild
                     variant="outline"
-                    className="justify-start gap-2 hover:border-primary/40 hover:text-primary"
+                    className="h-auto min-h-10 justify-start gap-2 whitespace-normal text-left hover:border-primary/40 hover:text-primary"
                   >
                     <a
                       href={r.website}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      <Globe className="size-4" aria-hidden /> Visit site
-                      <ExternalLink className="size-3 opacity-60" aria-hidden />
+                      <Globe className="size-4 shrink-0" aria-hidden />
+                      <span className="min-w-0 break-all">
+                        {decodeUrlForDisplay(r.website)}
+                      </span>
+                      <ExternalLink
+                        className="ml-auto size-3 shrink-0 opacity-60"
+                        aria-hidden
+                      />
                       <LinkStatusDot resourceId={r.id} size="md" />
                     </a>
                   </Button>
                 ) : null}
-                {maps ? (
+
+                {maps && r.address ? (
                   <Button
                     asChild
                     variant="outline"
-                    className="justify-start gap-2 hover:border-primary/40 hover:text-primary"
+                    className="h-auto min-h-10 justify-start gap-2 whitespace-normal text-left hover:border-primary/40 hover:text-primary"
                   >
                     <a
                       href={maps}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      <Navigation className="size-4" aria-hidden /> Directions
+                      <Navigation className="size-4 shrink-0" aria-hidden />
+                      <span className="min-w-0 break-words">{r.address}</span>
                     </a>
                   </Button>
                 ) : null}
               </div>
             </div>
 
-            {/* Address */}
-            {r.address ? (
-              <div className="space-y-1">
-                <h4 className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
-                  Address
-                </h4>
-                <p className="inline-flex items-start gap-2 text-sm text-foreground/90">
-                  <MapPin className="mt-0.5 size-4 shrink-0 text-primary/80" aria-hidden />
-                  {r.address}
-                </p>
-              </div>
+            {r.description ? (
+              <p className="text-sm leading-relaxed text-foreground/90">
+                {r.description}
+              </p>
             ) : null}
 
-            {/* Private rating + contact date + note (only if hooks are wired) */}
             {onSetRating || onSetContacted || (onSetNote && onDeleteNote) ? (
               <div className="space-y-2">
                 <Separator />
@@ -444,6 +467,7 @@ export function ResourceDetailDialog({
                     />
                   </div>
                 ) : null}
+
                 {onSetContacted && onClearContacted ? (
                   <ContactDateEditor
                     resourceId={r.id}
@@ -453,7 +477,7 @@ export function ResourceDetailDialog({
                     onClear={onClearContacted}
                   />
                 ) : null}
-                {/* Contact-log timeline (multiple dates + notes) */}
+
                 {onAddContactLog && onRemoveContactLog ? (
                   <ContactLogTimeline
                     resourceId={r.id}
@@ -466,6 +490,7 @@ export function ResourceDetailDialog({
                     onSetDefaultMethod={onSetDefaultContactMethod}
                   />
                 ) : null}
+
                 {onSetNote && onDeleteNote ? (
                   <NoteEditor
                     resourceId={r.id}
@@ -479,7 +504,6 @@ export function ResourceDetailDialog({
                 ) : null}
               </div>
             ) : null}
-
           </div>
         </ScrollArea>
       </DialogContent>
