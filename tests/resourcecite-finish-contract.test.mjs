@@ -48,15 +48,28 @@ test("ResourceCite dark mode lifts public supporting text out of low-contrast gr
   assert.match(css, /rgba\(248, 251, 255, 0\.84\)/);
 });
 
-test("public resource cards keep useful actions and contacts while hiding raw/internal metadata", () => {
+test("public resource cards use category surfaces, keep actions, hide exterior contacts, and expose full contacts in stable details", () => {
   const card = read("src/components/bndr/resource-card.tsx");
+  const grid = read("src/components/bndr/resource-grid.tsx");
   const detail = read("src/components/bndr/resource-detail-dialog.tsx");
-  assert.match(card, /bndr-public-card/);
+  assert.match(card, /bndr-category-tile/);
+  assert.doesNotMatch(card, /bndr-public-card/);
+  assert.match(grid, /bndr-category-tile/);
   assert.match(card, /Compare/);
   assert.match(card, /Save resource/);
   assert.match(card, /Share resource/);
+  assert.doesNotMatch(card, /href=\{`tel:|href=\{`mailto:|decodeUrlForDisplay\(resource\.website\)|resource\.address\s*\?/);
+  assert.doesNotMatch(grid, /Contact row|Contact badges placeholder/);
   assert.doesNotMatch(card, /resource\.tags|sourceNote|Phone available|Email available|Web available|Address available/);
   assert.doesNotMatch(detail, /r\.tags|resource\.tags|sourceNote/);
+  assert.match(detail, /href=\{`tel:\$\{allPhones\[i\]\}`\}/);
+  assert.match(detail, /href=\{`mailto:\$\{r\.email\}`\}/);
+  assert.match(detail, /decodeUrlForDisplay\(r\.website\)/);
+  assert.match(detail, /\{r\.address\}/);
+  assert.ok(detail.indexOf("Contact") < detail.indexOf("{r.description ?"), "contact information must appear before the long description");
+  assert.match(detail, /background:\s*"var\(--popover\)"/);
+  assert.match(detail, /backdropFilter:\s*"none"/);
+  assert.match(detail, /WebkitBackdropFilter:\s*"none"/);
   assert.match(detail, /Share/);
   assert.match(detail, /Print/);
   assert.match(detail, /Compare/);
