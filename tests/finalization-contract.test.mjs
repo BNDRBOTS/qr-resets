@@ -60,7 +60,7 @@ test("fresh site state always starts on ResourceCite", () => {
 });
 
 
-test("light is the global default while the cool-blue dark palette remains mobile-accessible", () => {
+test("light remains the global default and both product headers keep the shared switcher before the far-end theme control", () => {
   const layout = read("src/app/layout.tsx");
   const css = read("src/app/globals.css");
   const bndrHeader = read("src/components/bndr/site-header.tsx");
@@ -68,6 +68,9 @@ test("light is the global default while the cool-blue dark palette remains mobil
   assert.match(layout, /defaultTheme="light"/);
   assert.match(css, /--theme-light-primary:\s*#FF355E/);
   assert.match(css, /--theme-dark-primary:\s*oklch\(0\.68 0\.16 235\)/);
-  assert.match(bndrHeader, /md:hidden[\s\S]*<ThemeToggle \/>/);
-  assert.match(qrNav, /<ThemeToggle \/>[\s\S]*<SiteSwitcher compact \/>/);
+  assert.match(bndrHeader, /ResourceCite/);
+  assert.match(qrNav, /QR_BRAND\.name/);
+  assert.match(bndrHeader, /<SiteSwitcher compact \/>[\s\S]*<ThemeToggle \/>/);
+  assert.match(qrNav, /<SiteSwitcher compact \/>[\s\S]*<ThemeToggle \/>/);
+  assert.doesNotMatch(bndrHeader, /totalResources\.toLocaleString\(\)/);
 });
