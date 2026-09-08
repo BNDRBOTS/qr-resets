@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { GrainOverlay } from "@/components/bndr/grain-overlay";
 import { SiteHeader } from "@/components/bndr/site-header";
 import { Hero } from "@/components/bndr/hero";
@@ -17,7 +17,6 @@ import { SiteFooter } from "@/components/bndr/site-footer";
 // Client state is never authorization.
 import { CrisisHelpButton } from "@/components/bndr/crisis-help-button";
 import { QuickAccess } from "@/components/bndr/quick-access";
-import { BackToTop } from "@/components/bndr/back-to-top";
 import { SectionNav } from "@/components/bndr/section-nav";
 import { RecentlyViewed } from "@/components/bndr/recently-viewed";
 import { ActiveFilters } from "@/components/bndr/active-filters";
@@ -28,7 +27,6 @@ import { useResourceNotes } from "@/components/bndr/use-resource-notes";
 import { useResourceRatings } from "@/components/bndr/use-resource-ratings";
 import { useSearchHistory } from "@/components/bndr/use-search-history";
 import { SavedResourcesPanel } from "@/components/bndr/saved-resources-panel";
-import { CategoryModal } from "@/components/bndr/category-modal";
 import { CompareModal } from "@/components/bndr/compare-modal";
 import { CompareTray } from "@/components/bndr/compare-tray";
 import { ShortcutHelp } from "@/components/bndr/shortcut-help";
@@ -59,13 +57,12 @@ function parseUrlState(): {
   const sp = new URLSearchParams(window.location.search);
   const q = sp.get("q") ?? "";
   const cat = sp.get("cat") ?? "all";
-  const pri = sp.get("pri") === "1";
   // Validate category slug
   const validSlugs = new Set(CATEGORIES.map((c) => c.slug));
   const category = (cat === "all" || validSlugs.has(cat as CategorySlug)
     ? cat
     : "all") as CategorySlug | "all";
-  return { query: q, category, priorityOnly: pri };
+  return { query: q, category, priorityOnly: false };
 }
 
 /**
@@ -79,7 +76,6 @@ function serializeUrlState(
   const sp = new URLSearchParams();
   if (query.trim()) sp.set("q", query.trim());
   if (category !== "all") sp.set("cat", category);
-  if (priorityOnly) sp.set("pri", "1");
   const s = sp.toString();
   return s ? `?${s}` : "";
 }
@@ -100,21 +96,23 @@ export function Directory() {
   const hydratedRef = useRef(false);
   useEffect(() => {
     const s = parseUrlState();
+    // This one-time client hydration intentionally synchronizes URL state after SSR.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setQuery(s.query);
     setDebouncedQuery(s.query.trim());
     setCategory(s.category);
-    setPriorityOnly(s.priorityOnly);
+    setPriorityOnly(false);
     hydratedRef.current = true;
   }, []);
   const [selected, setSelected] = useState<Resource | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
   const [savedOpen, setSavedOpen] = useState(false);
   const [compareOpen, setCompareOpen] = useState(false);
-  const [categoryModal, setCategoryModal] = useState<CategorySlug | null>(null);
   const [shortcutHelpOpen, setShortcutHelpOpen] = useState(false);
   const [recentOpen, setRecentOpen] = useState(false);
   const [advocateDashboardOpen, setAdvocateDashboardOpen] = useState(false);
   const [collectionsOpen, setCollectionsOpen] = useState(false);
+  const [renderedAt] = useState(() => Date.now());
 
   const searchInputRef = useRef<HTMLInputElement | null>(null);
   const { recent, addRecent, clearRecent } = useRecentlyViewed();
@@ -207,22 +205,37 @@ export function Directory() {
       const s = parseUrlState();
       setQuery(s.query);
       setCategory(s.category);
-      setPriorityOnly(s.priorityOnly);
+      setPriorityOnly(false);
     };
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);
   }, []);
 
-  const { data, isLoading, isFetching, isError, refetch } = useQuery({
+  const PUBLIC_PAGE_SIZE = 100;
+  const {
+    data,
+    isLoading,
+    isFetching,
+    isFetchingNextPage,
+    isError,
+    refetch,
+    fetchNextPage,
+    hasNextPage,
+  } = useInfiniteQuery({
     queryKey: ["resources", debouncedQuery, category, priorityOnly],
-    queryFn: () =>
+    initialPageParam: 0,
+    queryFn: ({ pageParam }) =>
       fetchResources({
         q: debouncedQuery,
         category,
         priorityOnly,
-        limit: 500,
-        offset: 0,
+        limit: PUBLIC_PAGE_SIZE,
+        offset: pageParam,
       }),
+    getNextPageParam: (lastPage, pages) => {
+      const loaded = pages.reduce((sum, page) => sum + page.resources.length, 0);
+      return loaded < lastPage.total ? loaded : undefined;
+    },
   });
 
   const { data: stats } = useQuery({
@@ -230,8 +243,8 @@ export function Directory() {
     queryFn: fetchStats,
   });
 
-  const resources = data?.resources ?? [];
-  const totalCount = data?.total ?? 0;
+  const resources = data?.pages.flatMap((page) => page.resources) ?? [];
+  const totalCount = data?.pages[0]?.total ?? 0;
 
   // Per-category counts for the pill bar.
   const categoryCounts = useMemo(() => {
@@ -245,22 +258,6 @@ export function Directory() {
     return map;
   }, [stats]);
 
-  // Per-category contact coverage comes from the unfiltered public stats API,
-  // so category cards remain source-accurate while the user searches/filters.
-  const categoryStats = useMemo(() => {
-    const map: Record<string, { withPhone: number; withEmail: number; withWebsite: number }> = {};
-    for (const c of CATEGORIES) {
-      map[c.slug] = { withPhone: 0, withEmail: 0, withWebsite: 0 };
-    }
-    for (const row of stats?.categoryContactCoverage ?? []) {
-      map[row.category] = {
-        withPhone: row.withPhone,
-        withEmail: row.withEmail,
-        withWebsite: row.withWebsite,
-      };
-    }
-    return map;
-  }, [stats]);
 
   const handleOpen = useCallback(
     (r: Resource) => {
@@ -329,16 +326,6 @@ export function Directory() {
     }, 80);
   };
 
-  // Clicking a tag on a resource card fills the search with that tag.
-  const handleTagClick = (tag: string) => {
-    setQuery(tag);
-    // Scroll to the resources section so the user sees the filtered grid.
-    setTimeout(() => {
-      document
-        .getElementById("resources")
-        ?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 80);
-  };
 
   const handleJump = useCallback((id: string) => {
     if (id === "top") {
@@ -387,10 +374,6 @@ export function Directory() {
         // for random resource) don't get typed into the search field.
         if (target?.tagName === "INPUT" || target?.tagName === "TEXTAREA") {
           (target as HTMLElement).blur();
-        }
-      } else if (e.key === "p" || e.key === "P") {
-        if (!dialogOpen) {
-          setPriorityOnly((v) => !v);
         }
       } else if (e.key === "a" || e.key === "A") {
         if (!dialogOpen) {
@@ -442,7 +425,7 @@ export function Directory() {
   const gridKey = `${debouncedQuery}::${category}::${priorityOnly}`;
 
   return (
-    <div className="relative flex min-h-screen flex-col">
+    <div className="bndr-resourcecite relative flex min-h-screen flex-col">
       <GrainOverlay />
 
       <SiteHeader
@@ -459,7 +442,7 @@ export function Directory() {
           if (!d) return true; // never contacted
           const dt = new Date(d);
           if (isNaN(dt.getTime())) return true;
-          return (Date.now() - dt.getTime()) / (1000 * 60 * 60 * 24) > 7;
+          return (renderedAt - dt.getTime()) / (1000 * 60 * 60 * 24) > 7;
         }).length}
         onOpenAdvocateDashboard={() => setAdvocateDashboardOpen(true)}
         collectionsCount={collections.collections.length}
@@ -474,16 +457,18 @@ export function Directory() {
         <Hero
               query={query}
               onQueryChange={setQuery}
-              priorityOnly={priorityOnly}
-              onTogglePriority={() => setPriorityOnly((v) => !v)}
               total={stats?.totalResources ?? 0}
-              priorityCount={stats?.priorityCount ?? 0}
               searchInputRef={searchInputRef}
               onSelectCategory={handleSelectCategoryFromSearch}
               onSelectName={handleOpenById}
               recentSearches={searchHistoryItems}
               onClearSearches={clearSearchHistory}
               onBrowseAll={() => handleJump("resources")}
+              onPopularSearch={(term) => {
+                setQuery(term);
+                setDebouncedQuery(term.trim());
+                setTimeout(() => handleJump("resources"), 80);
+              }}
             />
 
 
@@ -501,13 +486,11 @@ export function Directory() {
 
             <StatsStrip
               total={stats?.totalResources ?? 0}
-              categoryCount={CATEGORIES.length}
-              priorityCount={stats?.priorityCount ?? 0}
+              categoryCount={CATEGORIES.filter((c) => (categoryCounts[c.slug] ?? 0) > 0).length}
             />
 
             <CategoryGrid
               counts={categoryCounts}
-              categoryStats={categoryStats}
               onSelect={(slug) => {
                 setCategory(slug);
                 // Delay scroll to ensure the filter is applied and the
@@ -524,26 +507,26 @@ export function Directory() {
 
             <CategoryPills
               active={category}
-              onChange={setCategory}
+              onChange={(slug) => {
+                setCategory(slug);
+                setTimeout(() => handleJump("resources"), 80);
+              }}
               counts={categoryCounts}
               total={stats?.totalResources ?? 0}
-              onShowCategory={(slug) => setCategoryModal(slug)}
             />
 
             <section
               id="resources"
-              aria-label="Resource directory"
+              aria-label="ResourceCite resources"
               className="py-12 md:py-16"
             >
               <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div className="mb-6 flex flex-wrap items-end justify-between gap-2">
                   <div>
                     <h2 className="text-xl font-bold text-foreground sm:text-2xl">
-                      {priorityOnly
-                        ? "Priority resources"
-                        : debouncedQuery
-                          ? `Results for "${debouncedQuery}"`
-                          : "All resources"}
+                      {debouncedQuery
+                        ? `Results for "${debouncedQuery}"`
+                        : "All resources"}
                     </h2>
                     <p className="mt-1 text-sm text-muted-foreground">
                       {isLoading
@@ -551,15 +534,11 @@ export function Directory() {
                         : `${totalCount} ${
                             totalCount === 1 ? "match" : "matches"
                           }`}
-                      {priorityOnly ? " · priority only" : ""}
                     </p>
                   </div>
                   <p className="hidden items-center gap-1.5 text-[11px] text-muted-foreground/60 lg:flex">
                     <kbd className="rounded border border-border/60 bg-muted/40 px-1.5 py-0.5 font-mono text-[10px]">/</kbd>
                     search
-                    <span className="mx-1.5 text-border/60">·</span>
-                    <kbd className="rounded border border-border/60 bg-muted/40 px-1.5 py-0.5 font-mono text-[10px]">P</kbd>
-                    priority
                     <span className="mx-1.5 text-border/60">·</span>
                     <kbd className="rounded border border-border/60 bg-muted/40 px-1.5 py-0.5 font-mono text-[10px]">S</kbd>
                     saved
@@ -590,7 +569,7 @@ export function Directory() {
                 <ActiveFilters
                   query={debouncedQuery}
                   category={category}
-                  priorityOnly={priorityOnly}
+                  priorityOnly={false}
                   onClearQuery={() => setQuery("")}
                   onClearCategory={() => setCategory("all")}
                   onClearPriority={() => setPriorityOnly(false)}
@@ -600,7 +579,7 @@ export function Directory() {
                 <CountBar
                   filtered={totalCount}
                   total={stats?.totalResources ?? 0}
-                  hasFilters={!!debouncedQuery || category !== "all" || priorityOnly}
+                  hasFilters={!!debouncedQuery || category !== "all"}
                   onClearFilters={clearSearch}
                 />
 
@@ -612,7 +591,7 @@ export function Directory() {
 
                 {isError ? (
                   <div className="rounded-2xl border border-border/70 bg-card/30 px-6 py-12 text-center">
-                    <h3 className="text-lg font-semibold text-foreground">Resource directory unavailable</h3>
+                    <h3 className="text-lg font-semibold text-foreground">ResourceCite unavailable</h3>
                     <p className="mx-auto mt-2 max-w-xl text-sm text-muted-foreground">
                       The resource request failed. Nothing is being represented as an empty search result.
                     </p>
@@ -632,7 +611,9 @@ export function Directory() {
                     loading={isLoading || (isFetching && resources.length === 0)}
                     totalCount={totalCount}
                     directoryTotal={stats?.totalResources ?? 0}
-                    pageSize={500}
+                    hasMore={hasNextPage}
+                    loadingMore={isFetchingNextPage}
+                    onLoadMore={() => void fetchNextPage()}
                     onReset={clearSearch}
                     onOpen={handleOpen}
                     isSaved={isSaved}
@@ -641,20 +622,20 @@ export function Directory() {
                     onToggleCompare={handleToggleCompare}
                     hasNote={(id) => !!notes.getNote(id)}
                     getRating={ratings.getRating}
-                    onTagClick={handleTagClick}
                     isFollowUpNeeded={(id) => {
                       if (!isSaved(id)) return false;
                       const d = lastContacted.getContacted(id);
                       if (!d) return true;
                       const dt = new Date(d);
                       if (isNaN(dt.getTime())) return true;
-                      return (Date.now() - dt.getTime()) / (1000 * 60 * 60 * 24) > 7;
+                      return (renderedAt - dt.getTime()) / (1000 * 60 * 60 * 24) > 7;
                     }}
                     getContactLogCount={(id) => contactLog.getEntries(id).length}
                     getDefaultContactMethod={defaultContactMethod.getMethod}
                     onSuggestionClick={(term) => {
                       setQuery(term);
                       setDebouncedQuery(term.trim());
+                      setTimeout(() => handleJump("resources"), 80);
                     }}
                   />
                 )}
@@ -740,13 +721,6 @@ export function Directory() {
         collectionMaxNameLength={collections.maxNameLength}
       />
 
-      <CategoryModal
-        category={categoryModal}
-        open={categoryModal !== null}
-        onOpenChange={(o) => !o && setCategoryModal(null)}
-        onOpenResource={handleOpen}
-        onSelectCategory={(c) => setCategory(c)}
-      />
 
       <CompareModal
         items={compare.items}
@@ -778,13 +752,12 @@ export function Directory() {
         }}
       />
 
-      <BackToTop />
 
       <SectionNav
         sections={[
           { id: "top", label: "Home" },
           { id: "categories", label: "Browse by Category" },
-          { id: "resources", label: "Resource Directory" },
+          { id: "resources", label: "ResourceCite" },
         ]}
       />
 
@@ -849,4 +822,3 @@ export function Directory() {
     </div>
   );
 }
-

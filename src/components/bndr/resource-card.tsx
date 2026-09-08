@@ -6,8 +6,6 @@ import {
   Mail,
   Globe,
   MapPin,
-  Info,
-  Sparkles,
   ExternalLink,
   Bookmark,
   BookmarkCheck,
@@ -16,7 +14,6 @@ import {
   StickyNote,
   Star,
   AlertCircle,
-  Inbox,
   History,
   User,
   Voicemail,
@@ -33,7 +30,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { CATEGORIES, type Resource, type CategorySlug } from "@/lib/types";
 import { formatPhoneDisplay, decodeUrlForDisplay } from "@/lib/pii";
-import { parseTags } from "@/lib/tags";
 import type { ContactMethod } from "./use-contact-log";
 import { Highlight } from "./highlight";
 import { LinkStatusDot } from "./link-status-dot";
@@ -51,11 +47,8 @@ interface ResourceCardProps {
   hasNote?: boolean;
   rating?: number;
   onTagClick?: (tag: string) => void;
-  /** Saved + (never contacted OR contacted >7d ago) → amber dot */
   followUpNeeded?: boolean;
-  /** Number of contact-log entries for this resource (shows a history badge). */
   contactLogCount?: number;
-  /** The advocate's saved default contact method for this resource (shows an icon badge). */
   defaultContactMethod?: ContactMethod;
 }
 
@@ -63,7 +56,6 @@ const CATEGORY_NAME: Record<CategorySlug, string> = Object.fromEntries(
   CATEGORIES.map((c) => [c.slug, c.shortName]),
 ) as Record<CategorySlug, string>;
 
-/** Icon + label for the default-contact-method badge on cards. */
 const DEFAULT_METHOD_ICONS: Record<ContactMethod, typeof Phone> = {
   phone: Phone,
   email: Mail,
@@ -72,6 +64,7 @@ const DEFAULT_METHOD_ICONS: Record<ContactMethod, typeof Phone> = {
   text: MessageCircle,
   other: HelpCircle,
 };
+
 const DEFAULT_METHOD_LABELS: Record<ContactMethod, string> = {
   phone: "Phone call",
   email: "Email",
@@ -86,11 +79,42 @@ function firstPhone(normalized: string | null): string | null {
   return normalized.split("|")[0].trim() || null;
 }
 
-/**
- * Glassmorphic resource card with consistent geometry for every resource.
- * Priority is preserved as metadata and an explicit filter, never as a larger
- * card footprint that could visually over-weight one resource or category.
- */
+function ActionButton({
+  label,
+  active = false,
+  onClick,
+  children,
+}: {
+  label: string;
+  active?: boolean;
+  onClick: (event: React.MouseEvent<HTMLButtonElement>) => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <TooltipProvider delayDuration={150}>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            type="button"
+            onClick={onClick}
+            aria-label={label}
+            aria-pressed={active || undefined}
+            className={
+              "flex size-8 items-center justify-center rounded-full border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 " +
+              (active
+                ? "border-primary/35 bg-primary/15 text-primary"
+                : "border-transparent text-foreground/75 hover:border-primary/25 hover:bg-primary/10 hover:text-primary")
+            }
+          >
+            {children}
+          </button>
+        </TooltipTrigger>
+        <TooltipContent side="bottom">{label}</TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+}
+
 export function ResourceCard({
   resource,
   query,
@@ -102,290 +126,29 @@ export function ResourceCard({
   onToggleCompare,
   hasNote = false,
   rating = 0,
-  onTagClick,
   followUpNeeded = false,
   contactLogCount = 0,
   defaultContactMethod,
 }: ResourceCardProps) {
-  const isPriority = resource.priority >= 1;
-  const tags = parseTags(resource.tags);
   const phone = firstPhone(resource.phoneNormalized);
   const phoneDisplay = formatPhoneDisplay(phone);
   const catName = CATEGORY_NAME[resource.category] ?? resource.category;
   const hasContact = Boolean(phoneDisplay || resource.email || resource.website || resource.address);
-
   const stop = (e: React.MouseEvent) => e.stopPropagation();
+  const MethodIcon = defaultContactMethod ? DEFAULT_METHOD_ICONS[defaultContactMethod] : null;
 
-  // ---- Compare toggle button (shared) --------------------------------------
-  const CompareButton = onToggleCompare ? (
-    <TooltipProvider delayDuration={150}>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <button
-            type="button"
-            onClick={(e) => {
-              stop(e);
-              onToggleCompare(resource);
-            }}
-            aria-label={isComparing ? `Remove ${resource.name} from comparison` : `Add ${resource.name} to comparison`}
-            aria-pressed={isComparing}
-            className={
-              "flex size-8 items-center justify-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 " +
-              (isComparing
-                ? "text-primary hover:bg-primary/15"
-                : "text-muted-foreground/60 hover:text-primary hover:bg-primary/10")
-            }
-          >
-            {isComparing ? (
-              <Check className="size-3.5" aria-hidden />
-            ) : (
-              <ArrowLeftRight className="size-3.5" aria-hidden />
-            )}
-          </button>
-        </TooltipTrigger>
-        <TooltipContent side="bottom">
-          {isComparing ? "Remove from comparison" : "Add to compare"}
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
-  ) : null;
-
-  // ---- Save toggle button (shared) -----------------------------------------
-  const SaveButton = onToggleSave ? (
-    <TooltipProvider delayDuration={150}>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <button
-            type="button"
-            onClick={(e) => {
-              stop(e);
-              onToggleSave(resource);
-            }}
-            aria-label={isSaved ? `Remove ${resource.name} from saved` : `Save ${resource.name}`}
-            aria-pressed={isSaved}
-            className={
-              "flex size-8 items-center justify-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 " +
-              (isSaved
-                ? "text-primary hover:bg-primary/15"
-                : "text-muted-foreground/60 hover:text-primary hover:bg-primary/10")
-            }
-          >
-            {isSaved ? (
-              <BookmarkCheck className="size-3.5" aria-hidden />
-            ) : (
-              <Bookmark className="size-3.5" aria-hidden />
-            )}
-          </button>
-        </TooltipTrigger>
-        <TooltipContent side="bottom">
-          {isSaved ? "Remove from saved" : "Save to my list"}
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
-  ) : null;
-
-  // ---- Share button (shared) -----------------------------------------------
-  const ShareButton = (
-    <TooltipProvider delayDuration={150}>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <button
-            type="button"
-            onClick={(e) => {
-              stop(e);
-              const text = `${resource.name}\n${resource.description ?? ""}\n${resource.phoneNormalized ? "Phone: " + resource.phoneNormalized : ""}\n${resource.website ? "Web: " + resource.website : ""}\n\nVia BNDR. Resource Directory`;
-              if (navigator.share) {
-                navigator.share({ title: resource.name, text }).catch(() => {});
-              } else {
-                navigator.clipboard.writeText(text).then(
-                  () => toast.success("Resource details copied to clipboard"),
-                  () => toast.error("Could not copy to clipboard"),
-                );
-              }
-            }}
-            aria-label={`Share ${resource.name}`}
-            className="flex size-8 items-center justify-center rounded-full text-muted-foreground/60 transition-colors hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
-          >
-            <Share2 className="size-3.5" aria-hidden />
-          </button>
-        </TooltipTrigger>
-        <TooltipContent side="bottom">Share resource</TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
-  );
-
-  // ---- Shared sub-elements --------------------------------------------------
-
-  const Badges = (
-    <div className="flex flex-wrap items-center gap-2">
-      {isPriority ? (
-        <Badge className="border border-primary/40 bg-primary/20 text-primary">
-          <Sparkles className="size-3" aria-hidden /> Priority
-        </Badge>
-      ) : null}
-      {resource.acronym ? (
-        <Badge
-          variant="secondary"
-          className="bg-secondary/70 font-mono text-xs uppercase tracking-wide"
-        >
-          {resource.acronym}
-        </Badge>
-      ) : null}
-      <Badge
-        variant="outline"
-        className="border-border/80 text-muted-foreground"
-      >
-        {catName}
-      </Badge>
-      {followUpNeeded ? (
-        <TooltipProvider delayDuration={150}>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <span
-                className="bndr-status-pill inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-medium"
-                aria-label="Follow-up needed: saved but not contacted recently"
-              >
-                <AlertCircle className="size-3" aria-hidden />
-                Follow-up
-              </span>
-            </TooltipTrigger>
-            <TooltipContent side="bottom">
-              Saved but never contacted, or last contacted over 7 days ago.
-              Open to log a new contact date.
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      ) : null}
-      {contactLogCount > 0 ? (
-        <TooltipProvider delayDuration={150}>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <span
-                className="inline-flex items-center gap-1 rounded-full border border-primary/30 bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary"
-                aria-label={`${contactLogCount} contact log ${contactLogCount === 1 ? "entry" : "entries"}`}
-              >
-                <History className="size-3" aria-hidden />
-                {contactLogCount}
-              </span>
-            </TooltipTrigger>
-            <TooltipContent side="bottom">
-              {contactLogCount} contact {contactLogCount === 1 ? "log entry" : "log entries"} recorded. Open to view the full timeline.
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      ) : null}
-      {defaultContactMethod ? (
-        <TooltipProvider delayDuration={150}>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <span
-                className="inline-flex items-center gap-1 rounded-full border border-primary/30 bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary"
-                aria-label={`Default contact method: ${DEFAULT_METHOD_LABELS[defaultContactMethod] ?? defaultContactMethod}`}
-              >
-                {(() => {
-                  const Icon = DEFAULT_METHOD_ICONS[defaultContactMethod] ?? HelpCircle;
-                  return <Icon className="size-3" aria-hidden />;
-                })()}
-              </span>
-            </TooltipTrigger>
-            <TooltipContent side="bottom">
-              Default method: {DEFAULT_METHOD_LABELS[defaultContactMethod] ?? defaultContactMethod}. Auto-selected when logging a new contact.
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      ) : null}
-      {/* Right-aligned action icons */}
-      <div className="ml-auto flex shrink-0 items-center gap-1">
-        {rating > 0 ? (
-          <TooltipProvider delayDuration={150}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span className="inline-flex items-center gap-0.5 rounded-full p-1 text-primary" aria-label={`Your rating: ${rating} of 5 stars`}>
-                  <Star className="size-3.5 fill-current" aria-hidden />
-                  <span className="text-[10px] font-medium tabular-nums">{rating}</span>
-                </span>
-              </TooltipTrigger>
-              <TooltipContent side="bottom">Your rating: {rating}/5</TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        ) : null}
-        {hasNote ? (
-          <TooltipProvider delayDuration={150}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <span className="rounded-full p-1 text-primary" aria-label="Has a private note">
-                  <StickyNote className="size-3.5" aria-hidden />
-                </span>
-              </TooltipTrigger>
-              <TooltipContent side="bottom">Has a private note</TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        ) : null}
-        {CompareButton}
-        {SaveButton}
-        {ShareButton}
-        {resource.sourceNote ? (
-          <TooltipProvider delayDuration={150}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  type="button"
-                  onClick={stop}
-                  aria-label="Source note"
-                  className="flex size-8 items-center justify-center rounded-full text-muted-foreground/70 hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
-                >
-                  <Info className="size-3.5" />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent
-                side="bottom"
-                className="max-w-xs border-border bg-popover/95 text-xs text-popover-foreground"
-              >
-                {resource.sourceNote}
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        ) : null}
-      </div>
-    </div>
-  );
-
-  const Tags = tags.length > 0 ? (
-    <div className="flex flex-wrap gap-1.5 pt-1">
-      {tags.slice(0, 4).map((t) =>
-        onTagClick ? (
-          <button
-            key={t}
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onTagClick(t);
-            }}
-            className="rounded-lg border border-border/50 bg-muted/40 px-2.5 py-1 text-xs font-medium text-foreground/70 transition-colors hover:border-primary/40 hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary/60"
-          >
-            {t}
-          </button>
-        ) : (
-          <span
-            key={t}
-            className="rounded-lg border border-border/50 bg-muted/40 px-2.5 py-1 text-xs font-medium text-foreground/70"
-          >
-            {t}
-          </span>
-        ),
-      )}
-      {tags.length > 4 ? (
-        <span className="rounded-lg border border-primary/30 bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary/80">
-          +{tags.length - 4}
-        </span>
-      ) : null}
-    </div>
-  ) : null;
-
-  // ---- Unified resource card -------------------------------------------------
-  // Priority remains a badge/filter only; all resources keep equal card geometry.
-
-  // ---- NORMAL: vertical compact card ---------------------------------------
+  const share = (event: React.MouseEvent<HTMLButtonElement>) => {
+    stop(event);
+    const text = `${resource.name}\n${resource.description ?? ""}\n${phoneDisplay ? "Phone: " + phoneDisplay : ""}\n${resource.email ? "Email: " + resource.email : ""}\n${resource.website ? "Web: " + resource.website : ""}\n\nVia ResourceCite by BNDR LLC`;
+    if (navigator.share) {
+      navigator.share({ title: resource.name, text }).catch(() => {});
+    } else {
+      navigator.clipboard.writeText(text).then(
+        () => toast.success("Resource details copied to clipboard"),
+        () => toast.error("Could not copy to clipboard"),
+      );
+    }
+  };
 
   return (
     <motion.article
@@ -394,121 +157,137 @@ export function ResourceCard({
       viewport={{ once: true, margin: "-60px" }}
       transition={{ duration: 0.45, delay: Math.min(index * 0.04, 0.32) }}
       onClick={() => onOpen(resource)}
-      className="bndr-card group relative flex cursor-pointer flex-col gap-3 rounded-2xl p-4 sm:p-5 lg:p-6"
+      className="bndr-card bndr-public-card group relative flex min-h-[310px] cursor-pointer flex-col rounded-2xl p-4 sm:p-5 lg:p-6"
     >
-      {Badges}
+      {/* Stable header: identity on the left, primary actions on the right. */}
+      <div className="flex min-h-9 items-start gap-3">
+        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5">
+          <Badge variant="outline" className="bndr-card-category border-primary/25 bg-primary/8 text-[10px] font-semibold text-foreground/85">
+            {catName}
+          </Badge>
+          {resource.acronym ? (
+            <Badge variant="secondary" className="bndr-card-acronym bg-secondary/30 font-mono text-[10px] uppercase tracking-wide text-foreground/85">
+              {resource.acronym}
+            </Badge>
+          ) : null}
+        </div>
+        <div className="flex shrink-0 items-center gap-0.5" aria-label="Resource actions">
+          {onToggleCompare ? (
+            <ActionButton
+              label={isComparing ? "Remove from comparison" : "Add to compare"}
+              active={isComparing}
+              onClick={(event) => {
+                stop(event);
+                onToggleCompare(resource);
+              }}
+            >
+              {isComparing ? <Check className="size-3.5" aria-hidden /> : <ArrowLeftRight className="size-3.5" aria-hidden />}
+            </ActionButton>
+          ) : null}
+          {onToggleSave ? (
+            <ActionButton
+              label={isSaved ? "Remove from saved" : "Save resource"}
+              active={isSaved}
+              onClick={(event) => {
+                stop(event);
+                onToggleSave(resource);
+              }}
+            >
+              {isSaved ? <BookmarkCheck className="size-3.5" aria-hidden /> : <Bookmark className="size-3.5" aria-hidden />}
+            </ActionButton>
+          ) : null}
+          <ActionButton label="Share resource" onClick={share}>
+            <Share2 className="size-3.5" aria-hidden />
+          </ActionButton>
+        </div>
+      </div>
 
-      <h3 className="text-lg font-semibold leading-snug text-foreground">
+      <h3 className="bndr-card-title mt-3 text-lg font-semibold leading-snug">
         <button
           type="button"
-          onClick={(e) => { e.stopPropagation(); onOpen(resource); }}
+          onClick={(event) => {
+            event.stopPropagation();
+            onOpen(resource);
+          }}
           className="rounded-sm text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
         >
           <Highlight text={resource.name} query={query} />
         </button>
       </h3>
 
-      {/* Contact method quick-badges — at-a-glance availability indicators */}
+      {resource.description ? (
+        <p className="bndr-card-copy mt-2 bndr-line-clamp-4 text-sm leading-relaxed">
+          <Highlight text={resource.description} query={query} />
+        </p>
+      ) : null}
+
       {hasContact ? (
-        <div className="flex flex-wrap items-center gap-1.5">
+        <div className="bndr-card-contact mt-auto flex flex-col gap-1.5 border-t border-white/10 pt-3 text-sm">
           {phoneDisplay ? (
-            <span className="bndr-contact-chip" title="Phone available">
-              <Phone className="size-2.5" aria-hidden />
-              Phone
-            </span>
+            <a href={`tel:${phone}`} onClick={stop} className="inline-flex items-center gap-2 transition-colors hover:text-primary focus-visible:underline">
+              <Phone className="bndr-contact-icon size-3.5" aria-hidden />
+              <span className="font-mono tabular-nums">{phoneDisplay}</span>
+            </a>
           ) : null}
           {resource.email ? (
-            <span className="bndr-contact-chip" title="Email available">
-              <Mail className="size-2.5" aria-hidden />
-              Email
-            </span>
+            <a href={`mailto:${resource.email}`} onClick={stop} className="inline-flex items-center gap-2 truncate transition-colors hover:text-primary focus-visible:underline">
+              <Mail className="bndr-contact-icon size-3.5 shrink-0" aria-hidden />
+              <span className="truncate">{resource.email}</span>
+            </a>
           ) : null}
           {resource.website ? (
-            <span className="bndr-contact-chip" title="Website available">
-              <Globe className="size-2.5" aria-hidden />
-              Web
-            </span>
+            <a href={resource.website} target="_blank" rel="noopener noreferrer" onClick={stop} className="inline-flex items-center gap-2 truncate transition-colors hover:text-primary focus-visible:underline">
+              <Globe className="bndr-contact-icon size-3.5 shrink-0" aria-hidden />
+              <span className="truncate">
+                {decodeUrlForDisplay(resource.website).replace(/^https?:\/\//, "").replace(/\/$/, "")}
+              </span>
+              <span
+                className="ml-auto flex items-center gap-1"
+                onClick={(event) => {
+                  event.preventDefault();
+                  event.stopPropagation();
+                }}
+              >
+                <LinkStatusDot resourceId={resource.id} />
+                <ExternalLink className="size-3 shrink-0 opacity-70" aria-hidden />
+              </span>
+            </a>
           ) : null}
           {resource.address ? (
-            <span className="bndr-contact-chip" title="Address available">
-              <MapPin className="size-2.5" aria-hidden />
-              Address
+            <span className="inline-flex items-start gap-2">
+              <MapPin className="bndr-contact-icon mt-0.5 size-3.5 shrink-0" aria-hidden />
+              <span>{resource.address}</span>
             </span>
           ) : null}
         </div>
       ) : null}
 
-      {resource.description ? (
-        <p className="bndr-line-clamp-3 text-sm leading-relaxed text-foreground/90">
-          <Highlight text={resource.description} query={query} />
-        </p>
+      {/* Private user-state indicators are separated from public resource facts. */}
+      {followUpNeeded || contactLogCount > 0 || defaultContactMethod || rating > 0 || hasNote ? (
+        <div className="mt-3 flex min-h-7 flex-wrap items-center gap-2 border-t border-white/10 pt-3 text-[10px] text-foreground/75">
+          {followUpNeeded ? (
+            <span className="inline-flex items-center gap-1 rounded-full border border-amber-400/30 bg-amber-400/10 px-2 py-1">
+              <AlertCircle className="size-3" aria-hidden /> Follow-up
+            </span>
+          ) : null}
+          {contactLogCount > 0 ? (
+            <span className="inline-flex items-center gap-1 rounded-full border border-primary/25 bg-primary/10 px-2 py-1">
+              <History className="size-3" aria-hidden /> {contactLogCount}
+            </span>
+          ) : null}
+          {MethodIcon && defaultContactMethod ? (
+            <span className="inline-flex items-center gap-1 rounded-full border border-primary/25 bg-primary/10 px-2 py-1" title={`Default contact method: ${DEFAULT_METHOD_LABELS[defaultContactMethod]}`}>
+              <MethodIcon className="size-3" aria-hidden /> {DEFAULT_METHOD_LABELS[defaultContactMethod]}
+            </span>
+          ) : null}
+          {rating > 0 ? (
+            <span className="ml-auto inline-flex items-center gap-1" aria-label={`Your rating: ${rating} of 5`}>
+              <Star className="size-3 fill-current text-primary" aria-hidden /> {rating}/5
+            </span>
+          ) : null}
+          {hasNote ? <StickyNote className="size-3.5 text-primary" aria-label="Has a private note" /> : null}
+        </div>
       ) : null}
-
-      {/* Contact row — brighter text for readability, hover lifts to primary.
-           When a card has no contact info at all, show a subtle "no direct
-           contact on file" note so the row never collapses to empty space. */}
-      <div className="mt-auto flex flex-col gap-1.5 border-t border-border/50 pt-3 text-sm">
-        {phoneDisplay ? (
-          <a
-            href={`tel:${phone}`}
-            onClick={stop}
-            className="inline-flex items-center gap-2 text-foreground/90 transition-colors hover:text-primary focus-visible:outline-none focus-visible:underline"
-          >
-            <Phone className="size-3.5 text-primary/80" aria-hidden />
-            <span className="font-mono tabular-nums">{phoneDisplay}</span>
-          </a>
-        ) : null}
-        {resource.email ? (
-          <a
-            href={`mailto:${resource.email}`}
-            onClick={stop}
-            className="inline-flex items-center gap-2 truncate text-foreground/90 transition-colors hover:text-primary focus-visible:outline-none focus-visible:underline"
-          >
-            <Mail className="size-3.5 shrink-0 text-primary/80" aria-hidden />
-            <span className="truncate">{resource.email}</span>
-          </a>
-        ) : null}
-        {resource.website ? (
-          <a
-            href={resource.website}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={stop}
-            className="inline-flex items-center gap-2 truncate text-foreground/90 transition-colors hover:text-primary focus-visible:outline-none focus-visible:underline"
-          >
-            <Globe className="size-3.5 shrink-0 text-primary/80" aria-hidden />
-            <span className="truncate">
-              {decodeUrlForDisplay(resource.website)
-                .replace(/^https?:\/\//, "")
-                .replace(/\/$/, "")}
-            </span>
-            <span
-              className="ml-auto flex items-center gap-1"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-              }}
-            >
-              <LinkStatusDot resourceId={resource.id} />
-              <ExternalLink className="size-3 shrink-0 opacity-60" aria-hidden />
-            </span>
-          </a>
-        ) : null}
-        {resource.address ? (
-          <span className="inline-flex items-center gap-2 text-foreground/70">
-            <MapPin className="size-3.5 shrink-0 text-primary/70" aria-hidden />
-            <span className="truncate">{resource.address}</span>
-          </span>
-        ) : null}
-        {!hasContact ? (
-          <span className="inline-flex items-center gap-2 text-muted-foreground/70">
-            <Inbox className="size-3.5 shrink-0 text-muted-foreground/60" aria-hidden />
-            <span className="italic">No direct contact on file — open for full details</span>
-          </span>
-        ) : null}
-      </div>
-
-      {Tags}
     </motion.article>
   );
 }

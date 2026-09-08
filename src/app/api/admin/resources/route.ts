@@ -2,8 +2,8 @@
 // GET returns every publication state. POST creates a resource.
 
 import { NextRequest, NextResponse } from "next/server";
+import type { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
-import { searchResources } from "@/lib/search";
 import { getAdminSession, requireAdminRateLimited, apiError } from "@/lib/require-admin";
 import { RATE_LIMITS } from "@/lib/rate-limit";
 import {
@@ -16,6 +16,9 @@ import {
 import type { CategorySlug, SearchResult } from "@/lib/types";
 import { toResourceShape } from "../../resources/route";
 import { createResourceRecord } from "@/lib/resource-service";
+import { ResourceIngestionError } from "@/lib/resource-ingestion";
+import { paginateResources } from "@/lib/resource-pagination";
+import { verifyExistingResources } from "@/lib/verification-pipeline";
 
 export const dynamic = "force-dynamic";
 
@@ -39,11 +42,7 @@ export async function GET(req: NextRequest) {
 
     const { q, category, priorityOnly, limit, offset } = parsed.data;
     const publishedParam = sp.get("published");
-    const where: {
-      category?: string;
-      priority?: { gte: number };
-      published?: boolean;
-    } = {};
+    const where: Prisma.ResourceWhereInput = {};
 
     if (category && category !== "all") {
       where.category = category as CategorySlug;
@@ -52,19 +51,27 @@ export async function GET(req: NextRequest) {
     if (publishedParam === "true") where.published = true;
     if (publishedParam === "false") where.published = false;
 
-    const rows = await db.resource.findMany({ where });
-    const resources = rows.map(toResourceShape);
-    const scored = searchResources(resources, q, { limit, offset });
-    const total = q.trim()
-      ? searchResources(resources, q).length
-      : resources.length;
+    const page = await paginateResources(
+      {
+        count: () => db.resource.count({ where }),
+        fetchPage: async ({ skip, take }) => {
+          const rows = await db.resource.findMany({
+            where,
+            orderBy: [{ name: "asc" }, { id: "asc" }],
+            skip,
+            take,
+          });
+          return rows.map(toResourceShape);
+        },
+      },
+      { q, limit, offset },
+    );
 
     const result: SearchResult = {
-      resources: scored as SearchResult["resources"],
-      total,
+      resources: page.resources as SearchResult["resources"],
+      total: page.total,
       query: q,
     };
-
     return NextResponse.json(result);
   } catch (error) {
     console.error("[api/admin/resources GET]", error);
@@ -100,8 +107,23 @@ export async function POST(req: NextRequest) {
     const actor = session?.user?.email;
     if (!actor) return apiError("UNAUTHORIZED", "Authentication required.", 401);
     const created = await createResourceRecord(parsed.data, actor);
+    // Automatically queue verifier-v4 verification for the new resource; the
+    // durable background worker picks it up. Staging failures never block the
+    // create itself (the record simply stays unverified until re-queued).
+    try {
+      await verifyExistingResources({
+        actor,
+        resourceIds: [created.id],
+        origin: "resource-created",
+      });
+    } catch (stageError) {
+      console.error("[api/admin/resources POST] failed to stage verification", stageError);
+    }
     return NextResponse.json(toResourceShape(created), { status: 201 });
   } catch (error) {
+    if (error instanceof ResourceIngestionError) {
+      return apiError(error.code, error.message, error.code === "DUPLICATE_RESOURCE" ? 409 : 400);
+    }
     console.error("[api/admin/resources POST]", error);
     return apiError("INTERNAL", "Failed to create resource.", 500);
   }

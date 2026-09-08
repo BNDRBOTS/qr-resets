@@ -233,6 +233,7 @@ export function AdvocateDashboard({
   defaultMethodCount = 0,
   onClearAllDefaults,
 }: AdvocateDashboardProps) {
+  const [renderedAt] = useState(() => Date.now());
   const stats = useMemo(() => {
     const savedCount = saved.length;
     const contactedCount = saved.filter((r) => !!contacted[r.id]).length;
@@ -247,14 +248,14 @@ export function AdvocateDashboard({
       if (!d) return false;
       const dt = new Date(d);
       if (isNaN(dt.getTime())) return false;
-      return (Date.now() - dt.getTime()) / (1000 * 60 * 60 * 24) <= 7;
+      return (renderedAt - dt.getTime()) / (1000 * 60 * 60 * 24) <= 7;
     });
     const recentlyContacted30d = saved.filter((r) => {
       const d = contacted[r.id];
       if (!d) return false;
       const dt = new Date(d);
       if (isNaN(dt.getTime())) return false;
-      return (Date.now() - dt.getTime()) / (1000 * 60 * 60 * 24) <= 30;
+      return (renderedAt - dt.getTime()) / (1000 * 60 * 60 * 24) <= 30;
     });
 
     // Outreach cadence: contacts per week over the last 30 days (0 if none).
@@ -330,7 +331,7 @@ export function AdvocateDashboard({
       totalMethodContacts,
       recentContacts,
     };
-  }, [saved, notes, ratings, contacted, contactLogs]);
+  }, [saved, notes, ratings, contacted, contactLogs, renderedAt]);
 
   // ---- Outreach stats — uses the shared useOutreachStats hook so the site
   // header indicators + this dashboard stay perfectly in sync. The hook
@@ -376,7 +377,7 @@ export function AdvocateDashboard({
   // ---- Share dashboard summary (copyable text) -----------------------------
   const shareDashboard = async () => {
     const lines = [
-      `BNDR. Advocate Dashboard — ${stamp}`,
+      `ResourceCite Advocate Dashboard — ${stamp}`,
       ``,
       `Outreach at a glance:`,
       `  Saved: ${stats.savedCount}`,
@@ -574,8 +575,8 @@ export function AdvocateDashboard({
         })
       : ["All caught up — no follow-ups needed."];
     const header = hasFollowUps
-      ? `BNDR. Follow-up worklist — ${stats.followUpNeeded.length} item${stats.followUpNeeded.length === 1 ? "" : "s"} (${stamp})\n\n`
-      : `BNDR. Dashboard summary (${stamp})\n\n`;
+      ? `ResourceCite Follow-up worklist — ${stats.followUpNeeded.length} item${stats.followUpNeeded.length === 1 ? "" : "s"} (${stamp})\n\n`
+      : `ResourceCite Dashboard summary (${stamp})\n\n`;
     // Append a compact summary section so the text is useful even with 0 follow-ups.
     const summary = [
       `Saved: ${stats.savedCount} · Contacted: ${stats.contactedCount} · Follow-up: ${stats.followUpCount}`,
@@ -678,7 +679,7 @@ export function AdvocateDashboard({
       <div class="mbar">${methodSegments}</div>
       <table class="mlegend">${methodLegend}</table>` : "";
 
-    w.document.write(`<!DOCTYPE html><html><head><title>BNDR. Advocate Dashboard — ${stamp}</title><style>
+    w.document.write(`<!DOCTYPE html><html><head><title>ResourceCite Advocate Dashboard — ${stamp}</title><style>
       body{font:14px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#111;max-width:720px;margin:0 auto;padding:32px 24px}
       h1{font-size:24px;margin:0 0 4px;color:#315f8f}
       .sub{color:#666;font-size:12px;margin-bottom:24px}
@@ -712,7 +713,7 @@ export function AdvocateDashboard({
       .mpct{font-family:monospace;color:#888;text-align:right;width:40px}
       .footer{margin-top:32px;padding-top:12px;border-top:1px solid #ddd;font-size:10px;color:#999}
     </style></head><body>
-      <h1>BNDR. Advocate Dashboard</h1>
+      <h1>ResourceCite Advocate Dashboard</h1>
       <div class="sub">Outreach summary · ${stamp} · Computed locally — no data leaves the browser</div>
       ${streak > 0 ? `<div class="streak"><div class="num">${streak}</div><div><strong>${streak}-week contact streak</strong><br><span style="font-size:11px;color:#666">Consistent outreach over the last ${streak} week${streak === 1 ? "" : "s"}.</span></div></div>` : ""}
       <h2>Outreach at a glance</h2>
@@ -723,7 +724,7 @@ export function AdvocateDashboard({
       ${methodBlock}
       <h2>Follow-up worklist (${stats.followUpNeeded.length})</h2>
       ${stats.followUpNeeded.length > 0 ? `<table class="followup"><tr><th>#</th><th>Name</th><th>Category</th><th>Phone</th><th>Email</th><th>Last contacted</th><th>Note</th></tr>${followUpRows}</table>` : `<p style="color:#888;font-size:12px">All caught up — no follow-ups needed.</p>`}
-      <div class="footer">BNDR. Resource Directory · Source-backed dataset · Printed ${new Date().toLocaleString()}</div>
+      <div class="footer">ResourceCite · BNDR LLC · Printed ${new Date().toLocaleString()}</div>
     </body></html>`);
     w.document.close();
     w.focus();
@@ -1242,7 +1243,7 @@ export function AdvocateDashboard({
                     <div className="mb-2 flex items-center justify-between gap-2">
                       <h3 className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.16em] text-muted-foreground">
                         <Target className={cn("size-3.5", goalMet ? "text-emerald-600 dark:text-emerald-400" : "text-primary")} aria-hidden />
-                        This week's goal
+                        This week&apos;s goal
                       </h3>
                       {onUpdateWeeklyGoal ? (
                         editingGoal ? (
@@ -1352,7 +1353,7 @@ export function AdvocateDashboard({
                           <div className="bndr-celebrate mt-2.5 flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/[0.08] px-3 py-2">
                             <PartyPopper className="size-4 shrink-0 text-emerald-600 dark:text-emerald-400" aria-hidden />
                             <p className="text-xs font-medium text-emerald-700 dark:text-emerald-300">
-                              Goal achieved! You've reached your weekly target.
+                              Goal achieved! You&apos;ve reached your weekly target.
                             </p>
                           </div>
                         </motion.div>

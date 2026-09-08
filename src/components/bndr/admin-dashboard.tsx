@@ -16,7 +16,9 @@ import {
   CheckCircle2,
   AlertTriangle,
   FileJson,
-  HeartHandshake,
+  BadgeCheck,
+  FilePenLine,
+  MoreHorizontal,
 } from "lucide-react";
 import {
   Tabs,
@@ -37,6 +39,12 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -50,14 +58,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { fetchAdminResources, fetchAdminStats, fetchUrlVerification, deleteResource } from "@/lib/api";
+import { fetchAdminResources, fetchAdminStats, fetchUrlVerification, deleteResource, undoResourceDelete } from "@/lib/api";
 import { CATEGORIES, type Resource, type CategorySlug } from "@/lib/types";
 import { AdminResourceForm } from "./admin-resource-form";
 import { AdminAuditLog } from "./admin-audit-log";
 import { AdminCleanup } from "./admin-cleanup";
 import { AdminLinkAudit } from "./admin-link-audit";
 import { AdminBulkImport } from "./admin-bulk-import";
-import { AdminQrRequests } from "./admin-qr-requests";
+import { AdminSnapshots } from "./admin-snapshots";
+import { AdminVerification } from "./admin-verification";
+import { AdminSiteCopy } from "./admin-site-copy";
 
 const CAT_SHORT: Record<CategorySlug, string> = Object.fromEntries(
   CATEGORIES.map((c) => [c.slug, c.shortName]),
@@ -118,15 +128,40 @@ function ResourcesTable() {
   });
 
   const delMut = useMutation({
-    mutationFn: (id: string) => deleteResource(id),
-    onSuccess: () => {
-      toast.success("Resource deleted");
-      qc.invalidateQueries({ queryKey: ["admin-resources"] });
-      qc.invalidateQueries({ queryKey: ["admin-stats"] });
-      qc.invalidateQueries({ queryKey: ["audit"] });
+    mutationFn: (resource: Resource) => deleteResource(resource.id),
+    onSuccess: (result, resource) => {
+      const refresh = () => {
+        void qc.invalidateQueries({ queryKey: ["admin-resources"] });
+        void qc.invalidateQueries({ queryKey: ["admin-stats"] });
+        void qc.invalidateQueries({ queryKey: ["audit"] });
+        void qc.invalidateQueries({ queryKey: ["resources"] });
+        void qc.invalidateQueries({ queryKey: ["stats"] });
+      };
+      refresh();
+      toast.success(`Permanently deleted "${resource.name}" from the active resource dataset.`, {
+        description: "A verified pre-delete snapshot was captured first.",
+        duration: 12000,
+        action: {
+          label: "Undo delete",
+          onClick: async () => {
+            try {
+              const restored = await undoResourceDelete(resource.id, result.snapshotId);
+              if (!restored.exactRecoveryVerified || restored.restoredRowHash !== restored.expectedRowHash) {
+                throw new Error("Undo completed without exact row recovery verification.");
+              }
+              refresh();
+              toast.success(`Restored "${resource.name}" exactly from the verified pre-delete snapshot.`);
+            } catch (error) {
+              toast.error("Restore failed", {
+                description: error instanceof Error ? error.message : "Unknown restore error",
+              });
+            }
+          },
+        },
+      });
     },
     onError: (e: Error) =>
-      toast.error("Delete failed", { description: e.message }),
+      toast.error("Delete failed — the active resource was not reported as deleted", { description: e.message }),
   });
 
   const resources = data?.resources ?? [];
@@ -241,33 +276,42 @@ function ResourcesTable() {
                     )}
                   </TableCell>
                   <TableCell className="text-right">
-                    <div className="flex justify-end gap-1">
+                    <div className="flex justify-end gap-2">
                       <Button
-                        size="icon"
-                        variant="ghost"
+                        size="sm"
+                        variant="outline"
                         aria-label={`Edit ${r.name}`}
                         onClick={() => setEditing(r)}
-                        className="hover:text-primary"
+                        className="gap-1.5 hover:text-primary"
                       >
-                        <Pencil className="size-4" />
+                        <Pencil className="size-3.5" aria-hidden />
+                        Edit
                       </Button>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        aria-label={`Delete ${r.name}`}
-                        onClick={() => {
-                          if (
-                            confirm(
-                              `Delete "${r.name}"? This is recorded in the audit log.`,
-                            )
-                          ) {
-                            delMut.mutate(r.id);
-                          }
-                        }}
-                        className="hover:text-destructive"
-                      >
-                        <Trash2 className="size-4" />
-                      </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button size="sm" variant="ghost" aria-label={`More actions for ${r.name}`}>
+                            <MoreHorizontal className="size-4" aria-hidden />
+                            More actions
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            variant="destructive"
+                            onSelect={() => {
+                              const confirmed = window.confirm(
+                                `Permanently delete "${r.name}" from the active resource dataset?\n\n` +
+                                  "A verified full recovery snapshot will be captured before deletion. " +
+                                  "If snapshot capture or verification fails, the deletion will be aborted. " +
+                                  "The captured snapshot can restore the exact prior resource.",
+                              );
+                              if (confirmed) delMut.mutate(r);
+                            }}
+                          >
+                            <Trash2 className="size-4" aria-hidden />
+                            Permanently delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -365,8 +409,8 @@ export function AdminDashboard() {
               Admin dashboard
             </h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Manage resources, Reset requests, the PII pipeline, and the audit
-              trail. Every administrative change is recorded.
+              Manage resources, verification, the PII pipeline, and the audit
+              trail. QR Resets remains a prototype preview in this release.
             </p>
           </div>
         </div>
@@ -454,8 +498,11 @@ export function AdminDashboard() {
             <TabsTrigger value="import" className="gap-1.5">
               <FileJson className="size-4" aria-hidden /> Import
             </TabsTrigger>
-            <TabsTrigger value="qr-requests" className="gap-1.5">
-              <HeartHandshake className="size-4" aria-hidden /> QR Requests
+            <TabsTrigger value="verification" className="gap-1.5">
+              <BadgeCheck className="size-4" aria-hidden /> Verification
+            </TabsTrigger>
+            <TabsTrigger value="site-copy" className="gap-1.5">
+              <FilePenLine className="size-4" aria-hidden /> Site Copy
             </TabsTrigger>
             <TabsTrigger value="audit" className="gap-1.5">
               <History className="size-4" aria-hidden /> Audit Log
@@ -477,18 +524,26 @@ export function AdminDashboard() {
           </TabsContent>
 
           <TabsContent value="import">
-            <AdminBulkImport
-              onDone={() => {
-                qc.invalidateQueries({ queryKey: ["admin-resources"] });
-                qc.invalidateQueries({ queryKey: ["admin-stats"] });
-                qc.invalidateQueries({ queryKey: ["audit"] });
-                qc.invalidateQueries({ queryKey: ["url-verification"] });
-              }}
-            />
+            <div className="space-y-5">
+              <AdminBulkImport
+                onDone={() => {
+                  qc.invalidateQueries({ queryKey: ["admin-resources"] });
+                  qc.invalidateQueries({ queryKey: ["admin-stats"] });
+                  qc.invalidateQueries({ queryKey: ["audit"] });
+                  qc.invalidateQueries({ queryKey: ["url-verification"] });
+                  qc.invalidateQueries({ queryKey: ["verification"] });
+                }}
+              />
+              <AdminSnapshots />
+            </div>
           </TabsContent>
 
-          <TabsContent value="qr-requests">
-            <AdminQrRequests />
+          <TabsContent value="verification">
+            <AdminVerification />
+          </TabsContent>
+
+          <TabsContent value="site-copy">
+            <AdminSiteCopy />
           </TabsContent>
 
           <TabsContent value="audit">

@@ -1,0 +1,64 @@
+{
+  "reportVersion": 1,
+  "generatedAt": "2026-09-07T21:53:40.481Z",
+  "command": "node --no-warnings --experimental-strip-types scripts/verify-data-safety.mjs",
+  "allChecksPassed": true,
+  "evidence": {
+    "paginationAndSearch": {
+      "datasetRows": 725,
+      "deepOffsetRequested": 700,
+      "firstDeepRowId": "r-0700",
+      "typoQuery": "sheltr",
+      "typoTopId": "r-0511",
+      "priorityTopId": "r-0511",
+      "acronymQuery": "NCMEC",
+      "acronymTopId": "r-0712",
+      "boundedDbScanSkips": [
+        0,
+        250,
+        500,
+        0,
+        250,
+        500
+      ],
+      "scanPageSize": 250,
+      "publicUiFetchesSubsequentApiPages": true
+    },
+    "snapshotAndRestore": {
+      "rowCount": 3,
+      "datasetSha256": "ab128a7e6d75ea1ab9978c943d1ed08fa6362630f9583145a2c28cf9c3d5ad47",
+      "reorderedFullDataRecoverySha256": "ab128a7e6d75ea1ab9978c943d1ed08fa6362630f9583145a2c28cf9c3d5ad47",
+      "exactCountRecovered": true,
+      "exactDataHashRecovered": true,
+      "tamperedSnapshotRejected": true,
+      "preRestoreSnapshotBeforeDelete": true,
+      "restoredDatabaseReReadBeforeCommit": true
+    },
+    "cleanup": {
+      "previewReturnsBeforeMutationTransaction": true,
+      "applyReReadsCurrentRowsInsideTransaction": true,
+      "durableSnapshotBeforeFirstResourceMutation": true,
+      "preCleanupSnapshotStoresDatasetHash": true
+    },
+    "identity": {
+      "sharedHostPhoneEmailDifferentProgram": "ambiguous",
+      "sharedContactCandidateCount": 2,
+      "multiplePlausibleCanonicalMatches": "ambiguous",
+      "uniqueNamePlusContactMatch": "strong",
+      "firstMatchSelectionUsedForAmbiguity": false
+    },
+    "egress": {
+      "dnsTransportOnlyEffectiveStatus": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT",
+      "dnsTransportOnlyIssue": "UNREACHABLE_IN_RESTRICTED_ENVIRONMENT",
+      "hardHttpStatus": 410,
+      "hardHttpEffectiveStatus": "WEBSITE_DEAD_CONFIRMED",
+      "hardHttpIssue": "WEBSITE_DEAD_REPORTED"
+    },
+    "portableMerge": {
+      "hardCodedExternalDataDependency": false,
+      "verifierEvidenceRelativeToProductionRoot": true,
+      "egressProbeRelativeToProductionRoot": true,
+      "restrictedEgressAppliedToIssueDerivation": true
+    }
+  }
+}

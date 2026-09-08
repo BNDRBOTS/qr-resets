@@ -6,10 +6,8 @@ import {
   Mail,
   Globe,
   MapPin,
-  Sparkles,
   ExternalLink,
   Navigation,
-  Info,
   Printer,
   Share2,
   Check,
@@ -46,7 +44,6 @@ import {
   type CategorySlug,
 } from "@/lib/types";
 import { formatPhoneDisplay } from "@/lib/pii";
-import { parseTags } from "@/lib/tags";
 import { NoteEditor } from "./note-editor";
 import { StarRating } from "./star-rating";
 import { ContactDateEditor } from "./contact-date-editor";
@@ -147,7 +144,6 @@ export function ResourceDetailDialog({
   const r = resource;
   const allPhones = phones(r.phoneNormalized);
   const phoneDisplay = allPhones.map(formatPhoneDisplay);
-  const tags = parseTags(r.tags);
   const maps = mapsHref(r);
 
   const handlePrint = () => {
@@ -159,7 +155,7 @@ export function ResourceDetailDialog({
       toast.error("Pop-up blocked — allow pop-ups to print");
       return;
     }
-    const html = buildPrintDocument(`${r.name} — BNDR. Resource Directory`, [
+    const html = buildPrintDocument(`${r.name} — ResourceCite`, [
       {
         name: r.name,
         acronym: r.acronym,
@@ -169,8 +165,6 @@ export function ResourceDetailDialog({
         email: r.email,
         address: r.address,
         website: r.website,
-        tags: tags.join(", "),
-        sourceNote: r.sourceNote,
       },
     ]);
     printWin.document.write(html);
@@ -180,7 +174,7 @@ export function ResourceDetailDialog({
   };
 
   const handleShare = async () => {
-    const text = `${r.name}\n${r.description ?? ""}\n${phoneDisplay[0] ? "Phone: " + phoneDisplay[0] : ""}\n${r.email ? "Email: " + r.email : ""}\n${r.website ? "Web: " + r.website : ""}\n\nVia BNDR. Resource Directory`;
+    const text = `${r.name}\n${r.description ?? ""}\n${phoneDisplay[0] ? "Phone: " + phoneDisplay[0] : ""}\n${r.email ? "Email: " + r.email : ""}\n${r.website ? "Web: " + r.website : ""}\n\nVia ResourceCite by BNDR LLC`;
     try {
       if (navigator.share) {
         await navigator.share({ title: r.name, text });
@@ -197,16 +191,11 @@ export function ResourceDetailDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[88vh] gap-0 overflow-hidden p-0 sm:max-w-2xl">
+      <DialogContent className="bndr-resource-detail max-h-[88vh] gap-0 overflow-hidden p-0 sm:max-w-2xl">
         {/* Header strip */}
         <div className="relative border-b border-border/60 bg-card/40 px-6 pt-6 pb-5">
           {/* Badge row — category / priority / acronym only (no action icons). */}
           <div className="flex flex-wrap items-center gap-2">
-            {r.priority >= 1 ? (
-              <Badge className="bg-primary/20 text-primary border border-primary/40">
-                <Sparkles className="size-3" aria-hidden /> Priority
-              </Badge>
-            ) : null}
             {r.acronym ? (
               <Badge
                 variant="secondary"
@@ -436,45 +425,6 @@ export function ResourceDetailDialog({
               </div>
             ) : null}
 
-            {/* Tags */}
-            {tags.length > 0 ? (
-              <div className="space-y-2">
-                <h4 className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
-                  Tags
-                </h4>
-                <div className="flex flex-wrap gap-1.5">
-                  {tags.map((t) => (
-                    <span
-                      key={t}
-                      className="rounded-md border border-border/80 bg-muted/40 px-2 py-0.5 text-xs text-muted-foreground"
-                    >
-                      {t}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ) : null}
-
-            {/* Source note */}
-            {r.sourceNote ? (
-              <div className="space-y-2">
-                <Separator />
-                <div className="rounded-lg border border-primary/20 bg-primary/5 p-3">
-                  <div className="flex items-start gap-2">
-                    <Info className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
-                    <div>
-                      <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-primary/80">
-                        Source note
-                      </p>
-                      <p className="mt-1 text-sm text-muted-foreground">
-                        {r.sourceNote}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ) : null}
-
             {/* Private rating + contact date + note (only if hooks are wired) */}
             {onSetRating || onSetContacted || (onSetNote && onDeleteNote) ? (
               <div className="space-y-2">
@@ -530,34 +480,6 @@ export function ResourceDetailDialog({
               </div>
             ) : null}
 
-            {/* Verification footer */}
-            <div className="flex items-center justify-between pt-1 text-xs text-muted-foreground">
-              <TooltipProvider delayDuration={150}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <span className="inline-flex items-center gap-1 cursor-help">
-                      <span
-                        className={
-                          "size-1.5 rounded-full " +
-                          (r.verified ? "bg-primary" : "bg-muted-foreground/50")
-                        }
-                      />
-                      {r.verified ? "Verified" : "Unverified"}
-                    </span>
-                  </TooltipTrigger>
-                  <TooltipContent side="top">
-                    {r.verified
-                      ? "Reviewed against source list"
-                      : "Not yet reviewed"}
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-              {r.piipassAt ? (
-                <span>
-                  PII pass: {new Date(r.piipassAt).toLocaleDateString()}
-                </span>
-              ) : null}
-            </div>
           </div>
         </ScrollArea>
       </DialogContent>

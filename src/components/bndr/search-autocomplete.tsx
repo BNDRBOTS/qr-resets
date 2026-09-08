@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Tag, Folder, FileText, CornerDownLeft, TrendingUp, Clock, X } from "lucide-react";
+import { Search, Folder, FileText, CornerDownLeft, Clock, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { CATEGORIES, type CategorySlug } from "@/lib/types";
 
@@ -13,20 +13,14 @@ interface SuggestionCategory {
   shortName: string;
   count: number;
 }
-interface SuggestionTag {
-  tag: string;
-  count: number;
-}
 interface SuggestionName {
   id: string;
   name: string;
   acronym: string | null;
   category: CategorySlug;
-  priority: number;
 }
 interface Suggestions {
   categories: SuggestionCategory[];
-  tags: SuggestionTag[];
   names: SuggestionName[];
 }
 
@@ -34,7 +28,6 @@ interface SearchAutocompleteProps {
   query: string;
   onQueryChange: (q: string) => void;
   onSelectCategory: (slug: CategorySlug) => void;
-  onSelectTag: (tag: string) => void;
   onSelectName: (id: string) => void;
   searchInputRef?: React.RefObject<HTMLInputElement | null>;
   recentSearches?: string[];
@@ -47,9 +40,8 @@ const CATEGORY_SHORT: Record<CategorySlug, string> = Object.fromEntries(
 
 /**
  * Search input with live autocomplete dropdown. As the user types (≥2 chars),
- * shows matching categories, tags, and resource names. Each suggestion is
- * actionable: pick a category → filters grid; pick a tag → fills search;
- * pick a name → opens detail dialog.
+ * shows matching categories and resource names. Internal search tags may still
+ * improve matching, but raw taxonomy labels are never exposed in the public UI.
  *
  * When the input is focused and empty (or < 2 chars), shows recent search
  * history instead (if any).
@@ -60,7 +52,6 @@ export function SearchAutocomplete({
   query,
   onQueryChange,
   onSelectCategory,
-  onSelectTag,
   onSelectName,
   searchInputRef,
   recentSearches = [],
@@ -83,16 +74,14 @@ export function SearchAutocomplete({
     staleTime: 30_000,
   });
 
-  const suggestions = data ?? { categories: [], tags: [], names: [] };
+  const suggestions = data ?? { categories: [], names: [] };
 
   // Flatten into a single navigable list for keyboard up/down
   const flat: Array<
     | { kind: "category"; data: SuggestionCategory }
-    | { kind: "tag"; data: SuggestionTag }
     | { kind: "name"; data: SuggestionName }
   > = [
     ...suggestions.categories.map((data) => ({ kind: "category" as const, data })),
-    ...suggestions.tags.map((data) => ({ kind: "tag" as const, data })),
     ...suggestions.names.map((data) => ({ kind: "name" as const, data })),
   ];
 
@@ -107,10 +96,6 @@ export function SearchAutocomplete({
     if (!item) return;
     if (item.kind === "category") {
       onSelectCategory(item.data.slug);
-      setOpen(false);
-      inputRef.current?.blur();
-    } else if (item.kind === "tag") {
-      onQueryChange(item.data.tag);
       setOpen(false);
       inputRef.current?.blur();
     } else if (item.kind === "name") {
@@ -155,7 +140,7 @@ export function SearchAutocomplete({
         onFocus={() => setOpen(true)}
         onBlur={() => setTimeout(() => setOpen(false), 150)}
         onKeyDown={onKeyDown}
-        placeholder="Search by name, acronym, tag, location, or need…"
+        placeholder="Search by name, service, location, or need…"
         aria-label="Search resources"
         aria-expanded={open && hasAny}
         aria-controls="search-suggestions"
@@ -259,28 +244,6 @@ export function SearchAutocomplete({
               </SuggestionGroup>
             ) : null}
 
-            {/* Tags */}
-            {suggestions.tags.length > 0 ? (
-              <SuggestionGroup label="Tags">
-                {suggestions.tags.map((t) => {
-                  const idx = flat.findIndex(
-                    (f) => f.kind === "tag" && f.data.tag === t.tag,
-                  );
-                  return (
-                    <SuggestionItem
-                      key={`tag-${t.tag}`}
-                      icon={<Tag className="size-4 text-primary" aria-hidden />}
-                      title={t.tag}
-                      meta={`${t.count} ${t.count === 1 ? "resource" : "resources"}`}
-                      highlighted={safeHighlight === idx}
-                      onMouseEnter={() => setHighlighted(idx)}
-                      onClick={() => handleSelect(idx)}
-                    />
-                  );
-                })}
-              </SuggestionGroup>
-            ) : null}
-
             {/* Names */}
             {suggestions.names.length > 0 ? (
               <SuggestionGroup label="Resources">
@@ -291,13 +254,7 @@ export function SearchAutocomplete({
                   return (
                     <SuggestionItem
                       key={`name-${n.id}`}
-                      icon={
-                        n.priority >= 1 ? (
-                          <TrendingUp className="size-4 text-primary" aria-hidden />
-                        ) : (
-                          <FileText className="size-4 text-muted-foreground" aria-hidden />
-                        )
-                      }
+                      icon={<FileText className="size-4 text-primary" aria-hidden />}
                       title={n.name}
                       meta={n.acronym ? n.acronym : CATEGORY_SHORT[n.category]}
                       highlighted={safeHighlight === idx}

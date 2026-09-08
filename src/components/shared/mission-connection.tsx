@@ -10,12 +10,11 @@ import { QR_BRAND } from "@/lib/qr-resets-content";
  * Mission-connection band.
  *
  * A slim, high-impact callout that sits near the end of each site and
- * invites the user to explore the OTHER site — reinforcing that BNDR.
- * Resource Directory and QR Resets™ are two halves of one mission.
+ * invites the user to explore the other BNDR LLC product.
+ * ResourceCite and QR Resets remain distinct sibling experiences.
  *
- * On the BNDR directory it promotes QR Resets™ ("give $1 or request a Reset").
- * On the QR Resets site it promotes the Resource Directory ("find immediate
- * help now").
+ * On ResourceCite it introduces QR Resets. On QR Resets it returns visitors
+ * to ResourceCite for practical resources.
  */
 export function MissionConnection({ from }: { from: "bndr" | "qr" }) {
   const setSite = useSiteStore((s) => s.setSite);
@@ -33,7 +32,7 @@ export function MissionConnection({ from }: { from: "bndr" | "qr" }) {
             <div className="max-w-xl">
               <p className="mb-2 flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.22em] text-primary/80">
                 <Sparkles className="size-3.5" aria-hidden />
-                Same mission
+                Also from BNDR LLC
               </p>
               <h2 className="text-balance text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
                 One scan. One dollar. One real Reset.
@@ -68,7 +67,7 @@ export function MissionConnection({ from }: { from: "bndr" | "qr" }) {
     );
   }
 
-  // from === "qr" → promote the Resource Directory
+  // from === "qr" → promote ResourceCite
   return (
     <motion.section
       initial={{ opacity: 0, y: 16 }}
@@ -85,15 +84,14 @@ export function MissionConnection({ from }: { from: "bndr" | "qr" }) {
           <div className="max-w-xl">
             <p className="mb-2 flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.22em] text-primary/80">
               <BookOpen className="size-3.5" aria-hidden />
-              Same mission
+              Also from BNDR LLC
             </p>
             <h2 className="text-balance text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
               Need immediate help right now?
             </h2>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground sm:text-base">
-              The BNDR. Resource Directory indexes the published resource dataset across
-              victim advocacy, family court, legal aid, housing and more —
-              source-backed, searchable, and ready to use today.
+              ResourceCite helps you find advocacy, legal, housing, medical,
+              family-support, and other practical resources in one searchable place.
             </p>
           </div>
           <div className="flex shrink-0 flex-col gap-2 sm:items-end">
@@ -108,7 +106,7 @@ export function MissionConnection({ from }: { from: "bndr" | "qr" }) {
               className="gap-2 rounded-full border-primary/40 hover:border-primary/70 hover:text-primary"
             >
               <BookOpen className="size-4" aria-hidden />
-              Open Resource Directory
+              Open ResourceCite
               <ArrowRight className="size-4" aria-hidden />
             </Button>
             <span className="text-xs text-muted-foreground">

@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/dialog";
 import {
   Search,
-  Sparkles,
   BookmarkCheck,
   ArrowLeftRight,
   LayoutGrid,
@@ -42,12 +41,6 @@ const SHORTCUTS: Shortcut[] = [
     label: "Focus search",
     description: "Jump the cursor to the search input instantly.",
     icon: <Search className="size-4" />,
-  },
-  {
-    keyLabel: "P",
-    label: "Toggle priority filter",
-    description: "Show only resources currently marked priority.",
-    icon: <Sparkles className="size-4" />,
   },
   {
     keyLabel: "S",
@@ -94,7 +87,7 @@ const SHORTCUTS: Shortcut[] = [
   {
     keyLabel: "Esc",
     label: "Clear all filters",
-    description: "Reset search query, category, and priority in one keystroke.",
+    description: "Reset the search query and category filter in one keystroke.",
     icon: <X className="size-4" />,
   },
 ];

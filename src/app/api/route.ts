@@ -9,7 +9,7 @@ import { NextResponse } from "next/server";
 export async function GET() {
   return NextResponse.json(
     {
-      name: "BNDR. Resource Directory API",
+      name: "ResourceCite API",
       version: "1.1.4",
       endpoints: [
         "/api/health",

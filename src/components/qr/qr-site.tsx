@@ -780,9 +780,6 @@ type RequestValues = Partial<Record<RequestKey | "contactDetails", string>>;
 
 function QrRequest() {
   const [submitted, setSubmitted] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
-  const [requestId, setRequestId] = useState<string | null>(null);
   const [values, setValues] = useState<RequestValues>({});
   const [requiredChecked, setRequiredChecked] = useState<boolean[]>(() =>
     QR_REQUEST.consentRequired.map(() => false),
@@ -796,30 +793,11 @@ function QrRequest() {
   const setValue = (key: RequestKey | "contactDetails", value: string) =>
     setValues((prev) => ({ ...prev, [key]: value }));
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!allRequiredChecked || submitting) return;
-    setSubmitting(true);
-    setSubmitError(null);
-    try {
-      const res = await fetch("/api/qr/requests", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...values,
-          consentRequired: requiredChecked,
-          consentOptional: optionalChecked,
-        }),
-      });
-      const body = (await res.json()) as { ok?: boolean; requestId?: string; error?: string };
-      if (!res.ok || !body.ok) throw new Error(body.error || "Request could not be saved.");
-      setRequestId(body.requestId ?? null);
-      setSubmitted(true);
-    } catch (error) {
-      setSubmitError(error instanceof Error ? error.message : "Request could not be saved.");
-    } finally {
-      setSubmitting(false);
-    }
+    if (!allRequiredChecked) return;
+    // Prototype-only local interaction. Nothing is transmitted or persisted.
+    setSubmitted(true);
   };
 
   if (submitted) {
@@ -830,32 +808,26 @@ function QrRequest() {
             <ShieldCheck className="size-7 text-primary" />
           </div>
           <h3 className="text-2xl font-bold text-foreground sm:text-3xl">
-            {QR_REQUEST.confirmation.heading}
+            Prototype preview only.
           </h3>
           <p className="mt-4 text-lg leading-relaxed text-foreground/90">
-            {QR_REQUEST.confirmation.body}
+            This example form did not submit or store any information.
           </p>
           <p className="mt-6 text-sm leading-relaxed text-muted-foreground">
-            {QR_REQUEST.confirmation.note}
+            QR Resets is not accepting requests in this release. No request was created.
           </p>
-          {requestId ? (
-            <p className="mt-4 text-xs font-mono text-muted-foreground" aria-label="Request reference">
-              Reference: {requestId}
-            </p>
-          ) : null}
           <Button
             type="button"
             variant="outline"
             className="mt-8"
             onClick={() => {
               setSubmitted(false);
-              setRequestId(null);
               setValues({});
               setRequiredChecked(QR_REQUEST.consentRequired.map(() => false));
               setOptionalChecked(QR_REQUEST.consentOptional.map(() => false));
             }}
           >
-            Submit another request
+            Reset example form
           </Button>
         </div>
       </Section>
@@ -880,6 +852,11 @@ function QrRequest() {
         <p className="text-base font-medium leading-relaxed text-foreground">
           {QR_REQUEST.prompt}
         </p>
+
+        <div role="note" className="rounded-xl border border-primary/40 bg-primary/10 p-4 text-sm leading-relaxed text-foreground">
+          <strong>Prototype preview:</strong> this form is an example of the proposed request flow.
+          QR Resets is not accepting requests yet. Nothing entered here is submitted, transmitted, or stored.
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-6" noValidate>
           {fields.map((field, idx) => {
@@ -935,15 +912,9 @@ function QrRequest() {
             ))}
           </div>
 
-          {submitError ? (
-            <div role="alert" className="rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm text-foreground">
-              {submitError}
-            </div>
-          ) : null}
-
-          <Button type="submit" size="lg" disabled={!allRequiredChecked || submitting} className="w-full sm:w-auto">
-            {submitting ? "SAVING REQUEST…" : QR_REQUEST.submit}
-            {!submitting ? <ArrowRight className="size-4" /> : null}
+          <Button type="submit" size="lg" disabled={!allRequiredChecked} className="w-full sm:w-auto">
+            PREVIEW REQUEST FLOW
+            <ArrowRight className="size-4" />
           </Button>
           {!allRequiredChecked && <p className="text-xs text-muted-foreground">Please confirm both required consent statements to continue.</p>}
         </form>
@@ -1096,33 +1067,25 @@ function QrGive() {
       <div className="space-y-10">
         <Paragraphs text={QR_GIVE.intro} lead />
 
-        {/* CTA buttons */}
+        <div role="note" className="rounded-xl border border-primary/40 bg-primary/10 p-4 text-sm leading-relaxed text-foreground">
+          <strong>Prototype preview:</strong> QR Resets is not accepting or processing donations yet.
+          These controls show the proposed contribution experience only.
+        </div>
+
+        {/* CTA buttons — intentionally disabled in prototype mode */}
         <div className="flex flex-wrap gap-3">
-          {QR_GIVE.ctas.map((cta, index) => {
-            const links = [
-              process.env.NEXT_PUBLIC_QR_DONATE_MONTHLY_URL,
-              process.env.NEXT_PUBLIC_QR_DONATE_ANNUAL_URL,
-              process.env.NEXT_PUBLIC_QR_DONATE_CUSTOM_URL,
-              process.env.NEXT_PUBLIC_QR_DONATE_SPONSOR_URL,
-            ];
-            const href = links[index];
-            return href ? (
-              <Button key={cta} size="lg" variant={cta.startsWith("$1") ? "default" : "outline"} asChild>
-                <a href={href} rel="noopener noreferrer">{cta}</a>
-              </Button>
-            ) : (
-              <Button
-                key={cta}
-                type="button"
-                size="lg"
-                variant={cta.startsWith("$1") ? "default" : "outline"}
-                disabled
-                title="Payment link not configured yet"
-              >
-                {cta}
-              </Button>
-            );
-          })}
+          {QR_GIVE.ctas.map((cta) => (
+            <Button
+              key={cta}
+              type="button"
+              size="lg"
+              variant={cta.startsWith("$1") ? "default" : "outline"}
+              disabled
+              title="Prototype preview — donations are not being accepted"
+            >
+              {cta}
+            </Button>
+          ))}
         </div>
 
         {/* Fund supports */}
@@ -1768,6 +1731,10 @@ function QrFooter() {
 
         {/* Disclaimer */}
         <div className="mt-10 border-t border-border/60 pt-6">
+          <p className="mb-3 max-w-4xl text-xs font-semibold leading-relaxed text-foreground">
+            Prototype preview only. QR Resets is not currently accepting requests or donations.
+            Interactive request and contribution controls are illustrative and do not create a request or payment.
+          </p>
           <p className="max-w-4xl text-xs leading-relaxed text-muted-foreground/80">
             {QR_FOOTER.disclaimer}
           </p>

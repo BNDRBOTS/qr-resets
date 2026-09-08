@@ -10,7 +10,7 @@ export default function NotFound() {
           href="/"
           className="mt-6 inline-flex rounded-full bg-foreground px-5 py-2.5 text-sm font-semibold text-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
         >
-          Resource Directory
+          ← Back to ResourceCite
         </Link>
       </div>
     </main>

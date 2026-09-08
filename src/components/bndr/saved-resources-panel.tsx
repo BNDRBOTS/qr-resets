@@ -121,6 +121,7 @@ export function SavedResourcesPanel({
   >("recent");
   const [followUpOnly, setFollowUpOnly] = useState(false);
   const [recentOnly, setRecentOnly] = useState(false);
+  const [renderedAt] = useState(() => Date.now());
   // ---- Bulk selection state ----
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkMode, setBulkMode] = useState(false);
@@ -228,7 +229,7 @@ export function SavedResourcesPanel({
     try {
       const d = new Date(dateStr + "T00:00:00");
       const days = Math.floor(
-        (Date.now() - d.getTime()) / (1000 * 60 * 60 * 24),
+        (renderedAt - d.getTime()) / (1000 * 60 * 60 * 24),
       );
       return days > FOLLOW_UP_DAYS;
     } catch {
@@ -243,7 +244,7 @@ export function SavedResourcesPanel({
     try {
       const d = new Date(dateStr + "T00:00:00");
       const days = Math.floor(
-        (Date.now() - d.getTime()) / (1000 * 60 * 60 * 24),
+        (renderedAt - d.getTime()) / (1000 * 60 * 60 * 24),
       );
       return days <= FOLLOW_UP_DAYS;
     } catch {
@@ -312,14 +313,10 @@ export function SavedResourcesPanel({
           category: r.category,
           subcategory: r.subcategory,
           description: r.description,
-          phoneRaw: r.phoneRaw,
-          phoneNormalized: r.phoneNormalized,
+          phone: r.phoneNormalized ? formatPhoneDisplay(r.phoneNormalized.split("|")[0]?.trim() || null) : null,
           email: r.email,
           website: r.website,
           address: r.address,
-          tags: r.tags,
-          sourceNote: r.sourceNote,
-          priority: r.priority,
           privateNote: getNote ? getNote(r.id) || null : null,
           privateRating: getRating ? getRating(r.id) || null : null,
           lastContacted: getContacted ? getContacted(r.id) || null : null,
@@ -344,14 +341,10 @@ export function SavedResourcesPanel({
         "Category",
         "Subcategory",
         "Description",
-        "Phone (raw)",
-        "Phone (normalized)",
+        "Phone",
         "Email",
         "Website",
         "Address",
-        "Tags",
-        "Priority",
-        "Source Note",
         "Private Note",
         "Private Rating",
         "Last Contacted",
@@ -363,14 +356,10 @@ export function SavedResourcesPanel({
           CATEGORY_NAME[r.category] ?? r.category,
           r.subcategory,
           r.description,
-          r.phoneRaw,
-          r.phoneNormalized,
+          r.phoneNormalized ? formatPhoneDisplay(r.phoneNormalized.split("|")[0]?.trim() || null) : "",
           r.email,
           r.website,
           r.address,
-          r.tags,
-          r.priority >= 1 ? "Priority" : "",
-          r.sourceNote,
           getNote ? getNote(r.id) : "",
           getRating ? String(getRating(r.id) || "") : "",
           getContacted ? getContacted(r.id) : "",
@@ -387,7 +376,7 @@ export function SavedResourcesPanel({
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `bndr-saved-resources-${new Date().toISOString().slice(0, 10)}.${ext}`;
+    a.download = `resourcecite-saved-resources-${new Date().toISOString().slice(0, 10)}.${ext}`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -416,7 +405,7 @@ export function SavedResourcesPanel({
       .join("\n\n");
     try {
       await navigator.clipboard.writeText(
-        text + "\n\n— Via BNDR. Resource Directory",
+        text + "\n\n— Via ResourceCite by BNDR LLC",
       );
       toast.success(`Copied ${saved.length} resources to clipboard`);
     } catch {
@@ -465,14 +454,12 @@ export function SavedResourcesPanel({
         email: r.email,
         address: r.address,
         website: r.website,
-        tags: r.tags,
-        sourceNote: r.sourceNote,
         notes: note || null,
         contactLog: contactLog || null,
       };
     });
     const html = buildPrintDocument(
-      `BNDR. Saved Resources — ${new Date().toLocaleDateString()}`,
+      `ResourceCite Saved Resources — ${new Date().toLocaleDateString()}`,
       printResources,
     );
     printWin.document.write(html);
@@ -932,11 +919,6 @@ export function SavedResourcesPanel({
                                 className="bg-secondary/70 font-mono text-[9px] uppercase"
                               >
                                 {r.acronym}
-                              </Badge>
-                            ) : null}
-                            {r.priority >= 1 ? (
-                              <Badge className="border border-primary/30 bg-primary/15 px-1.5 py-0 text-[9px] text-primary">
-                                Priority
                               </Badge>
                             ) : null}
                           </div>

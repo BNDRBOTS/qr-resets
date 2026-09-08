@@ -1,8 +1,6 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
 
 export type SiteId = "bndr" | "qr";
 
@@ -13,30 +11,19 @@ interface SiteState {
 }
 
 /**
- * Which of the two mission sites is currently visible.
- * Persisted to localStorage so a refresh keeps the user on the same site.
+ * Which product is visible for the current page session.
+ *
+ * The public entry point is intentionally ResourceCite on every new load.
+ * Site choice is not persisted, so a prior QR Resets visit cannot override
+ * the next application entry. Visitors can still switch products at any time.
  */
-export const useSiteStore = create<SiteState>()(
-  persist(
-    (set, get) => ({
-      site: "bndr",
-      setSite: (site) => set({ site }),
-      toggle: () => set({ site: get().site === "bndr" ? "qr" : "bndr" }),
-    }),
-    { name: "bndr-site" },
-  ),
-);
+export const useSiteStore = create<SiteState>()((set, get) => ({
+  site: "bndr",
+  setSite: (site) => set({ site }),
+  toggle: () => set({ site: get().site === "bndr" ? "qr" : "bndr" }),
+}));
 
-/**
- * Returns true once the persisted store has hydrated on the client.
- * Prevents a flash of the default site before localStorage loads.
- * Uses useSyncExternalStore to avoid setState-in-effect (React 19 lint rule).
- */
-const emptySubscribe = () => () => {};
+/** The site store no longer hydrates from persisted browser state. */
 export function useSiteHydrated() {
-  return useSyncExternalStore(
-    emptySubscribe,
-    () => true, // client snapshot
-    () => false, // server snapshot
-  );
+  return true;
 }

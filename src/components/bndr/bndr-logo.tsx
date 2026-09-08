@@ -28,7 +28,7 @@ export function BndrLogo({
   size = 36,
   className,
   glow = true,
-  alt = "BNDR. — Resource Directory",
+  alt = "BNDR LLC",
   onClick,
 }: BndrLogoProps) {
   const [failed, setFailed] = useState(false);
@@ -41,7 +41,7 @@ export function BndrLogo({
       style={{ fontSize: `${Math.max(12, visibleHeight * 1.35)}px`, lineHeight: 1 }}
       aria-hidden
     >
-      BNDR<span className="text-primary">.</span>
+      BNDR
     </span>
   ) : (
     <img
@@ -65,7 +65,7 @@ export function BndrLogo({
           "group inline-flex items-center rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60",
           className,
         )}
-        aria-label="BNDR. — back to top"
+        aria-label="BNDR LLC — back to top"
       >
         {inner}
       </button>
@@ -96,9 +96,9 @@ export function BndrLogoHero({ failed: forcedFailed }: { failed?: boolean }) {
       <span
         className="bndr-wordmark bndr-fallback-italic relative font-extrabold leading-none"
         style={{ fontSize: "clamp(3.5rem, 12vw, 9rem)" }}
-        aria-label="BNDR."
+        aria-label="BNDR LLC"
       >
-        BNDR<span className="bndr-dot">.</span>
+        BNDR
       </span>
     );
   }
@@ -106,7 +106,7 @@ export function BndrLogoHero({ failed: forcedFailed }: { failed?: boolean }) {
   return (
     <img
       src="/bndr-logo-black.png"
-      alt="BNDR. — Resource Directory"
+      alt="BNDR LLC"
       onError={() => setErrored(true)}
       className="bndr-logo-glow relative select-none"
       style={{

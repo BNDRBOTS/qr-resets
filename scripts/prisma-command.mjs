@@ -1,6 +1,6 @@
 import { spawnSync } from "node:child_process";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { schemaPath, storageBackend, resolvedDatabaseUrl } from "./storage-backend.mjs";
 
 const command = process.argv[2] || "generate";
@@ -14,7 +14,7 @@ const backend = storageBackend(env);
 if (backend === "sqlite" && !env.DATABASE_URL?.startsWith("file:")) {
   // Build-time generation does not need the persistent volume. Give Prisma a
   // valid local URL so generation remains independent from Railway runtime.
-  env.DATABASE_URL = `file:${path.join(root, ".build", "bndr-build.db")}`;
+  env.DATABASE_URL = pathToFileURL(path.join(root, ".build", "bndr-build.db")).href;
 } else {
   env.DATABASE_URL = resolvedDatabaseUrl(env);
 }

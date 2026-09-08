@@ -39,6 +39,7 @@ model Resource {
 
   auditLogs              AuditLog[]
   urlVerificationResults UrlVerificationResult[]
+  verificationResults    VerificationResult[]
 
   @@index([category])
   @@index([priority])
@@ -86,6 +87,19 @@ model RateLimitAttempt {
 
   @@index([key, expiresAt])
   @@index([namespace, expiresAt])
+}
+
+
+model AdminCredential {
+  id                      String   @id
+  email                   String   @unique
+  passwordHash            String
+  recoveryKeyHash         String?
+  credentialVersion       Int      @default(1)
+  bootstrappedAt          DateTime @default(now()) @db.Timestamptz(3)
+  passwordUpdatedAt       DateTime @default(now()) @db.Timestamptz(3)
+  recoveryKeyConfiguredAt DateTime? @db.Timestamptz(3)
+  updatedAt               DateTime @updatedAt @db.Timestamptz(3)
 }
 
 model PendingResource {
@@ -236,4 +250,124 @@ model QrDonationEvent {
   @@index([status])
   @@index([resetCaseId])
   @@index([occurredAt])
+}
+
+
+// Resource verification pipeline — verifier-v4 result persistence.
+// Runs, per-record results, and field-level issues are server-owned review
+// state. Candidate payloads live here until the publication gate admits them.
+model VerificationRun {
+  id              String    @id @default(cuid())
+  origin          String
+  status          String    @default("queued")
+  actor           String    @default("system")
+  claimedBy       String?
+  heartbeatAt     DateTime? @db.Timestamptz(3)
+  attempts        Int       @default(0)
+  nextAttemptAt   DateTime? @db.Timestamptz(3)
+  verifierVersion String?
+  startedAt       DateTime  @default(now()) @db.Timestamptz(3)
+  completedAt     DateTime? @db.Timestamptz(3)
+  inputHashes     Json?
+  settings        Json?
+  summary         Json?
+  error           String?
+  createdAt       DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt       DateTime  @updatedAt @db.Timestamptz(3)
+
+  results VerificationResult[]
+
+  @@index([status])
+  @@index([origin])
+  @@index([createdAt])
+  @@index([heartbeatAt])
+}
+
+model VerificationResult {
+  id                  String    @id @default(cuid())
+  runId               String
+  recordId            String
+  resourceId          String?
+  name                String
+  suggestedName       String?
+  category            String?
+  organizationStatus  String    @default("PENDING_VERIFICATION")
+  organizationReason  String?
+  duplicateGroupId    String?
+  duplicateConfidence String?
+  duplicateKind       String    @default("none")
+  attempts            Int       @default(0)
+  publishState        String    @default("held")
+  reviewState         String    @default("unreviewed")
+  resolvedAt          DateTime? @db.Timestamptz(3)
+  resolvedBy          String?
+  candidateJson       Json?
+  evidenceJson        Json?
+  flagsJson           Json?
+  viabilityJson       Json?
+  sourceJson          Json?
+  errorsJson          Json?
+  checkedAt           DateTime? @db.Timestamptz(3)
+  createdAt           DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt           DateTime  @updatedAt @db.Timestamptz(3)
+
+  run      VerificationRun     @relation(fields: [runId], references: [id], onDelete: Cascade)
+  resource Resource?           @relation(fields: [resourceId], references: [id], onDelete: SetNull)
+  issues   VerificationIssue[]
+
+  @@unique([runId, recordId])
+  @@index([organizationStatus])
+  @@index([publishState])
+  @@index([reviewState])
+  @@index([resourceId])
+  @@index([checkedAt])
+}
+
+model VerificationIssue {
+  id             String    @id @default(cuid())
+  resultId       String
+  field          String
+  code           String
+  severity       String
+  currentValue   String?
+  suggestedValue String?
+  evidenceJson   Json?
+  reviewState    String    @default("unresolved")
+  resolvedAt     DateTime? @db.Timestamptz(3)
+  resolvedBy     String?
+  createdAt      DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime  @updatedAt @db.Timestamptz(3)
+
+  result VerificationResult @relation(fields: [resultId], references: [id], onDelete: Cascade)
+
+  @@index([resultId])
+  @@index([severity])
+  @@index([reviewState])
+}
+
+
+model ResourceSnapshot {
+  id          String   @id @default(cuid())
+  actor       String
+  reason      String
+  trigger     String   @default("manual")
+  rowCount    Int
+  datasetHash String?
+  dataJson    Json
+  createdAt   DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([trigger])
+}
+
+model SiteCopyRevision {
+  id          String   @id @default(cuid())
+  actor       String
+  status      String   @default("draft")
+  contentJson Json
+  createdAt   DateTime @default(now())
+  publishedAt DateTime?
+
+  @@index([status, createdAt])
+  @@index([publishedAt])
 }

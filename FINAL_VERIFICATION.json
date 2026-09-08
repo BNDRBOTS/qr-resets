@@ -1,0 +1,144 @@
+{
+  "status": "SOURCE_COMPLETE_WITH_ENVIRONMENT_BLOCKED_RUNTIME_GATES",
+  "base": {
+    "archive": "qr-resets-5.zip",
+    "sha256": "334bfcf92bbb05501f58b2ae37ef78e7ee63376c49d89d23e7fdbc4858b2f966",
+    "acceptedGitCommit": "927af12e66c0c227b0614f21576132106bbd9652",
+    "gitTree": "cea75461ceea6d8198343dd02cc3a914512e8256"
+  },
+  "gates": {
+    "package": {
+      "status": "PASS",
+      "filesScannedBeforeFinalMetadata": 328
+    },
+    "dataset": {
+      "status": "PASS",
+      "rows": 114,
+      "sourceVerified": 103,
+      "csvSha256": "5e9a8438ee652c9be5b44fb781a2ba94db9dafffddcc720c254bc291aab2d72b"
+    },
+    "importGraph": {
+      "status": "PASS",
+      "sourceFiles": 224,
+      "localImportEdges": 582,
+      "brokenLocalImports": 0,
+      "undeclaredExternalRoots": 0
+    },
+    "syntax": {
+      "status": "PASS",
+      "files": 224,
+      "diagnostics": 0
+    },
+    "contracts": {
+      "status": "PASS",
+      "tests": 124,
+      "passed": 124,
+      "failed": 0,
+      "todo": 0
+    },
+    "dataSafety": {
+      "status": "PASS",
+      "allChecksPassed": true
+    },
+    "unfinishedMarkerScan": {
+      "status": "PASS",
+      "TODO": 0,
+      "FIXME": 0,
+      "STUB": 0,
+      "NOT_IMPLEMENTED": 0,
+      "COMING_SOON": 0
+    },
+    "dependencyInstall": {
+      "status": "BLOCKED",
+      "reason": "npm registry DNS/network failure (EAI_AGAIN registry.npmjs.org) after one clean npm ci attempt"
+    },
+    "ingestionTest": {
+      "status": "BLOCKED",
+      "reason": "clean dependency install unavailable; fast-xml-parser package could not be completed"
+    },
+    "typecheck": {
+      "status": "BLOCKED",
+      "reason": "clean dependency install unavailable; required project type packages are absent"
+    },
+    "lint": {
+      "status": "BLOCKED",
+      "reason": "clean dependency install unavailable; project eslint package unavailable"
+    },
+    "build": {
+      "status": "BLOCKED",
+      "reason": "clean dependency install unavailable; Next.js dependency tree unavailable"
+    },
+    "productionStartHealth": {
+      "status": "BLOCKED",
+      "reason": "build unavailable in this environment"
+    },
+    "browserMobileRender": {
+      "status": "BLOCKED",
+      "reason": "no runnable local Next build/browser runtime after dependency network failure; not relabeled as PASS"
+    }
+  },
+  "candidateVerification": {
+    "verifierVersion": "4.0.0",
+    "rawRecordsLoaded": 559,
+    "recordsAfterStrongDedupe": 545,
+    "recordsOutput": 545,
+    "networkEnabled": false,
+    "organizationStatusCounts": {
+      "INCONCLUSIVE": 341,
+      "INSUFFICIENT_SOURCE_DATA": 153,
+      "UNVERIFIED_CONTACT_ONLY": 51
+    },
+    "websiteStatusCounts": {
+      "INCONCLUSIVE_OFFLINE": 472
+    },
+    "parseIssueCount": 0,
+    "recordErrorCount": 0,
+    "decisions": {
+      "admitted": 0,
+      "published": 0,
+      "held": 506,
+      "excludedNonOrganizationOrBatchDuplicate": 20,
+      "canonicalMatches": 19,
+      "publishStates": {
+        "held": 506,
+        "canonical_match": 19,
+        "excluded": 20
+      },
+      "reasonsHistogram": {
+        "organization_status_inconclusive": 325,
+        "strong_identity_match_existing_resource": 19,
+        "organization_status_insufficient_source_data": 133,
+        "non_organization_record": 20,
+        "organization_status_unverified_contact_only": 48
+      },
+      "identityMatchCounts": {
+        "strong": 19,
+        "ambiguous": 56,
+        "none": 470
+      },
+      "rawOrganizationStatusCounts": {
+        "INCONCLUSIVE": 341,
+        "INSUFFICIENT_SOURCE_DATA": 153,
+        "UNVERIFIED_CONTACT_ONLY": 51
+      },
+      "effectiveOrganizationStatusCounts": {
+        "INCONCLUSIVE": 341,
+        "INSUFFICIENT_SOURCE_DATA": 153,
+        "UNVERIFIED_CONTACT_ONLY": 51
+      }
+    },
+    "canonicalAfter": {
+      "count": 114,
+      "csvSha256": "5e9a8438ee652c9be5b44fb781a2ba94db9dafffddcc720c254bc291aab2d72b",
+      "jsonSha256": "bf6152067ed67d46f96f1d866443d66fa5efcdce73446e443e9560603642a2af",
+      "unchanged": true,
+      "proof": "Hashes recomputed from disk after evaluation and asserted equal to the pinned canonical values; this script has no write path to the dataset files."
+    }
+  },
+  "releaseBoundaries": {
+    "defaultProduct": "ResourceCite",
+    "defaultTheme": "light",
+    "qrResets": "prototype-only; no request persistence, payment/donation activation, donation webhooks, case funding, or operational QR mutation",
+    "canonicalResourceMutationFromCandidatePass": false
+  }
+}

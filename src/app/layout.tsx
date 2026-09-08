@@ -7,18 +7,18 @@ import { ThemeProvider } from "next-themes";
 import { Providers } from "@/components/providers";
 
 export const metadata: Metadata = {
-  title: "BNDR. — Resource Directory + QR Resets",
+  title: "BNDR LLC — ResourceCite + QR Resets",
   description:
-    "BNDR Resource Directory and QR Resets: searchable resources plus dignity-first direct-aid planning and requests.",
+    "ResourceCite by BNDR LLC, plus a prototype preview of QR Resets.",
   keywords: [
     "BNDR",
-    "resource directory",
+    "ResourceCite",
     "victim advocacy",
     "family court",
     "legal aid",
     "crime victim rights",
   ],
-  authors: [{ name: "BNDR." }],
+  authors: [{ name: "BNDR LLC" }],
   icons: {
     icon: [
       { url: "/bndr-logo.png", type: "image/png", sizes: "1024x1024" },
@@ -28,17 +28,17 @@ export const metadata: Metadata = {
     shortcut: ["/bndr-logo.png"],
   },
   openGraph: {
-    title: "BNDR. — Resource Directory + QR Resets",
+    title: "BNDR LLC — ResourceCite + QR Resets",
     description:
-      "A source-backed directory of victim, advocacy & family-court resources.",
-    siteName: "BNDR.",
+      "Find legal, advocacy, housing, medical, and practical support resources in one place.",
+    siteName: "BNDR LLC",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "BNDR. — Resource Directory + QR Resets",
+    title: "BNDR LLC — ResourceCite + QR Resets",
     description:
-      "A source-backed directory of victim, advocacy & family-court resources.",
+      "Find legal, advocacy, housing, medical, and practical support resources in one place.",
   },
 };
 

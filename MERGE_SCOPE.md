@@ -8,7 +8,7 @@
 
 ## Preserved from the production chassis
 
-- Resource Directory public UI and user workflows
+- ResourceCite public UI and user workflows
 - server-gated NextAuth admin console
 - PostgreSQL/Supabase schema and migration path (preserved as optional backend)
 - canonical resource dataset, taxonomy and provenance
@@ -18,7 +18,7 @@
 
 ## Merged from the QR source
 
-- Resource Directory ↔ QR Resets™ in-place switcher/router
+- ResourceCite ↔ QR Resets™ in-place switcher/router
 - full QR Resets page/component layer
 - pinned QR source-copy module
 - Phoenix participation calculator
@@ -31,11 +31,11 @@
 - black local BNDR logo derivative for light mode, preserving source aspect ratio; top-left in both views
 - explicit mobile switcher labels
 - removed build-time Google-font network dependency
-- real QR request persistence and admin review
+- QR request persistence/admin mutation retained only as historical schema provenance; current routes/UI are hard-disabled prototype-only
 - same-origin mutation protection for browser state changes
 - server-side admin authorization and real actor identity
 - bounded inputs and rate limits
-- signed/idempotent donation webhook persistence
+- donation webhook/payment mutation retained only as historical schema provenance; current release endpoint is hard-disabled
 - SSRF-safe URL verification with resolved-address pinning and redirect revalidation
 - escaped print HTML and formula-safe CSV exports
 - truthful public/private pending-register boundary

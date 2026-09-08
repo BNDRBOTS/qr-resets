@@ -6,7 +6,7 @@ The application no longer requires an undefined external PostgreSQL/Supabase dat
 
 **Default production backend:** Railway Volume + SQLite.
 
-This is sufficient for the current single-service/single-admin intent: resource updates, imports, audit history, pending records, URL verification history, QR Reset request intake/review/case state, and donation webhook records all have durable server-side persistence. Public advocate/user state that is intentionally private remains in browser localStorage.
+This is sufficient for the current single-service/single-admin ResourceCite intent: resource updates, imports, verification/review state, audit history, pending records, snapshots, URL verification history, and controlled ResourceCite site-copy revisions have durable server-side persistence. Public visitor workspace state that is intentionally private remains in browser localStorage. QR Resets request/payment/case mutation remains disabled in this release.
 
 PostgreSQL/Supabase support is preserved under `prisma/postgres/` and `supabase/`, but requires an explicit `STORAGE_BACKEND=postgres` choice.
 
@@ -26,11 +26,11 @@ The health endpoint requires:
 
 - package contract: PASS
 - canonical dataset: PASS — 114 rows, expected SHA-256
-- internal import graph: PASS — 463 local import edges, 0 broken
-- TypeScript/TSX syntax parse: PASS — 186 files, 0 diagnostics
-- contract/security tests: PASS — 30/30
-- storage backend resolver tests: PASS — SQLite default, `/data/bndr.db` resolution, Railway volume refusal gate
+- internal import graph: PASS — 224 source files, 582 local import edges, 0 broken imports, 0 undeclared external roots
+- TypeScript/TSX syntax parse: PASS — 224 files, 0 diagnostics
+- contract/security/product tests: PASS — 124/124
+- data-safety verification: PASS
 
-## Known external configuration dependency
+## Environment-limited gates
 
-Live donation collection still requires an actual payment provider configuration. The app cannot truthfully collect money without payment URLs/Stripe webhook configuration. This does not block the Resource Directory, local saved-state functions, QR request intake, or admin backend.
+This artifact environment could not complete a clean npm dependency install because registry DNS/network access failed. Dependency-required ingestion/typecheck/lint/build/start/browser gates remain BLOCKED here rather than being reported as PASS. QR Resets payments and request intake are intentionally disabled by release design, not missing configuration.

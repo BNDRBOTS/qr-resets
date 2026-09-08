@@ -5,6 +5,7 @@ import { Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/shared/logo";
 import { SiteSwitcher } from "@/components/shared/site-switcher";
+import { ThemeToggle } from "@/components/bndr/theme-toggle";
 import { QrScrollSpyPills } from "./qr-scroll-progress";
 
 /**
@@ -43,7 +44,7 @@ export function QrNav() {
             aria-label="QR Resets — back to top"
           >
             <Logo size={38} priority />
-            <span className="bndr-wordmark-sm hidden text-lg font-extrabold tracking-tight sm:inline sm:text-xl">
+            <span className="bndr-product-name text-base sm:text-xl">
               {QR_BRAND.name}
             </span>
           </button>
@@ -59,6 +60,7 @@ export function QrNav() {
             >
               <Printer className="size-4" aria-hidden />
             </Button>
+            <ThemeToggle />
             <SiteSwitcher compact />
           </div>
         </div>

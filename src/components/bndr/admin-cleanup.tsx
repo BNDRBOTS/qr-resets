@@ -17,16 +17,27 @@ interface AdminCleanupProps {
 export function AdminCleanup({ lastPiipass, onRan }: AdminCleanupProps) {
   const [reports, setReports] = useState<PIIPassReport[] | null>(null);
   const [ranAt, setRanAt] = useState<string | null>(null);
+  const [previewReady, setPreviewReady] = useState(false);
 
   const mut = useMutation({
-    mutationFn: () => runCleanup(),
+    mutationFn: (mode: "preview" | "apply") => runCleanup(mode),
     onSuccess: (data) => {
       setReports(data.reports);
       setRanAt(new Date().toISOString());
-      toast.success("PII pass complete", {
-        description: `${data.changedCount} of ${data.total} resources updated.`,
-      });
-      onRan();
+      if (data.dryRun) {
+        setPreviewReady(true);
+        toast.success("Cleanup preview complete", {
+          description: `${data.changedCount} of ${data.total} resources would change. No data was written.`,
+        });
+      } else {
+        setPreviewReady(false);
+        toast.success("PII cleanup applied", {
+          description: data.snapshotId
+            ? `${data.changedCount} resources updated after snapshot ${data.snapshotId}.`
+            : `${data.changedCount} resources updated; no snapshot was needed because no rows changed.`,
+        });
+        onRan();
+      }
     },
     onError: (e: Error) =>
       toast.error("Cleanup failed", { description: e.message }),
@@ -47,8 +58,9 @@ export function AdminCleanup({ lastPiipass, onRan }: AdminCleanupProps) {
             </h3>
             <p className="text-sm text-muted-foreground">
               Re-runs the normalization pipeline on every resource — phone,
-              email, URL, whitespace, and PII redaction. Persists any drift
-              and writes an audit entry per changed resource.
+              email, URL, whitespace, and PII redaction. Preview writes
+              nothing; Apply snapshots the full dataset before persisting drift
+              and auditing each changed resource.
             </p>
             {lastPiipass ? (
               <p className="text-xs text-muted-foreground">
@@ -63,14 +75,33 @@ export function AdminCleanup({ lastPiipass, onRan }: AdminCleanupProps) {
               </p>
             )}
           </div>
-          <Button
-            onClick={() => mut.mutate()}
-            disabled={mut.isPending}
-            className="bg-primary shadow-[var(--shadow-accent-strong)] hover:bg-primary/90"
-          >
-            <Play className="size-4" aria-hidden />
-            {mut.isPending ? "Running…" : "Run pass"}
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              onClick={() => mut.mutate("preview")}
+              disabled={mut.isPending}
+            >
+              <Play className="size-4" aria-hidden />
+              {mut.isPending ? "Running…" : "Preview only"}
+            </Button>
+            <Button
+              onClick={() => {
+                const affected = changedReports.length;
+                if (affected === 0) return;
+                const confirmed = window.confirm(
+                  `Apply cleanup to ${affected} resource${affected === 1 ? "" : "s"}?\n\n` +
+                    "This will normalize the previewed records. A full recovery snapshot of the exact pre-change dataset will be captured before any write. " +
+                    "If snapshot creation fails, the cleanup will not be applied.",
+                );
+                if (confirmed) mut.mutate("apply");
+              }}
+              disabled={mut.isPending || !previewReady || changedReports.length === 0}
+              className="bg-primary shadow-[var(--shadow-accent-strong)] hover:bg-primary/90"
+            >
+              <ShieldCheck className="size-4" aria-hidden />
+              Apply cleanup
+            </Button>
+          </div>
         </div>
       </div>
 

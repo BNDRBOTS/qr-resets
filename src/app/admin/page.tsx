@@ -7,6 +7,7 @@
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";
+import { isAdminSession } from "@/lib/admin-auth-core";
 import { AdminDashboard } from "@/components/bndr/admin-dashboard";
 import Link from "next/link";
 import { AdminSignOut } from "@/components/bndr/admin-sign-out";
@@ -16,7 +17,7 @@ export const dynamic = "force-dynamic";
 export default async function AdminPage() {
   const session = await getServerSession(authOptions);
 
-  if (!session || (session.user as { role?: string })?.role !== "admin") {
+  if (!isAdminSession(session)) {
     redirect("/admin/login");
   }
 
@@ -28,7 +29,7 @@ export default async function AdminPage() {
         <div className="mx-auto flex min-h-14 max-w-7xl flex-wrap items-center justify-between gap-2 px-3 py-2 sm:px-4">
           <div className="flex items-center gap-3">
             <Link href="/" className="text-sm font-medium text-muted-foreground hover:text-foreground">
-              ← Back to Directory
+              ← Back to ResourceCite
             </Link>
             <span className="h-4 w-px bg-border" />
             <span className="text-sm font-semibold text-foreground">

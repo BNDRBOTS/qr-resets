@@ -1,11 +1,5 @@
 "use client";
 
-// BNDR. — Trending Searches
-// ----------------------------------------------------------------------------
-// A compact row of trending/popular search chips that appears below the hero
-// search bar. Helps users discover content and provides quick entry points.
-// Each chip immediately searches for that term.
-
 import { motion } from "framer-motion";
 import { TrendingUp } from "lucide-react";
 
@@ -32,9 +26,9 @@ export function TrendingSearches({ onSearch }: TrendingSearchesProps) {
       transition={{ duration: 0.5, delay: 0.9 }}
       className="mt-4 flex flex-wrap items-center justify-center gap-2"
     >
-      <span className="inline-flex items-center gap-1 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+      <span className="inline-flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider text-foreground/80">
         <TrendingUp className="size-3" aria-hidden />
-        Trending
+        Popular searches
       </span>
       {TRENDING.map((term, i) => (
         <motion.button
@@ -46,7 +40,7 @@ export function TrendingSearches({ onSearch }: TrendingSearchesProps) {
           whileHover={{ y: -1 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => onSearch(term)}
-          className="rounded-full border border-border/50 bg-card/30 px-3 py-1 text-xs text-muted-foreground transition-all hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
+          className="rounded-full border border-primary/35 bg-card/80 px-3 py-1.5 text-xs font-semibold text-foreground shadow-sm transition-all hover:border-primary/70 hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/55"
         >
           {term}
         </motion.button>

@@ -2,7 +2,13 @@
 // database; this module contains no seed rows, fallback rows, or demo records.
 
 import { db } from "@/lib/db";
+import {
+  findExistingIdentityConflict,
+  prepareResourceCandidate,
+  ResourceIngestionError,
+} from "@/lib/resource-ingestion";
 import { normalizeResource } from "@/lib/pii";
+import { prepareResourceSnapshot, verifyResourceSnapshot } from "@/lib/resource-snapshot";
 import type { CategorySlug, ResourceInput } from "@/lib/types";
 
 export class ResourceNotFoundError extends Error {
@@ -16,26 +22,37 @@ export async function createResourceRecord(
   input: ResourceInput,
   actor: string,
 ) {
-  const normalized = normalizeResource(input);
+  const prepared = prepareResourceCandidate(input as unknown as Record<string, unknown>);
+  const normalized = normalizeResource(prepared.input);
+  const existing = await db.resource.findMany({
+    select: { id: true, name: true, email: true, website: true, phoneNormalized: true },
+  });
+  const conflict = findExistingIdentityConflict(prepared, existing);
+  if (conflict) {
+    throw new ResourceIngestionError(
+      "DUPLICATE_RESOURCE",
+      `An existing resource already has the same exact name/contact identity (${conflict.name}).`,
+    );
+  }
 
   return db.$transaction(async (tx) => {
     const created = await tx.resource.create({
       data: {
         name: normalized.name,
-        acronym: input.acronym,
+        acronym: prepared.input.acronym,
         description: normalized.description,
-        category: input.category,
-        subcategory: input.subcategory,
-        phoneRaw: input.phoneRaw,
-        phoneNormalized: normalized.phoneNormalized,
+        category: prepared.input.category,
+        subcategory: prepared.input.subcategory,
+        phoneRaw: prepared.input.phoneRaw,
+        phoneNormalized: prepared.phoneNormalized,
         email: normalized.email,
-        address: input.address,
+        address: prepared.input.address,
         website: normalized.website,
-        tags: input.tags,
-        priority: input.priority,
-        verified: input.verified,
-        published: input.published,
-        sourceNote: input.sourceNote,
+        tags: prepared.input.tags,
+        priority: prepared.input.priority,
+        verified: prepared.input.verified,
+        published: prepared.input.published,
+        sourceNote: prepared.input.sourceNote,
         piipassAt: new Date(),
         piipassNotes: normalized.changes.length
           ? normalized.changes.join(" | ")
@@ -51,6 +68,8 @@ export async function createResourceRecord(
         summary: `Created resource: ${created.name}`,
         details: JSON.stringify({
           changes: normalized.changes,
+          issues: prepared.issues,
+          viability: prepared.viability,
           source: "admin",
         }),
       },
@@ -90,27 +109,38 @@ export async function updateResourceRecord(
       patch.sourceNote !== undefined ? patch.sourceNote : existing.sourceNote,
   };
 
-  const normalized = normalizeResource(merged);
+  const prepared = prepareResourceCandidate(merged as unknown as Record<string, unknown>);
+  const normalized = normalizeResource(prepared.input);
+  const allResources = await db.resource.findMany({
+    select: { id: true, name: true, email: true, website: true, phoneNormalized: true },
+  });
+  const conflict = findExistingIdentityConflict(prepared, allResources, id);
+  if (conflict) {
+    throw new ResourceIngestionError(
+      "DUPLICATE_RESOURCE",
+      `Another resource already has the same exact name/contact identity (${conflict.name}).`,
+    );
+  }
 
   return db.$transaction(async (tx) => {
     const updated = await tx.resource.update({
       where: { id },
       data: {
         name: normalized.name,
-        acronym: merged.acronym,
+        acronym: prepared.input.acronym,
         description: normalized.description,
-        category: merged.category,
-        subcategory: merged.subcategory,
-        phoneRaw: merged.phoneRaw,
-        phoneNormalized: normalized.phoneNormalized,
+        category: prepared.input.category,
+        subcategory: prepared.input.subcategory,
+        phoneRaw: prepared.input.phoneRaw,
+        phoneNormalized: prepared.phoneNormalized,
         email: normalized.email,
-        address: merged.address,
+        address: prepared.input.address,
         website: normalized.website,
-        tags: merged.tags,
-        priority: merged.priority,
-        verified: merged.verified,
-        published: merged.published,
-        sourceNote: merged.sourceNote,
+        tags: prepared.input.tags,
+        priority: prepared.input.priority,
+        verified: prepared.input.verified,
+        published: prepared.input.published,
+        sourceNote: prepared.input.sourceNote,
         piipassAt: new Date(),
         piipassNotes: normalized.changes.length
           ? normalized.changes.join(" | ")
@@ -126,6 +156,8 @@ export async function updateResourceRecord(
         summary: `Updated resource: ${updated.name}`,
         details: JSON.stringify({
           changes: normalized.changes,
+          issues: prepared.issues,
+          viability: prepared.viability,
           fields: Object.keys(patch),
         }),
       },
@@ -136,26 +168,53 @@ export async function updateResourceRecord(
 }
 
 export async function deleteResourceRecord(id: string, actor: string) {
-  const existing = await db.resource.findUnique({ where: { id } });
-  if (!existing) throw new ResourceNotFoundError();
+  return db.$transaction(async (tx) => {
+    const existing = await tx.resource.findUnique({ where: { id } });
+    if (!existing) throw new ResourceNotFoundError();
 
-  await db.$transaction(async (tx) => {
-    // Create the deletion record before deleting the resource so the FK can be
-    // set to null by ON DELETE SET NULL while retaining the forensic log.
+    // Capture and verify the exact full dataset before the destructive write.
+    // If either operation fails, the transaction aborts and the resource remains.
+    const currentRows = await tx.resource.findMany();
+    const prepared = prepareResourceSnapshot(currentRows);
+    const snapshot = await tx.resourceSnapshot.create({
+      data: {
+        actor,
+        reason: `Automatic snapshot before permanently deleting resource ${existing.id}`,
+        trigger: "pre-delete",
+        rowCount: prepared.rowCount,
+        datasetHash: prepared.datasetHash,
+        dataJson: prepared.rows as unknown as object,
+      },
+    });
+    const verified = verifyResourceSnapshot(snapshot);
+    if (!verified.ok || verified.datasetHash !== prepared.datasetHash) {
+      throw new Error(
+        `PRE_DELETE_SNAPSHOT_VERIFICATION_FAILED ${verified.ok ? "hash mismatch" : verified.reason}`,
+      );
+    }
+
     await tx.auditLog.create({
       data: {
         action: "delete",
         resourceId: existing.id,
         actor,
-        summary: `Deleted resource: ${existing.name}`,
+        summary: `Permanently deleted active resource: ${existing.name}`,
         details: JSON.stringify({
           name: existing.name,
           category: existing.category,
+          preDeleteSnapshotId: snapshot.id,
+          preDeleteDatasetHash: prepared.datasetHash,
+          recoveryVerifiedBeforeDelete: true,
         }),
       },
     });
     await tx.resource.delete({ where: { id } });
-  });
 
-  return existing;
+    return {
+      resource: existing,
+      snapshotId: snapshot.id,
+      snapshotHash: prepared.datasetHash,
+      snapshotRowCount: prepared.rowCount,
+    };
+  });
 }

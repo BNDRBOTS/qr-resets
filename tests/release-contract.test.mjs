@@ -16,10 +16,10 @@ test("canonical dataset remains exactly 114 packaged resources", () => {
   assert.equal(data.resources.every((row) => row.published === true), true);
 });
 
-test("dual-view router keeps Resource Directory and QR Resets in one app", () => {
+test("dual-view router keeps ResourceCite and QR Resets in one app", () => {
   const switcher = read("src/components/shared/site-switcher.tsx");
   const router = read("src/components/shared/site-router.tsx");
-  assert.match(switcher, /label: "Resource Directory"/);
+  assert.match(switcher, /label: "ResourceCite"/);
   assert.match(switcher, /label: "QR Resets™"/);
   assert.match(switcher, /compact \? info\.short : info\.label/);
   assert.match(router, /<Directory \/>/);
@@ -101,10 +101,12 @@ test("public pending register exposes only name and reason", () => {
   assert.doesNotMatch(source, /select:\s*\{[^}]*sourceNote/i);
 });
 
-test("directory priority copy does not assert a strongest-five invariant", () => {
+test("public ResourceCite copy removes the obsolete priority-resource presentation", () => {
   const source = read("src/components/bndr/directory.tsx");
-  assert.doesNotMatch(source, /Strongest five for your stated need/i);
-  assert.match(source, /Priority resources/);
+  const hero = read("src/components/bndr/hero.tsx");
+  const stats = read("src/components/bndr/stats-strip.tsx");
+  assert.doesNotMatch(source + hero + stats, /Strongest five for your stated need|Priority resources|Priority matches|operator-marked/i);
+  assert.match(hero, /Browse all/);
 });
 
 
@@ -153,12 +155,14 @@ test("category and resource presentation is neutral by default", () => {
   const directory = read("src/components/bndr/directory.tsx");
   const card = read("src/components/bndr/resource-card.tsx");
   const search = read("src/lib/search.ts");
-  assert.match(grid, /CATEGORIES\.map/);
+  assert.match(grid, /CATEGORIES\.filter\(\(cat\) => \(counts\[cat\.slug\] \?\? 0\) > 0\)/);
   assert.doesNotMatch(grid, /slice\(0,\s*6\)|sort\([^)]*count|top 6/i);
   assert.match(pills, /bndr-filter-pill/);
   assert.doesNotMatch(pills, /rounded-r-none|border-l-0/);
   assert.doesNotMatch(directory, /FeaturedSpotlight/);
-  assert.match(directory, /pageSize=\{500\}/);
+  assert.match(directory, /useInfiniteQuery/);
+  assert.match(directory, /fetchNextPage/);
+  assert.doesNotMatch(directory, /limit:\s*500/);
   assert.doesNotMatch(card, /md:col-span-2|lg:col-span-3/);
   assert.doesNotMatch(card, /tags\.slice\(0,\s*isPriority/);
   assert.match(search, /a\.name\.localeCompare\(b\.name\)/);
@@ -180,39 +184,106 @@ test("emoji glyphs are removed and custom BNDR SVG icons are present", () => {
   assert.match(icons, /export function BndrCheckIcon/);
 });
 
-test("source normalizer and canonical data remain byte-identical to v2 baseline", () => {
+test("source normalizer and canonical data remain fixed while ingestion uses the shared pipeline", () => {
   assert.equal(sha256("src/lib/pii.ts"), "092ea94d6772f7f6d1ab6eed68ddfe7f52cb946babc6625b7de385fdaed8d72e");
-  assert.equal(sha256("src/app/api/admin/resources/import/route.ts"), "a7464c48cf64f225e62cb1a03c0770466560b18c9e516ba5a4438d4322c732a8");
-  assert.equal(sha256("src/components/bndr/admin-bulk-import.tsx"), "92491d384d27761bb02897bb3771563db3b48f05d30b1f6152ae2864196882b7");
   assert.equal(sha256("prisma/verified-resources.csv"), CANONICAL);
+  const importRoute = read("src/app/api/admin/resources/import/route.ts");
+  const bulkUi = read("src/components/bndr/admin-bulk-import.tsx");
+  assert.match(importRoute, /prepareResourceBatch/);
+  assert.match(importRoute, /prepareResourceDocument/);
+  assert.match(importRoute, /db\.\$transaction/);
+  assert.doesNotMatch(importRoute, /openai|anthropic|gemini|llm/i);
+  assert.match(bulkUi, /\.txt,\.md,\.markdown,\.json,\.xml/);
+  assert.match(bulkUi, /value="markdown"/);
+  assert.match(bulkUi, /value="json"/);
+  assert.match(bulkUi, /value="xml"/);
 });
 
-test("admin login and resource creation remain environment-backed and server-gated", () => {
+test("admin login uses persistent single-admin credentials with Railway bootstrap and server gates", () => {
   const auth = read("src/lib/auth-options.ts");
+  const credentials = read("src/lib/admin-credentials.ts");
+  const core = read("src/lib/admin-credential-core.ts");
   const adminRoute = read("src/app/api/admin/resources/route.ts");
   const adminPage = read("src/app/admin/page.tsx");
-  assert.match(auth, /process\.env\.ADMIN_EMAIL/);
-  assert.match(auth, /process\.env\.ADMIN_PASSWORD_HASH/);
-  assert.match(auth, /process\.env\.ADMIN_PASSWORD/);
-  assert.doesNotMatch(auth, /ADMIN_(?:EMAIL|PASSWORD|PASSWORD_HASH)\s*=\s*["'][^"']+["']/);
+  assert.match(credentials, /process\.env\.ADMIN_EMAIL/);
+  assert.match(credentials, /process\.env\.ADMIN_PASSWORD_HASH/);
+  assert.match(credentials, /process\.env\.ADMIN_PASSWORD/);
+  assert.match(credentials, /process\.env\.ADMIN_RECOVERY_KEY/);
+  assert.match(core, /existing = await deps\.store\.get\(\)/);
+  assert.match(core, /bootstrapIfMissing/);
+  assert.match(auth, /authenticateAdminCredential\(email, password\)/);
+  assert.match(auth, /isAdminCredentialVersionCurrent\(token\)/);
   assert.match(adminPage, /getServerSession\(authOptions\)/);
   assert.match(adminRoute, /requireAdminRateLimited\(req, RATE_LIMITS\.resourceMutation\)/);
   assert.match(adminRoute, /createResourceRecord\(parsed\.data, actor\)/);
 });
 
-test("category contact coverage is global dataset-backed rather than filtered-result derived", () => {
+test("category contact coverage remains available internally but is not exposed by public category presentation", () => {
   const statsRoute = read("src/app/api/stats/route.ts");
   const adminStatsRoute = read("src/app/api/admin/stats/route.ts");
   const directory = read("src/components/bndr/directory.tsx");
+  const grid = read("src/components/bndr/category-grid.tsx");
   const types = read("src/lib/types.ts");
   assert.match(statsRoute, /categoryContactCoverage/);
   assert.match(statsRoute, /db\.resource\.groupBy/);
   assert.match(statsRoute, /published:\s*true/);
-  assert.match(directory, /stats\?\.categoryContactCoverage/);
-  assert.doesNotMatch(directory, /for \(const resource of resources\)[\s\S]{0,600}categoryStats/);
+  assert.doesNotMatch(directory, /stats\?\.categoryContactCoverage/);
+  assert.doesNotMatch(grid, /categoryContactCoverage|phonePercent|emailPercent|webPercent|Source-backed category/);
   assert.match(types, /categoryContactCoverage:/);
   assert.match(adminStatsRoute, /categoryContactCoverage/);
   assert.match(adminStatsRoute, /phoneNormalized:\s*\{\s*not:\s*null\s*\}/);
   assert.match(adminStatsRoute, /email:\s*\{\s*not:\s*null\s*\}/);
   assert.match(adminStatsRoute, /website:\s*\{\s*not:\s*null\s*\}/);
+});
+
+test("forgot-password recovery is explicit, short-lived, same-origin, and version-invalidating", () => {
+  const login = read("src/components/bndr/admin-login-form.tsx");
+  const flow = read("src/components/bndr/admin-forgot-password-form.tsx");
+  const proof = read("src/app/api/admin-recovery/verify/route.ts");
+  const reset = read("src/app/api/admin-recovery/password/route.ts");
+  const ticket = read("src/lib/admin-recovery-ticket-core.ts");
+  assert.match(login, /Forgot password\?/);
+  assert.match(flow, /performAdminRecoveryProof/);
+  assert.match(flow, /performAdminPasswordReset/);
+  assert.match(proof, /createAdminRecoveryTicket/);
+  assert.match(reset, /resetAdminPasswordWithRecoveryGrant/);
+  assert.match(ticket, /ADMIN_RECOVERY_TICKET_TTL_MS = 10 \* 60 \* 1000/);
+  assert.match(ticket, /timingSafeEqual/);
+  assert.match(reset, /RECOVERY_EXPIRED/);
+});
+
+test("forgot-admin-email recovery requires proof and does not disclose identity before success", () => {
+  const login = read("src/components/bndr/admin-login-form.tsx");
+  const flow = read("src/components/bndr/admin-forgot-email-form.tsx");
+  const route = read("src/app/api/admin-recovery/email/route.ts");
+  assert.match(login, /Forgot email \/ username\?/);
+  assert.match(flow, /performAdminEmailRecovery/);
+  assert.match(flow, /Your username is the admin email used to sign in\./);
+  assert.match(route, /verifyAdminRecoveryCredential/);
+  assert.match(route, /requireSameOriginMutation\(req\)/);
+  assert.match(route, /RATE_LIMITS\.adminRecoveryProof/);
+  assert.match(route, /\{ ok: true, email: recovery\.admin\.email \}/);
+  assert.doesNotMatch(route, /console\.(?:log|error)\([^\n]*(?:recovery\.admin\.email|parsed\.data|recoveryKey)/);
+});
+
+test("shared Dialog and Sheet glass surfaces retain fixed positioning and dark category rail is opaque", () => {
+  const globals = read("src/app/globals.css");
+  const light = read("src/app/light-mode-surfaces.css");
+
+  assert.match(
+    globals,
+    /\.bndr-glass-panel\[data-slot="dialog-content"\],[\s\S]*\.bndr-glass-panel\[data-slot="sheet-content"\][\s\S]*position:\s*fixed;/,
+  );
+  assert.match(
+    globals,
+    /\.bndr-glass-panel\[data-slot="dialog-content"\] > \[data-slot="dialog-close"\],[\s\S]*\.bndr-glass-panel\[data-slot="sheet-content"\] > \[data-slot="sheet-close"\][\s\S]*position:\s*absolute;/,
+  );
+  assert.match(
+    globals,
+    /\.dark \.bndr-category-filter-bar \{[\s\S]*background:\s*color-mix\(in oklch,[\s\S]*backdrop-filter:\s*none;/,
+  );
+  assert.match(
+    light,
+    /:root:not\(\.dark\) \.bndr-category-filter-bar \{[\s\S]*backdrop-filter:\s*none;/,
+  );
 });

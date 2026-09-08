@@ -9,7 +9,7 @@ interface LogoProps {
   chip?: boolean;
 }
 
-/** Local production BNDR mark shared by the Directory and QR Resets views. */
+/** Local production BNDR LLC mark shared by ResourceCite and QR Resets. */
 export function Logo({
   size = 40,
   className = "",
@@ -20,7 +20,7 @@ export function Logo({
       size={size}
       className={className}
       glow={!chip}
-      alt="BNDR."
+      alt="BNDR LLC"
     />
   );
 }

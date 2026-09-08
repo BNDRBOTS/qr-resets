@@ -1,0 +1,36 @@
+{
+  "generatedAt": "2026-09-04T03:42:50.082115+00:00",
+  "method": "getent hosts against well-known control domains plus the npm registry",
+  "controls": [
+    {
+      "domain": "example.com",
+      "exitCode": 2,
+      "stdout": "",
+      "stderr": "",
+      "resolved": false
+    },
+    {
+      "domain": "google.com",
+      "exitCode": 2,
+      "stdout": "",
+      "stderr": "",
+      "resolved": false
+    },
+    {
+      "domain": "cloudflare.com",
+      "exitCode": 2,
+      "stdout": "",
+      "stderr": "",
+      "resolved": false
+    },
+    {
+      "domain": "registry.npmjs.org",
+      "exitCode": 2,
+      "stdout": "",
+      "stderr": "",
+      "resolved": false
+    }
+  ],
+  "egressRestricted": true,
+  "interpretation": "All control domains fail DNS resolution identically; DNS/transport failures from this environment are environmental uncertainty, while genuine completed HTTP 404/410/451 responses remain usable dead-URL evidence."
+}
