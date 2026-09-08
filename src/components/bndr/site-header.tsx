@@ -2,7 +2,17 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Menu, Shield, BookmarkCheck, StickyNote, Clock, LayoutDashboard, FolderOpen, Flame, CheckCircle2 } from "lucide-react";
+import {
+  Menu,
+  Shield,
+  BookmarkCheck,
+  StickyNote,
+  Clock,
+  LayoutDashboard,
+  FolderOpen,
+  Flame,
+  CheckCircle2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
@@ -35,7 +45,7 @@ interface SiteHeaderProps {
   goalProgress?: number;
   /** Whether the weekly goal has been met. */
   goalMet?: boolean;
-  /** Total resource count for the header badge. */
+  /** Retained API input; resource totals remain available elsewhere in the directory. */
   totalResources?: number;
 }
 
@@ -48,14 +58,9 @@ const NAV = [
 ];
 
 function WordmarkLogo({ onClick }: { onClick?: () => void }) {
-  // Real PNG logo is the primary mark; BndrLogo handles the Inter-italic
-  // fallback automatically if the image fails to load.
   return <BndrLogo size={48} onClick={onClick} />;
 }
 
-// Turn 1 Scope A.6 — Replace header admin toggle with navigation to /admin.
-// Client state is never authorization; the admin console lives behind
-// server-gated NextAuth at /admin.
 function AdminLink() {
   return (
     <Button
@@ -87,7 +92,6 @@ export function SiteHeader({
   streak = 0,
   goalProgress = 0,
   goalMet = false,
-  totalResources = 0,
 }: SiteHeaderProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [legal, setLegal] = useState<LegalKind | null>(null);
@@ -103,24 +107,16 @@ export function SiteHeader({
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border/60 bg-background/70 backdrop-blur-xl">
-      {/* Slow-shifting cool-blue hairline under the header. */}
       <div className="bndr-gradient-line absolute inset-x-0 bottom-0 h-px" />
-      <div className="container mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center gap-2">
+      <div className="container mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
+        <div className="flex min-w-0 items-center gap-3">
           <WordmarkLogo onClick={() => onJump("top")} />
-          {totalResources > 0 ? (
-            <span className="hidden items-center gap-1 rounded-full border border-border/60 bg-muted/40 px-2 py-0.5 text-[10px] font-medium tabular-nums text-muted-foreground sm:inline-flex">
-              <span className="size-1.5 rounded-full bg-emerald-500" aria-hidden />
-              {totalResources.toLocaleString()}
-            </span>
-          ) : null}
+          <span className="hidden h-5 w-px shrink-0 bg-border/80 sm:block" aria-hidden="true" />
+          <span className="bndr-product-name hidden truncate sm:inline">ResourceCite</span>
         </div>
 
-        {/* Desktop nav */}
-        <nav
-          aria-label="Primary"
-          className="hidden items-center gap-1 md:flex"
-        >
+        {/* Desktop primary navigation and global controls. */}
+        <nav aria-label="Primary" className="hidden items-center gap-1 lg:flex">
           {NAV.map((item) => (
             <Button
               key={item.label}
@@ -128,7 +124,7 @@ export function SiteHeader({
               variant="ghost"
               size="sm"
               onClick={() => handleNav(item)}
-              className="text-muted-foreground hover:text-primary hover:bg-transparent"
+              className="text-muted-foreground hover:bg-transparent hover:text-primary"
             >
               {item.label}
             </Button>
@@ -140,12 +136,12 @@ export function SiteHeader({
               variant="ghost"
               size="sm"
               onClick={() => (onOpenRecent ? onOpenRecent() : onJump("resources"))}
-              className="gap-1.5 text-muted-foreground hover:text-primary hover:bg-transparent"
+              className="gap-1.5 text-muted-foreground hover:bg-transparent hover:text-primary"
               aria-label={`Recently viewed (${recentlyViewedCount})`}
               title={`${recentlyViewedCount} recently viewed resources`}
             >
               <Clock className="size-4" aria-hidden />
-              <span className="hidden lg:inline">Recent</span>
+              <span className="hidden xl:inline">Recent</span>
               <span className="rounded-full bg-muted/60 px-1.5 py-0.5 text-[10px] font-medium tabular-nums">
                 {recentlyViewedCount}
               </span>
@@ -185,12 +181,12 @@ export function SiteHeader({
               variant="ghost"
               size="sm"
               onClick={onOpenCollections}
-              className="relative gap-1.5 text-muted-foreground hover:text-primary hover:bg-transparent"
+              className="relative gap-1.5 text-muted-foreground hover:bg-transparent hover:text-primary"
               aria-label={`Collections (${collectionsCount})`}
               title="Named groups of saved resources"
             >
               <FolderOpen className="size-4" aria-hidden />
-              <span className="hidden xl:inline">Collections</span>
+              <span className="hidden 2xl:inline">Collections</span>
               {collectionsCount > 0 ? (
                 <span className="ml-0.5 rounded-full bg-primary/20 px-1.5 py-0.5 text-[10px] font-medium text-primary">
                   {collectionsCount}
@@ -204,7 +200,7 @@ export function SiteHeader({
               variant="ghost"
               size="sm"
               onClick={onOpenAdvocateDashboard}
-              className="relative gap-1.5 text-muted-foreground hover:text-primary hover:bg-transparent"
+              className="relative gap-1.5 text-muted-foreground hover:bg-transparent hover:text-primary"
               aria-label={`Advocate dashboard${followUpCount > 0 ? ` — ${followUpCount} follow-up needed` : ""}${streak > 0 ? ` — ${streak}-week streak` : ""}${goalMet ? " — goal met" : goalProgress > 0 ? ` — goal ${goalProgress}%` : ""}`}
               title={
                 [
@@ -217,8 +213,7 @@ export function SiteHeader({
               }
             >
               <LayoutDashboard className="size-4" aria-hidden />
-              <span className="hidden xl:inline">Dashboard</span>
-              {/* Streak flame — shows when the advocate has a multi-week streak */}
+              <span className="hidden 2xl:inline">Dashboard</span>
               {streak >= 2 ? (
                 <span
                   className="bndr-flame-glow ml-0.5 inline-flex items-center gap-0.5 rounded-full bg-orange-500/15 px-1.5 py-0.5 text-[10px] font-medium text-orange-600 dark:text-orange-400"
@@ -229,7 +224,6 @@ export function SiteHeader({
                   {streak}
                 </span>
               ) : null}
-              {/* Goal progress ring — a compact SVG ring showing weekly progress */}
               {goalProgress > 0 && !goalMet ? (
                 <span
                   className="relative ml-0.5 inline-flex size-4 items-center justify-center"
@@ -253,7 +247,6 @@ export function SiteHeader({
                   </svg>
                 </span>
               ) : null}
-              {/* Goal met checkmark */}
               {goalMet ? (
                 <span
                   className="ml-0.5 inline-flex items-center rounded-full bg-emerald-500/15 px-1 py-0.5 text-[10px] font-medium text-emerald-600 dark:text-emerald-400"
@@ -275,19 +268,19 @@ export function SiteHeader({
             </Button>
           ) : null}
           <SiteSwitcher compact />
-          <ThemeToggle />
           <AdminLink />
+          <ThemeToggle />
         </nav>
 
-        {/* Mobile hamburger */}
-        <div className="flex items-center gap-2 md:hidden">
+        {/* Mobile/tablet controls preserve the same identity → switcher → utility order. */}
+        <div className="flex shrink-0 items-center gap-1.5 lg:hidden">
           {onOpenSaved ? (
             <Button
               type="button"
               variant="outline"
               size="icon"
               onClick={onOpenSaved}
-              className="relative hover:border-primary/40 hover:text-primary"
+              className="relative hidden hover:border-primary/40 hover:text-primary min-[400px]:inline-flex"
               aria-label={`Saved resources (${savedCount})`}
             >
               <BookmarkCheck className="size-4" aria-hidden />
@@ -313,15 +306,14 @@ export function SiteHeader({
             <SheetContent side="right" className="w-72 bg-background/95">
               <SheetHeader>
                 <SheetTitle asChild>
-                  <div className="pt-2">
+                  <div className="flex items-center gap-3 pt-2">
                     <BndrLogo size={42} />
+                    <span className="h-5 w-px bg-border/80" aria-hidden="true" />
+                    <span className="bndr-product-name text-base">ResourceCite</span>
                   </div>
                 </SheetTitle>
               </SheetHeader>
-              <nav
-                aria-label="Mobile primary"
-                className="flex flex-col gap-1 px-4"
-              >
+              <nav aria-label="Mobile primary" className="flex flex-col gap-1 px-4">
                 {NAV.map((item) => (
                   <SheetClose asChild key={item.label}>
                     <Button
@@ -404,9 +396,9 @@ export function SiteHeader({
                   </SheetClose>
                 ) : null}
                 <div className="my-2 h-px bg-border/70" aria-hidden="true" />
-                <div className="flex items-center gap-2 px-1">
-                  <ThemeToggle />
+                <div className="flex items-center justify-end gap-2 px-1">
                   <AdminLink />
+                  <ThemeToggle />
                 </div>
               </nav>
             </SheetContent>
@@ -414,7 +406,6 @@ export function SiteHeader({
         </div>
       </div>
 
-      {/* Controlled legal modal (driven from either desktop or mobile nav). */}
       <LegalModal
         kind={(legal ?? "about") as LegalKind}
         open={legal !== null}
