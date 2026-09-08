@@ -39,7 +39,7 @@ interface ResourceGridProps {
 function CardSkeleton({ index = 0 }: { index?: number }) {
   return (
     <div
-      className="bndr-card bndr-shimmer flex flex-col gap-3 rounded-2xl p-5"
+      className="bndr-category-tile bndr-shimmer flex min-h-[310px] flex-col gap-3 rounded-2xl p-5"
       style={{ animationDelay: `${index * 80}ms` }}
     >
       {/* Badge row */}
@@ -49,31 +49,14 @@ function CardSkeleton({ index = 0 }: { index?: number }) {
       </div>
       {/* Title */}
       <Skeleton className="h-6 w-3/4" />
-      {/* Contact badges placeholder */}
-      <div className="flex gap-1.5">
-        <Skeleton className="h-4 w-12 rounded-md" />
-        <Skeleton className="h-4 w-10 rounded-md" />
-        <Skeleton className="h-4 w-8 rounded-md" />
-      </div>
       {/* Description lines */}
       <div className="space-y-2">
         <Skeleton className="h-4 w-full" />
         <Skeleton className="h-4 w-5/6" />
         <Skeleton className="h-4 w-2/3" />
       </div>
-      {/* Contact row */}
-      <div className="mt-auto space-y-2 border-t border-border/30 pt-3">
-        <div className="flex items-center gap-2">
-          <Skeleton className="h-3 w-3 rounded-full" />
-          <Skeleton className="h-4 w-32" />
-        </div>
-        <div className="flex items-center gap-2">
-          <Skeleton className="h-3 w-3 rounded-full" />
-          <Skeleton className="h-4 w-40" />
-        </div>
-      </div>
       {/* Action buttons */}
-      <div className="flex gap-2 pt-1">
+      <div className="mt-auto flex gap-2 pt-1">
         <Skeleton className="h-8 w-8 rounded-lg" />
         <Skeleton className="h-8 w-8 rounded-lg" />
         <Skeleton className="h-8 w-8 rounded-lg" />
