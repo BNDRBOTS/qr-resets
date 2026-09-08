@@ -4,9 +4,6 @@ import { motion } from "framer-motion";
 import {
   Phone,
   Mail,
-  Globe,
-  MapPin,
-  ExternalLink,
   Bookmark,
   BookmarkCheck,
   ArrowLeftRight,
@@ -29,10 +26,9 @@ import {
 } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
 import { CATEGORIES, type Resource, type CategorySlug } from "@/lib/types";
-import { formatPhoneDisplay, decodeUrlForDisplay } from "@/lib/pii";
+import { formatPhoneDisplay } from "@/lib/pii";
 import type { ContactMethod } from "./use-contact-log";
 import { Highlight } from "./highlight";
-import { LinkStatusDot } from "./link-status-dot";
 import { toast } from "sonner";
 
 interface ResourceCardProps {
@@ -133,7 +129,6 @@ export function ResourceCard({
   const phone = firstPhone(resource.phoneNormalized);
   const phoneDisplay = formatPhoneDisplay(phone);
   const catName = CATEGORY_NAME[resource.category] ?? resource.category;
-  const hasContact = Boolean(phoneDisplay || resource.email || resource.website || resource.address);
   const stop = (e: React.MouseEvent) => e.stopPropagation();
   const MethodIcon = defaultContactMethod ? DEFAULT_METHOD_ICONS[defaultContactMethod] : null;
 
@@ -156,8 +151,9 @@ export function ResourceCard({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-60px" }}
       transition={{ duration: 0.45, delay: Math.min(index * 0.04, 0.32) }}
+      whileHover={{ y: -3 }}
       onClick={() => onOpen(resource)}
-      className="bndr-card bndr-public-card group relative flex min-h-[310px] cursor-pointer flex-col rounded-2xl p-4 sm:p-5 lg:p-6"
+      className="bndr-category-tile group relative flex min-h-[310px] cursor-pointer flex-col rounded-2xl p-4 sm:p-5 lg:p-6"
     >
       {/* Stable header: identity on the left, primary actions on the right. */}
       <div className="flex min-h-9 items-start gap-3">
@@ -221,50 +217,9 @@ export function ResourceCard({
         </p>
       ) : null}
 
-      {hasContact ? (
-        <div className="bndr-card-contact mt-auto flex flex-col gap-1.5 border-t border-white/10 pt-3 text-sm">
-          {phoneDisplay ? (
-            <a href={`tel:${phone}`} onClick={stop} className="inline-flex items-center gap-2 transition-colors hover:text-primary focus-visible:underline">
-              <Phone className="bndr-contact-icon size-3.5" aria-hidden />
-              <span className="font-mono tabular-nums">{phoneDisplay}</span>
-            </a>
-          ) : null}
-          {resource.email ? (
-            <a href={`mailto:${resource.email}`} onClick={stop} className="inline-flex items-center gap-2 truncate transition-colors hover:text-primary focus-visible:underline">
-              <Mail className="bndr-contact-icon size-3.5 shrink-0" aria-hidden />
-              <span className="truncate">{resource.email}</span>
-            </a>
-          ) : null}
-          {resource.website ? (
-            <a href={resource.website} target="_blank" rel="noopener noreferrer" onClick={stop} className="inline-flex items-center gap-2 truncate transition-colors hover:text-primary focus-visible:underline">
-              <Globe className="bndr-contact-icon size-3.5 shrink-0" aria-hidden />
-              <span className="truncate">
-                {decodeUrlForDisplay(resource.website).replace(/^https?:\/\//, "").replace(/\/$/, "")}
-              </span>
-              <span
-                className="ml-auto flex items-center gap-1"
-                onClick={(event) => {
-                  event.preventDefault();
-                  event.stopPropagation();
-                }}
-              >
-                <LinkStatusDot resourceId={resource.id} />
-                <ExternalLink className="size-3 shrink-0 opacity-70" aria-hidden />
-              </span>
-            </a>
-          ) : null}
-          {resource.address ? (
-            <span className="inline-flex items-start gap-2">
-              <MapPin className="bndr-contact-icon mt-0.5 size-3.5 shrink-0" aria-hidden />
-              <span>{resource.address}</span>
-            </span>
-          ) : null}
-        </div>
-      ) : null}
-
       {/* Private user-state indicators are separated from public resource facts. */}
       {followUpNeeded || contactLogCount > 0 || defaultContactMethod || rating > 0 || hasNote ? (
-        <div className="mt-3 flex min-h-7 flex-wrap items-center gap-2 border-t border-white/10 pt-3 text-[10px] text-foreground/75">
+        <div className="mt-auto flex min-h-7 flex-wrap items-center gap-2 border-t border-border/50 pt-3 text-[10px] text-foreground/75">
           {followUpNeeded ? (
             <span className="inline-flex items-center gap-1 rounded-full border border-amber-400/30 bg-amber-400/10 px-2 py-1">
               <AlertCircle className="size-3" aria-hidden /> Follow-up
