@@ -64,10 +64,11 @@ export async function POST(req: NextRequest) {
 
   try {
     if (parsed.data.action === "save-draft") {
+      const content = parsed.data.content;
       const created = await db.$transaction(async (tx) => {
         await tx.siteCopyRevision.updateMany({ where: { status: "draft" }, data: { status: "superseded" } });
         const row = await tx.siteCopyRevision.create({
-          data: { actor, status: "draft", contentJson: parsed.data.content },
+          data: { actor, status: "draft", contentJson: content },
         });
         await tx.auditLog.create({
           data: {

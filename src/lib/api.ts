@@ -252,6 +252,7 @@ export interface VerificationResultDto {
   recordId: string;
   resourceId: string | null;
   name: string;
+  sourceName: string;
   suggestedName: string | null;
   category: string | null;
   organizationStatus: string;
@@ -316,7 +317,14 @@ export async function fetchVerificationResults(params: {
   if (params.take) sp.set("take", String(params.take));
   if (params.skip) sp.set("skip", String(params.skip));
   const res = await fetch(`/api/admin/verification/results?${sp}`, { cache: "no-store" });
-  return jsonOrThrow(res);
+  const payload = await jsonOrThrow<{
+    total: number;
+    results: Array<Omit<VerificationResultDto, "sourceName">>;
+  }>(res);
+  return {
+    ...payload,
+    results: payload.results.map((result) => ({ ...result, sourceName: result.name })),
+  };
 }
 
 export async function reviewVerificationResult(
