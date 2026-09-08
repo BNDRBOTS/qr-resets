@@ -10,14 +10,9 @@ import { QrScrollSpyPills } from "./qr-scroll-progress";
 
 /**
  * Sticky header for the QR Resets site.
- *
- * Top row: real BNDR logo (on white chip) + "QR Resets™" wordmark (click →
- * scroll to top) on the left; print button + site switcher on the right.
- *
- * Bottom row: section pills with scroll-spy — the pill for the section
- * currently in view is highlighted with a cool-blue accent + dot indicator.
- *
- * The whole bar sticks to the top. On mobile the pills scroll horizontally.
+ * Shared top-level structure mirrors ResourceCite: BNDR + product identity on
+ * the left, product switcher + utilities on the right. QR-specific section
+ * navigation remains a separate secondary row.
  */
 export function QrNav() {
   const handleTop = (e: React.MouseEvent) => {
@@ -30,41 +25,42 @@ export function QrNav() {
   };
 
   return (
-    <header
-      className="sticky top-0 z-40 w-full border-b border-border/60 bg-background/80 backdrop-blur-xl"
-    >
+    <header className="sticky top-0 z-40 w-full border-b border-border/60 bg-background/80 backdrop-blur-xl">
       <div className="bndr-gradient-line h-px w-full" aria-hidden="true" />
       <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        {/* Top row: logo + actions */}
-        <div className="flex h-14 items-center justify-between gap-3">
+        {/* Shared product identity + global controls row. */}
+        <div className="flex h-16 items-center justify-between gap-3">
           <button
             type="button"
             onClick={handleTop}
-            className="flex items-center gap-2.5 focus-visible:outline-none"
+            className="flex min-w-0 items-center gap-3 focus-visible:outline-none"
             aria-label="QR Resets — back to top"
           >
-            <Logo size={38} priority />
-            <span className="bndr-product-name text-base sm:text-xl">
+            <Logo size={48} priority />
+            <span className="hidden h-5 w-px shrink-0 bg-border/80 sm:block" aria-hidden="true" />
+            <span className="bndr-product-name hidden truncate sm:inline">
               {QR_BRAND.name}
             </span>
           </button>
-          <div className="flex items-center gap-2">
+
+          <div className="flex shrink-0 items-center gap-2">
             <Button
               type="button"
               variant="ghost"
               size="icon"
               onClick={handlePrint}
-              className="size-9 text-muted-foreground hover:text-primary hover:bg-transparent"
+              className="hidden size-9 text-muted-foreground hover:bg-transparent hover:text-primary sm:inline-flex"
               aria-label="Print this page"
               title="Print / Save as PDF"
             >
               <Printer className="size-4" aria-hidden />
             </Button>
-            <ThemeToggle />
             <SiteSwitcher compact />
+            <ThemeToggle />
           </div>
         </div>
-        {/* Bottom row: scroll-spy section pills */}
+
+        {/* QR-specific secondary navigation remains intact. */}
         <nav aria-label="QR Resets sections">
           <QrScrollSpyPills />
         </nav>
