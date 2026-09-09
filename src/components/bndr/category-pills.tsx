@@ -38,16 +38,16 @@ export function CategoryPills({ active, onChange, counts, total }: CategoryPills
                 onClick={() => onChange(pill.slug)}
                 aria-pressed={isActive}
                 className={
-                  "bndr-filter-pill group flex h-10 shrink-0 items-center gap-2 rounded-full border px-3.5 text-sm font-semibold outline-none transition-all focus-visible:ring-2 focus-visible:ring-primary/55 " +
+                  "bndr-filter-pill group flex h-9 shrink-0 items-center gap-2 rounded-full border px-3 text-sm font-semibold outline-none transition-all focus-visible:ring-2 focus-visible:ring-primary/55 " +
                   (isActive
-                    ? "border-primary/55 bg-primary/15 text-primary shadow-[var(--shadow-accent-soft)]"
-                    : "border-border/55 bg-card/85 text-foreground/85 hover:border-primary/35 hover:bg-card hover:text-foreground")
+                    ? "border-primary/55 bg-accent text-primary shadow-[var(--shadow-accent-soft)]"
+                    : "border-border/55 bg-card text-foreground/85 hover:border-primary/35 hover:bg-accent hover:text-foreground")
                 }
               >
                 <span className="max-w-[13rem] truncate sm:max-w-none">{pill.label}</span>
                 <span className={
                   "inline-flex min-w-6 items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-bold tabular-nums " +
-                  (isActive ? "bg-primary/20 text-primary" : "bg-muted/75 text-foreground/75")
+                  (isActive ? "bg-secondary text-primary" : "bg-muted text-foreground/75")
                 }>
                   {pill.count}
                 </span>
