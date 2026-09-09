@@ -68,7 +68,7 @@ test("light remains the global default and both product headers keep the shared 
   assert.match(layout, /defaultTheme="light"/);
   assert.match(css, /--theme-light-primary:\s*#FF355E/);
   assert.match(css, /--theme-dark-primary:\s*oklch\(0\.68 0\.16 235\)/);
-  assert.match(bndrHeader, /ResourceCite/);
+  assert.match(bndrHeader, /BNDR Resource Site/);
   assert.match(qrNav, /QR_BRAND\.name/);
   assert.match(bndrHeader, /<SiteSwitcher compact \/>[\s\S]*<ThemeToggle \/>/);
   assert.match(qrNav, /<SiteSwitcher compact \/>[\s\S]*<ThemeToggle \/>/);
