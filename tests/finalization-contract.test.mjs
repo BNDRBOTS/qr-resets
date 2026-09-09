@@ -99,6 +99,6 @@ test("QR section carousel has explicit arrows and ordinary wheel horizontal acce
   assert.match(scrollNav, /scrollBy\(\{ left: direction \* distance, behavior: "smooth" \}\)/);
   assert.match(scrollNav, /onWheel=\{handleWheel\}/);
   assert.match(scrollNav, /ResizeObserver\(syncScrollControls\)/);
-  assert.match(scrollNav, /disabled=!\{?canScrollLeft\}?/);
-  assert.match(scrollNav, /disabled=!\{?canScrollRight\}?/);
+  assert.match(scrollNav, /disabled=\{!canScrollLeft\}/);
+  assert.match(scrollNav, /disabled=\{!canScrollRight\}/);
 });
