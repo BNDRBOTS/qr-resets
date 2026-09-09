@@ -1,5 +1,5 @@
-.dark body {
-  background-image: radial-gradient(circle at 50% 0%, var(--page-glow-primary), transparent 32rem);
+.dark body:has(button[aria-label="BNDR Resource Site — back to top"]) {
+  background-image: radial-gradient(circle at 50% 36%, var(--page-glow-primary), transparent 32rem);
 }
 
 .dark .bndr-category-filter-bar {
@@ -32,4 +32,20 @@ header:has(button[aria-label="BNDR Resource Site — back to top"]) > .container
    render as a second mini-pill on the exterior resource cards. */
 .bndr-category-tile .bndr-card-acronym {
   display: none;
+}
+
+/* Dark/blue Resource Site only: Saved and Admin keep their controls and
+   behavior without the gray glass wrapper. */
+.dark header:has(button[aria-label="BNDR Resource Site — back to top"]) [aria-label^="Saved resources"],
+.dark header:has(button[aria-label="BNDR Resource Site — back to top"]) a[href="/admin"][data-slot="button"] {
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+/* Dark/blue QR Resets hero only: the full subhead uses the same white text. */
+.dark body:has(button[aria-label="BNDR QR Resets — back to top"]) #top > p:nth-of-type(2) {
+  color: var(--foreground);
 }
