@@ -27,3 +27,9 @@ header:has(button[aria-label="BNDR Resource Site — back to top"]) > .container
     display: flex;
   }
 }
+
+/* Acronyms stay available in the clicked resource detail dialog, but do not
+   render as a second mini-pill on the exterior resource cards. */
+.bndr-category-tile .bndr-card-acronym {
+  display: none;
+}
