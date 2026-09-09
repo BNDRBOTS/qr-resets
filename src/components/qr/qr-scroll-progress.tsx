@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { motion, useScroll, useSpring, AnimatePresence } from "framer-motion";
-import { ArrowUp } from "lucide-react";
+import { ArrowUp, ChevronLeft, ChevronRight } from "lucide-react";
 import { QR_NAV } from "@/lib/qr-resets-content";
 import { cn } from "@/lib/utils";
 
@@ -107,6 +107,58 @@ interface QrScrollSpyNavProps {
 
 export function QrScrollSpyPills({ className }: QrScrollSpyNavProps) {
   const active = useQrActiveSection();
+  const scrollerRef = useRef<HTMLUListElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const syncScrollControls = useCallback(() => {
+    const scroller = scrollerRef.current;
+    if (!scroller) return;
+    const maxScrollLeft = Math.max(0, scroller.scrollWidth - scroller.clientWidth);
+    setCanScrollLeft(scroller.scrollLeft > 2);
+    setCanScrollRight(scroller.scrollLeft < maxScrollLeft - 2);
+  }, []);
+
+  useEffect(() => {
+    const scroller = scrollerRef.current;
+    if (!scroller) return;
+
+    syncScrollControls();
+    const observer = new ResizeObserver(syncScrollControls);
+    observer.observe(scroller);
+    for (const child of Array.from(scroller.children)) observer.observe(child);
+
+    scroller.addEventListener("scroll", syncScrollControls, { passive: true });
+    window.addEventListener("resize", syncScrollControls, { passive: true });
+
+    return () => {
+      observer.disconnect();
+      scroller.removeEventListener("scroll", syncScrollControls);
+      window.removeEventListener("resize", syncScrollControls);
+    };
+  }, [syncScrollControls]);
+
+  const scrollCarousel = (direction: -1 | 1) => {
+    const scroller = scrollerRef.current;
+    if (!scroller) return;
+    const distance = Math.max(180, Math.round(scroller.clientWidth * 0.68));
+    scroller.scrollBy({ left: direction * distance, behavior: "smooth" });
+  };
+
+  const handleWheel = (event: React.WheelEvent<HTMLUListElement>) => {
+    const scroller = scrollerRef.current;
+    if (!scroller) return;
+
+    const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
+    if (delta === 0) return;
+
+    const maxScrollLeft = Math.max(0, scroller.scrollWidth - scroller.clientWidth);
+    const canMove = delta < 0 ? scroller.scrollLeft > 2 : scroller.scrollLeft < maxScrollLeft - 2;
+    if (!canMove) return;
+
+    event.preventDefault();
+    scroller.scrollLeft += delta;
+  };
 
   const handleClick = (
     e: React.MouseEvent<HTMLButtonElement>,
@@ -117,9 +169,29 @@ export function QrScrollSpyPills({ className }: QrScrollSpyNavProps) {
     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
+  const arrowClass =
+    "absolute top-1/2 z-20 flex size-9 -translate-y-1/2 items-center justify-center rounded-full border border-border/75 bg-background/92 text-foreground shadow-[var(--shadow-accent-soft)] backdrop-blur-md transition-all hover:border-primary/55 hover:bg-accent hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 disabled:pointer-events-none disabled:opacity-0";
+
   return (
     <div className="relative">
-      <ul className={cn("bndr-pill-scroll flex items-center gap-1 overflow-x-auto pb-2.5", className)}>
+      <button
+        type="button"
+        onClick={() => scrollCarousel(-1)}
+        disabled={!canScrollLeft}
+        aria-label="Scroll section navigation left"
+        className={cn(arrowClass, "left-0.5")}
+      >
+        <ChevronLeft className="size-4" aria-hidden />
+      </button>
+
+      <ul
+        ref={scrollerRef}
+        onWheel={handleWheel}
+        className={cn(
+          "bndr-pill-scroll flex items-center gap-1 overflow-x-auto px-10 pb-2.5 scroll-smooth",
+          className,
+        )}
+      >
         {QR_NAV.map((item) => {
           const isActive = active === item.id;
           return (
@@ -145,9 +217,30 @@ export function QrScrollSpyPills({ className }: QrScrollSpyNavProps) {
           );
         })}
       </ul>
+
+      <button
+        type="button"
+        onClick={() => scrollCarousel(1)}
+        disabled={!canScrollRight}
+        aria-label="Scroll section navigation right"
+        className={cn(arrowClass, "right-0.5")}
+      >
+        <ChevronRight className="size-4" aria-hidden />
+      </button>
+
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-background to-transparent"
+        className={cn(
+          "pointer-events-none absolute inset-y-0 left-0 z-10 w-11 bg-gradient-to-r from-background via-background/85 to-transparent transition-opacity",
+          canScrollLeft ? "opacity-100" : "opacity-0",
+        )}
+      />
+      <div
+        aria-hidden="true"
+        className={cn(
+          "pointer-events-none absolute inset-y-0 right-0 z-10 w-11 bg-gradient-to-l from-background via-background/85 to-transparent transition-opacity",
+          canScrollRight ? "opacity-100" : "opacity-0",
+        )}
       />
     </div>
   );
