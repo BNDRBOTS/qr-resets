@@ -1,0 +1,14 @@
+.dark body {
+  background-image: radial-gradient(
+    circle at 50% 0%,
+    var(--page-glow-primary),
+    transparent 32rem
+  );
+}
+
+.dark .bndr-category-filter-bar {
+  background: var(--theme-dark-card);
+  border-color: var(--glass-border);
+  box-shadow: 0 12px 28px var(--surface-shadow-soft-color);
+  backdrop-filter: none;
+}
