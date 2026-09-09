@@ -58,7 +58,19 @@ const NAV = [
 ];
 
 function WordmarkLogo({ onClick }: { onClick?: () => void }) {
-  return <BndrLogo size={48} onClick={onClick} />;
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="inline-flex shrink-0 items-center gap-2 rounded-md text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/55"
+      aria-label="BNDR Resource Site — back to top"
+    >
+      <BndrLogo size={46} />
+      <span className="hidden whitespace-nowrap text-base font-semibold tracking-tight sm:inline">
+        Resource Site
+      </span>
+    </button>
+  );
 }
 
 function AdminLink() {
@@ -109,10 +121,8 @@ export function SiteHeader({
     <header className="sticky top-0 z-40 w-full border-b border-border/60 bg-background/70 backdrop-blur-xl">
       <div className="bndr-gradient-line absolute inset-x-0 bottom-0 h-px" />
       <div className="container mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
-        <div className="flex min-w-0 items-center gap-3">
+        <div className="flex min-w-0 items-center">
           <WordmarkLogo onClick={() => onJump("top")} />
-          <span className="hidden h-5 w-px shrink-0 bg-border/80 sm:block" aria-hidden="true" />
-          <span className="bndr-product-name hidden truncate sm:inline">ResourceCite</span>
         </div>
 
         {/* Desktop primary navigation and global controls. */}
@@ -306,10 +316,9 @@ export function SiteHeader({
             <SheetContent side="right" className="w-72 bg-background/95">
               <SheetHeader>
                 <SheetTitle asChild>
-                  <div className="flex items-center gap-3 pt-2">
-                    <BndrLogo size={42} />
-                    <span className="h-5 w-px bg-border/80" aria-hidden="true" />
-                    <span className="bndr-product-name text-base">ResourceCite</span>
+                  <div className="flex items-center gap-2 pt-2">
+                    <BndrLogo size={46} />
+                    <span className="whitespace-nowrap text-base font-semibold tracking-tight">Resource Site</span>
                   </div>
                 </SheetTitle>
               </SheetHeader>
