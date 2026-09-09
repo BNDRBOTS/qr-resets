@@ -60,7 +60,7 @@ export function SiteSwitcher({ compact = false }: SiteSwitcherProps) {
                   className={
                     "gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold transition-all sm:text-xs " +
                     (isActive
-                      ? "bg-foreground text-background shadow-sm hover:bg-foreground/90 hover:text-background"
+                      ? "bg-foreground text-background shadow-sm hover:bg-foreground/90 hover:text-background dark:hover:bg-foreground dark:hover:text-background"
                       : "text-muted-foreground hover:bg-foreground/5 hover:text-foreground")
                   }
                 >
@@ -70,7 +70,7 @@ export function SiteSwitcher({ compact = false }: SiteSwitcherProps) {
               </TooltipTrigger>
               <TooltipContent side="bottom" className="max-w-[240px]">
                 <p className="font-semibold">{info.label}</p>
-                <p className="text-xs text-muted-foreground">{info.desc}</p>
+                <p className="text-xs text-muted-foreground dark:text-primary-foreground">{info.desc}</p>
               </TooltipContent>
             </Tooltip>
           );
