@@ -170,7 +170,7 @@ export function QrScrollSpyPills({ className }: QrScrollSpyNavProps) {
   };
 
   const arrowClass =
-    "absolute top-1/2 z-20 flex size-9 -translate-y-1/2 items-center justify-center rounded-full border border-border/75 bg-background/92 text-foreground shadow-[var(--shadow-accent-soft)] backdrop-blur-md transition-all hover:border-primary/55 hover:bg-accent hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 disabled:pointer-events-none disabled:opacity-0";
+    "absolute top-1/2 z-20 flex size-9 -translate-y-1/2 items-center justify-center rounded-full border border-border/75 bg-background/90 text-foreground shadow-[var(--shadow-accent-soft)] backdrop-blur-md transition-all hover:border-primary/55 hover:bg-accent hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 disabled:pointer-events-none disabled:opacity-0";
 
   return (
     <div className="relative">
@@ -231,14 +231,14 @@ export function QrScrollSpyPills({ className }: QrScrollSpyNavProps) {
       <div
         aria-hidden="true"
         className={cn(
-          "pointer-events-none absolute inset-y-0 left-0 z-10 w-11 bg-gradient-to-r from-background via-background/85 to-transparent transition-opacity",
+          "pointer-events-none absolute inset-y-0 left-0 z-10 w-11 bg-gradient-to-r from-background via-background/80 to-transparent transition-opacity",
           canScrollLeft ? "opacity-100" : "opacity-0",
         )}
       />
       <div
         aria-hidden="true"
         className={cn(
-          "pointer-events-none absolute inset-y-0 right-0 z-10 w-11 bg-gradient-to-l from-background via-background/85 to-transparent transition-opacity",
+          "pointer-events-none absolute inset-y-0 right-0 z-10 w-11 bg-gradient-to-l from-background via-background/80 to-transparent transition-opacity",
           canScrollRight ? "opacity-100" : "opacity-0",
         )}
       />
