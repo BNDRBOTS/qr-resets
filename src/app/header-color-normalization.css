@@ -1,14 +1,29 @@
 .dark body {
-  background-image: radial-gradient(
-    circle at 50% 0%,
-    var(--page-glow-primary),
-    transparent 32rem
-  );
+  background-image: radial-gradient(circle at 50% 0%, var(--page-glow-primary), transparent 32rem);
 }
 
 .dark .bndr-category-filter-bar {
   background: var(--theme-dark-card);
   border-color: var(--glass-border);
   box-shadow: 0 12px 28px var(--surface-shadow-soft-color);
+  -webkit-backdrop-filter: none;
   backdrop-filter: none;
+}
+
+/* Resource Site only: use the available desktop width instead of forcing the
+   full utility/navigation row into the narrower 7xl container. */
+header:has(button[aria-label="BNDR Resource Site — back to top"]) > .container {
+  max-width: 96rem;
+}
+
+/* Between tablet and a true wide desktop, keep the existing compact controls
+   rather than allowing the full Resource Site navigation row to collide. */
+@media (min-width: 1024px) and (max-width: 1535px) {
+  header:has(button[aria-label="BNDR Resource Site — back to top"]) nav[aria-label="Primary"] {
+    display: none;
+  }
+
+  header:has(button[aria-label="BNDR Resource Site — back to top"]) > .container > div:last-child {
+    display: flex;
+  }
 }
