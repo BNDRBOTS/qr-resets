@@ -2,10 +2,6 @@
   background-image: radial-gradient(circle at 50% 0%, var(--page-glow-primary), transparent 32rem);
 }
 
-.dark body:has(button[aria-label="BNDR Resource Site — back to top"]) {
-  background-image: radial-gradient(circle at 50% 36%, var(--page-glow-primary), transparent 32rem);
-}
-
 .dark .bndr-category-filter-bar {
   background: var(--theme-dark-card);
   border-color: var(--glass-border);
@@ -38,6 +34,14 @@ header:has(button[aria-label="BNDR Resource Site — back to top"]) > .container
   display: none;
 }
 
+/* Dark/blue Resource Site only: keep the existing layered halo colors and
+   stops, but center the secondary glow so the hero reads as a controlled sphere. */
+.dark body:has(button[aria-label="BNDR Resource Site — back to top"]) .bndr-hero-halo {
+  background:
+    radial-gradient(circle at center, var(--glow-primary-strong) 0%, var(--glow-primary) 22%, var(--glow-primary-soft) 44%, transparent 72%),
+    radial-gradient(circle at center, var(--glow-secondary) 0%, transparent 52%);
+}
+
 /* Dark/blue Resource Site only: Saved and Admin keep their controls and
    behavior without the gray glass wrapper. */
 .dark header:has(button[aria-label="BNDR Resource Site — back to top"]) [aria-label^="Saved resources"],
@@ -50,6 +54,6 @@ header:has(button[aria-label="BNDR Resource Site — back to top"]) > .container
 }
 
 /* Dark/blue QR Resets hero only: the full subhead uses the same white text. */
-.dark body:has(button[aria-label="BNDR QR Resets — back to top"]) #top > p:nth-of-type(2) {
+.dark body:has(nav[aria-label="QR Resets sections"]) #top > p:nth-of-type(2) {
   color: var(--foreground);
 }
