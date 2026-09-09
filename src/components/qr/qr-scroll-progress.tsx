@@ -38,14 +38,12 @@ export function QrScrollProgress() {
 
   return (
     <>
-      {/* Top progress bar — fixed, thin, cool-blue, scales with scroll */}
       <motion.div
         className="fixed inset-x-0 top-0 z-[60] h-0.5 origin-left bg-gradient-to-r from-primary via-primary to-primary/60"
         style={{ scaleX }}
         aria-hidden="true"
       />
 
-      {/* Back-to-top FAB */}
       <AnimatePresence>
         {showTop ? (
           <motion.button
@@ -66,10 +64,6 @@ export function QrScrollProgress() {
   );
 }
 
-/**
- * Scroll-spy hook: returns the id of the QR section currently in view.
- * Uses IntersectionObserver to track which section the user is reading.
- */
 export function useQrActiveSection(): string | null {
   const [active, setActive] = useState<string | null>(null);
 
@@ -83,7 +77,6 @@ export function useQrActiveSection(): string | null {
 
     const observer = new IntersectionObserver(
       (entries) => {
-        // Find the entry with the highest intersection ratio that is intersecting.
         let best: { id: string; ratio: number } | null = null;
         for (const entry of entries) {
           if (entry.isIntersecting) {
@@ -96,8 +89,6 @@ export function useQrActiveSection(): string | null {
         if (best) setActive(best.id);
       },
       {
-        // Trigger when ~30% of the section is visible — balances responsiveness
-        // with stability on long sections.
         rootMargin: "-20% 0px -50% 0px",
         threshold: [0, 0.1, 0.3, 0.5, 0.7, 1],
       },
@@ -114,10 +105,6 @@ interface QrScrollSpyNavProps {
   className?: string;
 }
 
-/**
- * Renders the QR_NAV pills with the active section highlighted via scroll-spy.
- * Drop this in place of the static pill list in QrNav.
- */
 export function QrScrollSpyPills({ className }: QrScrollSpyNavProps) {
   const active = useQrActiveSection();
 
@@ -132,7 +119,7 @@ export function QrScrollSpyPills({ className }: QrScrollSpyNavProps) {
 
   return (
     <div className="relative">
-      <ul className={cn("bndr-pill-scroll flex items-center gap-1.5 overflow-x-auto pb-2.5", className)}>
+      <ul className={cn("bndr-pill-scroll flex items-center gap-1 overflow-x-auto pb-2.5", className)}>
         {QR_NAV.map((item) => {
           const isActive = active === item.id;
           return (
@@ -142,11 +129,11 @@ export function QrScrollSpyPills({ className }: QrScrollSpyNavProps) {
                 onClick={(e) => handleClick(e, item.id)}
                 aria-current={isActive ? "true" : undefined}
                 className={cn(
-                  "relative rounded-full border px-3.5 py-1.5 text-xs font-medium transition-all",
+                  "relative flex h-9 items-center rounded-full border px-3 text-xs font-medium transition-all",
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60",
                   isActive
-                    ? "border-primary/60 bg-primary/15 text-foreground shadow-[var(--shadow-accent-soft)]"
-                    : "border-border/60 text-muted-foreground hover:border-primary/50 hover:bg-primary/10 hover:text-foreground",
+                    ? "border-primary/55 bg-accent text-foreground shadow-[var(--shadow-accent-soft)]"
+                    : "border-border/60 bg-card text-muted-foreground hover:border-primary/40 hover:bg-accent hover:text-foreground",
                 )}
               >
                 {isActive ? (
@@ -158,7 +145,6 @@ export function QrScrollSpyPills({ className }: QrScrollSpyNavProps) {
           );
         })}
       </ul>
-      {/* Fade gradient on the right edge to hint at more pills on mobile. */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-background to-transparent"
