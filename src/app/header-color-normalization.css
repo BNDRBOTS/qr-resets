@@ -1,3 +1,7 @@
+.dark body {
+  background-image: radial-gradient(circle at 50% 0%, var(--page-glow-primary), transparent 32rem);
+}
+
 .dark body:has(button[aria-label="BNDR Resource Site — back to top"]) {
   background-image: radial-gradient(circle at 50% 36%, var(--page-glow-primary), transparent 32rem);
 }
