@@ -74,3 +74,31 @@ test("light remains the global default and both product headers keep the shared 
   assert.match(qrNav, /<SiteSwitcher compact \/>[\s\S]*<ThemeToggle \/>/);
   assert.doesNotMatch(bndrHeader, /totalResources\.toLocaleString\(\)/);
 });
+
+test("Resource Site header avoids desktop overlap without changing QR header geometry", () => {
+  const css = read("src/app/header-color-normalization.css");
+  assert.match(css, /header:has\(button\[aria-label="BNDR Resource Site — back to top"\]\) > \.container\s*{[\s\S]*max-width:\s*96rem/);
+  assert.match(css, /@media \(min-width: 1024px\) and \(max-width: 1535px\)/);
+  assert.match(css, /nav\[aria-label="Primary"\][\s\S]*display:\s*none/);
+  assert.doesNotMatch(css, /BNDR QR Resets/);
+});
+
+test("resource acronyms are hidden on exterior cards but remain in clicked details", () => {
+  const css = read("src/app/header-color-normalization.css");
+  const card = read("src/components/bndr/resource-card.tsx");
+  const detail = read("src/components/bndr/resource-detail-dialog.tsx");
+  assert.match(card, /bndr-card-acronym/);
+  assert.match(css, /\.bndr-category-tile \.bndr-card-acronym\s*{\s*display:\s*none/);
+  assert.match(detail, /r\.acronym/);
+});
+
+test("QR section carousel has explicit arrows and ordinary wheel horizontal access", () => {
+  const scrollNav = read("src/components/qr/qr-scroll-progress.tsx");
+  assert.match(scrollNav, /aria-label="Scroll section navigation left"/);
+  assert.match(scrollNav, /aria-label="Scroll section navigation right"/);
+  assert.match(scrollNav, /scrollBy\(\{ left: direction \* distance, behavior: "smooth" \}\)/);
+  assert.match(scrollNav, /onWheel=\{handleWheel\}/);
+  assert.match(scrollNav, /ResizeObserver\(syncScrollControls\)/);
+  assert.match(scrollNav, /disabled=!\{?canScrollLeft\}?/);
+  assert.match(scrollNav, /disabled=!\{?canScrollRight\}?/);
+});
