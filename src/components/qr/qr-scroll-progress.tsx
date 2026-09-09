@@ -170,78 +170,80 @@ export function QrScrollSpyPills({ className }: QrScrollSpyNavProps) {
   };
 
   const arrowClass =
-    "absolute top-1/2 z-20 flex size-9 -translate-y-1/2 items-center justify-center rounded-full border border-border/75 bg-background/90 text-foreground shadow-[var(--shadow-accent-soft)] backdrop-blur-md transition-all hover:border-primary/55 hover:bg-accent hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 disabled:pointer-events-none disabled:opacity-0";
+    "relative z-20 flex size-8 shrink-0 items-center justify-center rounded-full border border-border/75 bg-background/90 text-foreground shadow-[var(--shadow-accent-soft)] backdrop-blur-md transition-all hover:border-primary/55 hover:bg-accent hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 disabled:pointer-events-none disabled:opacity-0";
 
   return (
-    <div className="relative">
+    <div className="grid min-w-0 grid-cols-[2rem_minmax(0,1fr)_2rem] items-center gap-2">
       <button
         type="button"
         onClick={() => scrollCarousel(-1)}
         disabled={!canScrollLeft}
         aria-label="Scroll section navigation left"
-        className={cn(arrowClass, "left-0.5")}
+        className={arrowClass}
       >
         <ChevronLeft className="size-4" aria-hidden />
       </button>
 
-      <ul
-        ref={scrollerRef}
-        onWheel={handleWheel}
-        className={cn(
-          "bndr-pill-scroll flex items-center gap-1 overflow-x-auto px-10 pb-2.5 scroll-smooth",
-          className,
-        )}
-      >
-        {QR_NAV.map((item) => {
-          const isActive = active === item.id;
-          return (
-            <li key={item.id} className="shrink-0">
-              <button
-                type="button"
-                onClick={(e) => handleClick(e, item.id)}
-                aria-current={isActive ? "true" : undefined}
-                className={cn(
-                  "relative flex h-9 items-center rounded-full border px-3 text-xs font-medium transition-all",
-                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60",
-                  isActive
-                    ? "border-primary/55 bg-accent text-foreground shadow-[var(--shadow-accent-soft)]"
-                    : "border-border/60 bg-card text-muted-foreground hover:border-primary/40 hover:bg-accent hover:text-foreground",
-                )}
-              >
-                {isActive ? (
-                  <span className="mr-1.5 inline-block size-1.5 rounded-full bg-primary align-middle" aria-hidden />
-                ) : null}
-                {item.label}
-              </button>
-            </li>
-          );
-        })}
-      </ul>
+      <div className="relative min-w-0">
+        <ul
+          ref={scrollerRef}
+          onWheel={handleWheel}
+          className={cn(
+            "bndr-pill-scroll flex min-w-0 items-center gap-1 overflow-x-auto pb-2.5 scroll-smooth",
+            className,
+          )}
+        >
+          {QR_NAV.map((item) => {
+            const isActive = active === item.id;
+            return (
+              <li key={item.id} className="shrink-0">
+                <button
+                  type="button"
+                  onClick={(e) => handleClick(e, item.id)}
+                  aria-current={isActive ? "true" : undefined}
+                  className={cn(
+                    "relative flex h-9 items-center rounded-full border px-3 text-xs font-medium transition-all",
+                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/60",
+                    isActive
+                      ? "border-primary/55 bg-accent text-foreground shadow-[var(--shadow-accent-soft)]"
+                      : "border-border/60 bg-card text-muted-foreground hover:border-primary/40 hover:bg-accent hover:text-foreground",
+                  )}
+                >
+                  {isActive ? (
+                    <span className="mr-1.5 inline-block size-1.5 rounded-full bg-primary align-middle" aria-hidden />
+                  ) : null}
+                  {item.label}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+
+        <div
+          aria-hidden="true"
+          className={cn(
+            "pointer-events-none absolute inset-y-0 left-0 z-10 w-6 bg-gradient-to-r from-background via-background/80 to-transparent transition-opacity",
+            canScrollLeft ? "opacity-100" : "opacity-0",
+          )}
+        />
+        <div
+          aria-hidden="true"
+          className={cn(
+            "pointer-events-none absolute inset-y-0 right-0 z-10 w-6 bg-gradient-to-l from-background via-background/80 to-transparent transition-opacity",
+            canScrollRight ? "opacity-100" : "opacity-0",
+          )}
+        />
+      </div>
 
       <button
         type="button"
         onClick={() => scrollCarousel(1)}
         disabled={!canScrollRight}
         aria-label="Scroll section navigation right"
-        className={cn(arrowClass, "right-0.5")}
+        className={arrowClass}
       >
         <ChevronRight className="size-4" aria-hidden />
       </button>
-
-      <div
-        aria-hidden="true"
-        className={cn(
-          "pointer-events-none absolute inset-y-0 left-0 z-10 w-11 bg-gradient-to-r from-background via-background/80 to-transparent transition-opacity",
-          canScrollLeft ? "opacity-100" : "opacity-0",
-        )}
-      />
-      <div
-        aria-hidden="true"
-        className={cn(
-          "pointer-events-none absolute inset-y-0 right-0 z-10 w-11 bg-gradient-to-l from-background via-background/80 to-transparent transition-opacity",
-          canScrollRight ? "opacity-100" : "opacity-0",
-        )}
-      />
     </div>
   );
 }
