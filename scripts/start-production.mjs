@@ -3,8 +3,11 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { buildRuntimeEnv } from "./runtime-env.mjs";
 import { schemaPath, storageBackend } from "./storage-backend.mjs";
+import { assertVerifierRuntime } from "./verify-verifier-runtime.mjs";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
+const standaloneRoot = path.join(root, ".next", "standalone");
+const verifierScript = path.join(standaloneRoot, "verifier", "resource_verifier_core.py");
 const prismaBin = process.platform === "win32" ? path.join(root, "node_modules", ".bin", "prisma.cmd") : path.join(root, "node_modules", ".bin", "prisma");
 const requestedBackend = storageBackend(process.env);
 if (requestedBackend === "sqlite" && process.env.RAILWAY_SERVICE_ID && !process.env.RAILWAY_VOLUME_MOUNT_PATH?.trim()) {
@@ -12,6 +15,13 @@ if (requestedBackend === "sqlite" && process.env.RAILWAY_SERVICE_ID && !process.
 }
 const env = await buildRuntimeEnv(process.env);
 const backend = storageBackend(env);
+
+// Fail before any database initialization or seed activity unless the exact
+// bundled verifier is present and executable by Python in the final image.
+const verifier = await assertVerifierRuntime(verifierScript);
+env.BNDR_VERIFIER_READY = "1";
+env.BNDR_VERIFIER_VERSION = verifier.version ?? "";
+env.BNDR_VERIFIER_PYTHON = verifier.python ?? "";
 
 function run(command, args) {
   return new Promise((resolve, reject) => {
@@ -33,8 +43,8 @@ if (backend === "postgres") {
 }
 await run(process.execPath, ["scripts/seed-verified-resources.mjs"]);
 
-const server = spawn(process.execPath, [".next/standalone/server.js"], {
-  cwd: root,
+const server = spawn(process.execPath, ["server.js"], {
+  cwd: standaloneRoot,
   env: { ...env, HOSTNAME: "0.0.0.0" },
   stdio: "inherit",
 });
