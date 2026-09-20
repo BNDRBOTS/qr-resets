@@ -1,5 +1,7 @@
-# Optional accuracy/coverage enhancements. bootstrap.py checks versions first and
-# installs only missing/outdated packages.
+# Optional standalone-verifier accuracy/coverage enhancements.
+# The app integration sends JSON and the verifier has conservative fallbacks when
+# these packages are absent. Install this file to enable Excel ingestion plus
+# enhanced phone, MX-DNS, and CA-bundle checks.
 openpyxl>=3.1,<4
 phonenumbers>=8.13,<10
 dnspython>=2.6,<3
