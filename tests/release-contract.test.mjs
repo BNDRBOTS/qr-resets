@@ -47,6 +47,18 @@ test("global day/night palette preserves bone, exact magenta, and existing dark 
   assert.match(css, /\.bndr-glass-panel/);
 });
 
+test("production runtime packages and preflights the bundled Python verifier", () => {
+  const pkg = JSON.parse(read("package.json"));
+  const start = read("scripts/start-production.mjs");
+  const runtimeCheck = read("scripts/verify-verifier-runtime.mjs");
+  assert.match(pkg.scripts["build:next"], /cp -R verifier \.next\/standalone\/verifier/);
+  assert.equal(pkg.scripts["verify:verifier-runtime"], "node scripts/verify-verifier-runtime.mjs verifier/resource_verifier_core.py");
+  assert.match(start, /assertVerifierRuntime\(verifierScript\)/);
+  assert.match(start, /BNDR_VERIFIER_READY/);
+  assert.match(start, /cwd: standaloneRoot/);
+  assert.match(runtimeCheck, /EXPECTED_VERIFIER_VERSION = "4\.0\.0"/);
+});
+
 test("Railway initializes durable local storage at service start and uses real health path", () => {
   const railway = read("railway.toml");
   const pkg = JSON.parse(read("package.json"));
