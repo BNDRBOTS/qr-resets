@@ -54,7 +54,7 @@ async function claimNextRun(workerId: string) {
         },
         {
           status: "running",
-          attempts: { lte: MAX_RUN_ATTEMPTS },
+          attempts: { lt: MAX_RUN_ATTEMPTS },
           heartbeatAt: { lt: staleBefore },
         },
       ],
