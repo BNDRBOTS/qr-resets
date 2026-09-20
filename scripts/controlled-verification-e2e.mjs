@@ -307,3 +307,9 @@ try {
   }
   await rm(dataDir, { recursive: true, force: true });
 }
+
+// Node's fetch/Undici pool may retain idle keep-alive handles after the
+// controlled HTTP run. The test has completed and all child/temp resources
+// are closed above, so terminate explicitly instead of leaving Railway's build
+// step waiting on an otherwise idle event loop.
+process.exit(0);
