@@ -1,0 +1,49 @@
+name: Final Docker runtime validation
+
+on:
+  push:
+    branches:
+      - ci/docker-runtime-validation-final-20260920
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build exact production image
+        run: docker build --progress=plain -t qr-resets-validation .
+
+      - name: Start isolated runtime image
+        run: |
+          docker run -d --name qr-resets-validation \
+            -p 18080:8080 \
+            -e PORT=8080 \
+            -e HOSTNAME=0.0.0.0 \
+            -e STORAGE_BACKEND=sqlite \
+            -e ADMIN_EMAIL=validation@bndr.local \
+            -e ADMIN_PASSWORD=Validation-Only-9f7a2c4d \
+            -e NEXTAUTH_URL=http://127.0.0.1:18080 \
+            qr-resets-validation
+
+      - name: Require production health
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 120); do
+            if body="$(curl -fsS http://127.0.0.1:18080/api/health 2>/dev/null)"; then
+              echo "$body"
+              echo "$body" | jq -e '.ready == true and .checks.db == true and .checks.dataset == true and .checks.persistence == true and .checks.verifier == true and .checks.verifierVersion == "4.0.0"'
+              exit 0
+            fi
+            sleep 1
+          done
+          docker logs qr-resets-validation
+          exit 1
+
+      - name: Runtime logs
+        if: always()
+        run: docker logs qr-resets-validation || true
