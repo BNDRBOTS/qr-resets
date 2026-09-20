@@ -4,10 +4,14 @@ import { readFileSync } from "node:fs";
 
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 
-test("Railpack installs Python while retaining Node as the application provider", () => {
-  const railpack = JSON.parse(read("railpack.json"));
-  assert.equal(railpack.provider, "node");
-  assert.match(String(railpack.packages?.python ?? ""), /^3\.1[0-9]/);
+test("production Docker image installs Python and verifier enhancements beside Node", () => {
+  const dockerfile = read("Dockerfile");
+  assert.match(dockerfile, /FROM node:22-bookworm-slim AS build/);
+  assert.match(dockerfile, /python3-venv/);
+  assert.match(dockerfile, /\/opt\/verifier-venv/);
+  assert.match(dockerfile, /pip install --no-cache-dir -r verifier\/requirements\.txt/);
+  assert.match(dockerfile, /FROM node:22-bookworm-slim AS runtime/);
+  assert.match(dockerfile, /CMD \["npm", "run", "start"\]/);
 });
 
 test("standalone bundle contains verifier and production start preflights it before database work", () => {

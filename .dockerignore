@@ -1,0 +1,14 @@
+.git
+.github
+.next
+node_modules
+data
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+.env
+.env.*
+!.env.example
+RELEASE_VERIFICATION.json
+.DS_Store

@@ -54,7 +54,8 @@ const required = [
   "scripts/controlled-verification-e2e.mjs",
   "verifier/resource_verifier_core.py",
   "verifier/requirements.txt",
-  "railpack.json",
+  "Dockerfile",
+  ".dockerignore",
   "tests/export-safety.test.mjs",
   "tests/ssrf.test.mjs",
   "tests/release-contract.test.mjs",
@@ -205,8 +206,13 @@ for (const doc of ["PRODUCTION_QA.md", "MERGE_MANIFEST.json", "RAILWAY_DEPLOY.md
 }
 
 const railwayConfig = readFileSync(join(root, "railway.toml"), "utf8");
-if (!/builder\s*=\s*"railpack"/.test(railwayConfig)) fail("Railway builder is not current Railpack");
-if (/NIXPACKS/i.test(railwayConfig)) fail("Obsolete Nixpacks builder remains in Railway config");
+if (!/builder\s*=\s*"DOCKERFILE"/.test(railwayConfig)) fail("Railway builder is not the deterministic Dockerfile runtime");
+if (/NIXPACKS|RAILPACK/i.test(railwayConfig)) fail("Obsolete inferred builder remains in Railway config");
+if (!/dockerfilePath\s*=\s*"Dockerfile"/.test(railwayConfig)) fail("Railway Dockerfile path is not explicit");
+const dockerfile = readFileSync(join(root, "Dockerfile"), "utf8");
+if (!/FROM node:22-bookworm-slim AS build/.test(dockerfile) || !/python3-venv/.test(dockerfile) || !/\/opt\/verifier-venv/.test(dockerfile) || !/verifier\/requirements\.txt/.test(dockerfile) || !/npm run build/.test(dockerfile) || !/FROM node:22-bookworm-slim AS runtime/.test(dockerfile) || !/CMD \["npm", "run", "start"\]/.test(dockerfile)) {
+  fail("Dockerfile does not pin the Node+Python build/runtime contract and production start command");
+}
 if (/preDeployCommand/.test(railwayConfig)) fail("Railway preDeployCommand must not initialize volume-backed SQLite because volumes are unavailable pre-deploy");
 if (!/startCommand\s*=\s*"npm run start"/.test(railwayConfig)) fail("Railway start command is missing runtime DB initialization path");
 if (existsSync(join(root, "nixpacks.toml"))) fail("Obsolete nixpacks.toml remains in production package");

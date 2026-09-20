@@ -1,6 +1,6 @@
 [build]
-builder = "railpack"
-buildCommand = "npm run build"
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
 
 [deploy]
 # Database initialization happens in the start command because Railway volumes

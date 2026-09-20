@@ -179,7 +179,7 @@ function treeDigest() {
 import hashlib, pathlib
 root=pathlib.Path(${JSON.stringify(root)})
 roots=['src','prisma','scripts','tests','supabase','public','verifier']
-extra=['package.json','next.config.ts','railway.toml','railpack.json','tsconfig.json','postcss.config.mjs','.env.example','.npmrc']
+extra=['package.json','next.config.ts','railway.toml','Dockerfile','.dockerignore','tsconfig.json','postcss.config.mjs','.env.example','.npmrc']
 h=hashlib.sha256()
 files=[]
 for name in roots:
