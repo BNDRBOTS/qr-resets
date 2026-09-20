@@ -81,4 +81,5 @@ test("controlled E2E exercises actual HTTP parse-to-publish path in an isolated 
   assert.match(e2e, /BNDR_SKIP_PACKAGED_SEED: "1"/);
   assert.match(e2e, /delete runtimeEnv\[key\]/);
   assert.match(e2e, /productionDatasetTouched: false/);
+  assert.match(e2e, /process\.exit\(0\)/);
 });
