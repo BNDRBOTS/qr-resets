@@ -44,8 +44,11 @@ test("worker and pipeline enforce bounded retries and successful versioned verif
   assert.match(pipeline, /probeVerifier\(\)/);
   assert.match(pipeline, /batch\.exitCode !== 0/);
   assert.match(pipeline, /manifestVersion/);
-  assert.match(pipeline, /sourceIndexes/);
-  assert.match(pipeline, /bySourceIndex/);
+  assert.match(pipeline, /staged_record_ids/);
+  assert.match(pipeline, /correlatedRows/);
+  const bridge = read("src/lib/verifier-v4.ts");
+  assert.match(bridge, /staged_record_ids/);
+  assert.match(bridge, /verifier_record_id/);
   assert.match(pipeline, /verifier_strong_identity_merge_constituent/);
 });
 
