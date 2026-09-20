@@ -62,8 +62,9 @@ test("production runtime packages and preflights the bundled Python verifier", (
 test("Railway initializes durable local storage at service start and uses real health path", () => {
   const railway = read("railway.toml");
   const pkg = JSON.parse(read("package.json"));
-  assert.match(railway, /builder = "railpack"/);
-  assert.match(railway, /buildCommand = "npm run build"/);
+  assert.match(railway, /builder = "DOCKERFILE"/);
+  assert.match(railway, /dockerfilePath = "Dockerfile"/);
+  assert.doesNotMatch(railway, /buildCommand/);
   assert.doesNotMatch(railway, /preDeployCommand/);
   assert.match(railway, /healthcheckPath = "\/api\/health"/);
   assert.equal(pkg.scripts.start, "node scripts/start-production.mjs");
@@ -83,10 +84,11 @@ test("deployment seed is additive and canonical health check is data-backed", ()
   assert.match(health, /status: ready \? 200 : 503/);
 });
 
-test("Railway config uses current railpack builder and start-time volume initialization", () => {
+test("Railway config uses deterministic Dockerfile builder and start-time volume initialization", () => {
   const railway = read("railway.toml");
-  assert.match(railway, /builder\s*=\s*"railpack"/);
-  assert.match(railway, /buildCommand\s*=\s*"npm run build"/);
+  assert.match(railway, /builder\s*=\s*"DOCKERFILE"/);
+  assert.match(railway, /dockerfilePath\s*=\s*"Dockerfile"/);
+  assert.doesNotMatch(railway, /buildCommand/);
   assert.doesNotMatch(railway, /preDeployCommand/);
   assert.match(railway, /startCommand\s*=\s*"npm run start"/);
   assert.match(railway, /healthcheckPath\s*=\s*"\/api\/health"/);

@@ -51,8 +51,6 @@ const required = [
   "scripts/verify-syntax.mjs",
   "scripts/release-verify.mjs",
   "scripts/verify-verifier-runtime.mjs",
-  "verifier/resource_verifier_core.py",
-  "scripts/verify-verifier-runtime.mjs",
   "scripts/controlled-verification-e2e.mjs",
   "verifier/resource_verifier_core.py",
   "verifier/requirements.txt",
