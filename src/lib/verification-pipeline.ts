@@ -272,11 +272,6 @@ export async function applyVerifierRecords(
   });
   const byRecordId = new Map(stagedRows.map((row) => [row.recordId, row]));
   const byName = new Map(stagedRows.map((row) => [normalizeIdentity(row.name), row]));
-  const bySourceIndex = new Map<number, (typeof stagedRows)[number]>();
-  for (const row of stagedRows) {
-    const match = /^staged-(\d+)$/.exec(row.recordId);
-    if (match) bySourceIndex.set(Number.parseInt(match[1], 10) - 1, row);
-  }
   const ambiguousIds = ambiguousIdSet(context.reviewPairs);
   const seenStrongGroups = new Set<string>();
   let applied = 0;
@@ -288,12 +283,17 @@ export async function applyVerifierRecords(
       const record = normalizeVerifierRecord(raw);
       if (!record) continue;
 
-      const indexedRows = record.sourceIndexes
-        .map((index) => bySourceIndex.get(index))
+      const correlatedIds = Array.isArray(raw.staged_record_ids)
+        ? raw.staged_record_ids.filter(
+            (value): value is string => typeof value === "string" && value.trim().length > 0,
+          )
+        : [];
+      const correlatedRows = correlatedIds
+        .map((recordId) => byRecordId.get(recordId))
         .filter((row): row is (typeof stagedRows)[number] => Boolean(row));
       const stagedRow =
         (record.recordId ? byRecordId.get(record.recordId) : undefined) ??
-        indexedRows[0] ??
+        correlatedRows[0] ??
         byName.get(normalizeIdentity(record.name));
       if (stagedRow?.publishState === "published") continue; // published rows are immutable
 
@@ -415,8 +415,8 @@ export async function applyVerifierRecords(
       // If verifier dedupe merges several staged inputs into one output, keep the
       // first row as the reviewable merged result and explicitly quarantine the
       // remaining constituents instead of leaving them as false "did not run".
-      if (indexedRows.length > 1) {
-        for (const mergedRow of indexedRows.slice(1)) {
+      if (correlatedRows.length > 1) {
+        for (const mergedRow of correlatedRows.slice(1)) {
           if (mergedRow.publishState === "published") continue;
           await db.verificationResult.update({
             where: { id: mergedRow.id },
