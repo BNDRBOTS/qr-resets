@@ -41,7 +41,14 @@ if (backend === "postgres") {
   // preparation belongs here rather than in preDeployCommand.
   await run(prismaBin, ["db", "push", "--skip-generate", "--schema", schemaPath(env)]);
 }
-await run(process.execPath, ["scripts/seed-verified-resources.mjs"]);
+if (env.BNDR_SKIP_PACKAGED_SEED === "1") {
+  if (env.RAILWAY_SERVICE_ID) {
+    throw new Error("BNDR_SKIP_PACKAGED_SEED is forbidden in Railway runtime.");
+  }
+  console.log("[database] packaged resource seed skipped for isolated verification test");
+} else {
+  await run(process.execPath, ["scripts/seed-verified-resources.mjs"]);
+}
 
 const server = spawn(process.execPath, ["server.js"], {
   cwd: standaloneRoot,
