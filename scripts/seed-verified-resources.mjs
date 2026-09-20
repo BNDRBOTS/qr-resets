@@ -97,16 +97,14 @@ try {
     );
   }
 
-  const [prior, matchingRows] = await Promise.all([
-    db.datasetImport.findUnique({ where: { datasetHash } }),
-    db.resource.count({ where: { sourceDatasetHash: datasetHash } }),
-  ]);
+  const prior = await db.datasetImport.findUnique({ where: { datasetHash } });
 
-  // Idempotent deploys must never wipe administrator-added resources, QR data,
-  // verification history, or audit history. If the canonical source rows for
-  // this exact hash are already present, the seed is complete.
-  if (prior && matchingRows === payload.resources.length) {
-    console.log(`Source dataset already current (${datasetHash}, ${prior.rowCount} rows).`);
+  // The packaged dataset is a bootstrap, not an ongoing reconciliation source.
+  // Once this exact immutable baseline has been recorded as imported, the
+  // persistent database is authoritative: reviewed edits/deletes must survive
+  // every restart and deploy instead of being silently resurrected here.
+  if (prior) {
+    console.log(`Source dataset already bootstrapped (${datasetHash}, ${prior.rowCount} rows).`);
     await db.$disconnect();
     process.exit(0);
   }
