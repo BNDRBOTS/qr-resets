@@ -296,13 +296,15 @@ test("schema persists a durable verification queue (claims, heartbeats, retries,
   }
 });
 
-test("worker claims runs atomically, heartbeats, and reclaims stale processing runs", () => {
+test("worker claims runs atomically, heartbeats, and reclaims stale processing runs within the retry bound", () => {
   const worker = read("src/lib/verification-worker.ts");
   assert.match(worker, /updateMany/);
   assert.match(worker, /status: candidate\.status, attempts: candidate\.attempts/);
   assert.match(worker, /attempts: \{ increment: 1 \}/);
   assert.match(worker, /STALE_CLAIM_MS/);
   assert.match(worker, /heartbeatAt: \{ lt: staleBefore \}/);
+  assert.match(worker, /attempts: \{ lt: MAX_RUN_ATTEMPTS \}/);
+  assert.doesNotMatch(worker, /attempts: \{ lte: MAX_RUN_ATTEMPTS \}/);
   assert.match(worker, /nextAttemptAt/);
   const instrumentation = read("src/instrumentation.ts");
   assert.match(instrumentation, /NEXT_RUNTIME === "nodejs"/);
@@ -319,7 +321,12 @@ test("pipeline stages durable runs, persists per-record checkpoints, and never f
   const bridge = read("src/lib/verifier-v4.ts");
   assert.match(bridge, /checkpoint_partial\.json/);
   assert.match(bridge, /probeEgress/);
+  assert.match(bridge, /correlateRecord/);
+  assert.match(bridge, /source_indexes/);
+  assert.match(bridge, /verifier_record_id/);
   assert.match(bridge, /--no-network/);
+  assert.match(pipeline, /batch\.exitCode !== 0/);
+  assert.match(pipeline, /manifestVersion/);
 });
 
 test("bundled verifier v4 ships with the app and keeps canonical semantics external", () => {
@@ -361,13 +368,18 @@ test("all verification admin routes are authenticated and rate limited", () => {
   }
 });
 
-test("publication gate blocks unresolved critical issues and never silently overwrites", () => {
+test("publication gate requires a completed supported verifier and publishes atomically", () => {
   const route = read("src/app/api/admin/verification/results/[id]/publish/route.ts");
+  assert.match(route, /VERIFICATION_INCOMPLETE/);
+  assert.match(route, /row\.checkedAt === null/);
+  assert.match(route, /row\.run\.status !== "completed"/);
+  assert.match(route, /VERIFIER_MIN_VERSION/);
   assert.match(route, /UNRESOLVED_CRITICAL_ISSUES/);
   assert.match(route, /publish_eligible/);
   assert.match(route, /reviewState === "reviewed"/);
   assert.match(route, /DUPLICATE_/);
-  assert.match(route, /createResourceRecord/);
+  assert.match(route, /db\.\$transaction/);
+  assert.match(route, /createResourceRecordInTransaction/);
 });
 
 test("artifact upload is recovery/interchange only, not the primary workflow", () => {
