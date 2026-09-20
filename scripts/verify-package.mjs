@@ -50,6 +50,11 @@ const required = [
   "scripts/verify-imports.mjs",
   "scripts/verify-syntax.mjs",
   "scripts/release-verify.mjs",
+  "scripts/verify-verifier-runtime.mjs",
+  "scripts/controlled-verification-e2e.mjs",
+  "verifier/resource_verifier_core.py",
+  "verifier/requirements.txt",
+  "railpack.json",
   "tests/export-safety.test.mjs",
   "tests/ssrf.test.mjs",
   "tests/release-contract.test.mjs",
@@ -184,10 +189,10 @@ for (const table of ["QrResetRequest", "QrRequestReview", "QrResetCase", "QrDona
   }
 }
 const healthRoute = readFileSync(join(root, "src/app/api/health/route.ts"), "utf8");
-if (!healthRoute.includes("db.datasetImport.findUnique") || !healthRoute.includes("sourceDatasetHash: EXPECTED_DATASET_SHA256") || !healthRoute.includes("datasetReady") || !healthRoute.includes("persistenceReady()") || !healthRoute.includes("adminConfigured()") || !healthRoute.includes("const ready = dbReady && datasetReady && persistence;") || !healthRoute.includes("status: ready ? 200 : 503")) {
+if (!healthRoute.includes("db.datasetImport.findUnique") || !healthRoute.includes("sourceDatasetHash: EXPECTED_DATASET_SHA256") || !healthRoute.includes("datasetReady") || !healthRoute.includes("persistenceReady()") || !healthRoute.includes("verifierReady()") || !healthRoute.includes("adminConfigured()") || !healthRoute.includes("const ready = dbReady && datasetReady && persistence && verifier;") || !healthRoute.includes("status: ready ? 200 : 503")) {
   fail("Health endpoint is not a real DB + dataset + durable-persistence readiness gate with non-blocking admin diagnostics");
 }
-if (healthRoute.includes("dbReady && datasetReady && persistence && admin")) {
+if (healthRoute.includes("dbReady && datasetReady && persistence && verifier && admin")) {
   fail("Admin credentials must not be a Railway deployment health prerequisite");
 }
 const adminDashboard = readFileSync(join(root, "src/components/bndr/admin-dashboard.tsx"), "utf8");
@@ -355,7 +360,7 @@ if (!existsSync(join(root, ".npmrc")) || !readFileSync(join(root, ".npmrc"), "ut
 const packageJson = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
 if (!String(packageJson.engines?.node ?? "").startsWith(">=22")) fail("Node 22+ engine missing");
 if (packageJson.packageManager !== "npm@10.9.2") fail("Deterministic npm package-manager declaration missing");
-if (packageJson.scripts?.build !== "npm run db:generate && npm run verify:prebuild && npm run build:next") fail("Production build does not generate the selected Prisma backend before verification and Next build");
+if (packageJson.scripts?.build !== "npm run db:generate && npm run verify:prebuild && npm run build:next && npm run test:e2e:controlled") fail("Production build does not run the isolated verification E2E after the production bundle is built");
 if (!String(packageJson.scripts?.["verify:prebuild"] ?? "").includes("npm run verify:syntax") || !String(packageJson.scripts?.["verify:prebuild"] ?? "").includes("npm run test:contracts") || !String(packageJson.scripts?.["verify:prebuild"] ?? "").includes("npm run typecheck")) fail("Prebuild verification is missing syntax, contract tests, or typecheck");
 if (!packageJson.scripts?.["verify:release"]) fail("Release verification command missing");
 if (packageJson.scripts?.start !== "node scripts/start-production.mjs") fail("Production start does not initialize the Railway backend before launching standalone Next");
@@ -368,7 +373,7 @@ if (!storageBackendSource.includes('STORAGE_BACKEND || "sqlite"') || !storageBac
   fail("Railway-local SQLite is not the explicit default persistence backend");
 }
 const startProductionSource = readFileSync(join(root, "scripts/start-production.mjs"), "utf8");
-if (!startProductionSource.includes("Railway SQLite mode requires an attached persistent volume") || !startProductionSource.includes('["db", "push"') || !startProductionSource.includes("seed-verified-resources.mjs")) {
+if (!startProductionSource.includes("Railway SQLite mode requires an attached persistent volume") || !startProductionSource.includes("assertVerifierRuntime") || !startProductionSource.includes('["db", "push"') || !startProductionSource.includes("seed-verified-resources.mjs")) {
   fail("Production start does not enforce durable Railway SQLite + schema + seed initialization");
 }
 
