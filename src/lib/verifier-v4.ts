@@ -117,15 +117,19 @@ function correlateRecord(
     typeof record.record_id === "string" && record.record_id.trim()
       ? record.record_id.trim()
       : null;
-  const sourceIndex = sourceIndexes(record)[0];
-  const stagedRecordId =
-    sourceIndex !== undefined && typeof inputs[sourceIndex]?.record_id === "string"
-      ? inputs[sourceIndex].record_id?.trim()
-      : "";
+  const stagedRecordIds = sourceIndexes(record)
+    .map((sourceIndex) =>
+      typeof inputs[sourceIndex]?.record_id === "string"
+        ? inputs[sourceIndex].record_id?.trim() ?? ""
+        : "",
+    )
+    .filter(Boolean);
+  const stagedRecordId = stagedRecordIds[0] ?? "";
   if (!stagedRecordId) return record;
   return {
     ...record,
     ...(verifierRecordId ? { verifier_record_id: verifierRecordId } : {}),
+    staged_record_ids: stagedRecordIds,
     record_id: stagedRecordId,
   };
 }
