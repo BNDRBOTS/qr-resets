@@ -3,7 +3,9 @@
 // Health validates the backend that is actually in use. Railway-local SQLite is
 // the default; PostgreSQL/Supabase is opt-in with STORAGE_BACKEND=postgres.
 // Railway deployment readiness requires the server-owned data path to be usable:
-// database reachable, canonical 114-row dataset present, and durable persistence.
+// database reachable, immutable baseline import recorded, durable persistence,
+// and an executable verifier. Live resource rows are administrator-owned state
+// after bootstrap and are not silently treated as a deploy-time invariant.
 // Admin credentials are reported diagnostically but do not make the public app unhealthy.
 
 import { NextResponse } from "next/server";
@@ -45,23 +47,13 @@ export async function GET() {
   let datasetReady = false;
 
   try {
-    const [datasetImport, sourceRows] = await Promise.all([
-      db.datasetImport.findUnique({
-        where: { datasetHash: EXPECTED_DATASET_SHA256 },
-        select: { rowCount: true },
-      }),
-      db.resource.count({
-        where: {
-          sourceDatasetHash: EXPECTED_DATASET_SHA256,
-          published: true,
-        },
-      }),
-    ]);
+    const datasetImport = await db.datasetImport.findUnique({
+      where: { datasetHash: EXPECTED_DATASET_SHA256 },
+      select: { rowCount: true },
+    });
 
     dbReady = true;
-    datasetReady =
-      datasetImport?.rowCount === EXPECTED_DATASET_ROWS &&
-      sourceRows === EXPECTED_DATASET_ROWS;
+    datasetReady = datasetImport?.rowCount === EXPECTED_DATASET_ROWS;
   } catch {
     dbReady = false;
     datasetReady = false;
