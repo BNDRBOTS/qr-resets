@@ -34,6 +34,12 @@ function persistenceReady() {
   return process.env.BNDR_PERSISTENCE_READY === "1" && Boolean(process.env.RAILWAY_VOLUME_MOUNT_PATH?.trim());
 }
 
+function verifierReady() {
+  return process.env.BNDR_VERIFIER_READY === "1" &&
+    process.env.BNDR_VERIFIER_VERSION?.trim() === "4.0.0" &&
+    Boolean(process.env.BNDR_VERIFIER_PYTHON?.trim());
+}
+
 export async function GET() {
   let dbReady = false;
   let datasetReady = false;
@@ -62,8 +68,9 @@ export async function GET() {
   }
 
   const persistence = persistenceReady();
+  const verifier = verifierReady();
   const admin = adminConfigured();
-  const ready = dbReady && datasetReady && persistence;
+  const ready = dbReady && datasetReady && persistence && verifier;
 
   return NextResponse.json(
     {
@@ -73,6 +80,8 @@ export async function GET() {
       db: dbReady,
       dataset: datasetReady,
       persistence,
+      verifier,
+      verifierVersion: process.env.BNDR_VERIFIER_VERSION?.trim() || null,
       admin,
     },
     { status: ready ? 200 : 503 },
