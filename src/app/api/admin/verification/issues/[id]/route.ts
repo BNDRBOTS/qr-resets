@@ -39,8 +39,18 @@ export async function PATCH(req: NextRequest, context: RouteContext) {
     const actor = session?.user?.email;
     if (!actor) return apiError("UNAUTHORIZED", "Authentication required.", 401);
 
-    const existing = await db.verificationIssue.findUnique({ where: { id } });
+    const existing = await db.verificationIssue.findUnique({
+      where: { id },
+      include: { result: { select: { publishState: true } } },
+    });
     if (!existing) return apiError("NOT_FOUND", "Verification issue not found.", 404);
+    if (existing.result.publishState === "published") {
+      return apiError(
+        "IMMUTABLE_PUBLISHED",
+        "Published verification evidence is immutable; run a new verification to change review state.",
+        409,
+      );
+    }
 
     const reviewState = parsed.data.reviewState;
     const updated = await db.$transaction(async (tx) => {
