@@ -178,8 +178,8 @@ function treeDigest() {
   const r = spawnSync("python3", ["-c", `
 import hashlib, pathlib
 root=pathlib.Path(${JSON.stringify(root)})
-roots=['src','prisma','scripts','tests','supabase','public']
-extra=['package.json','next.config.ts','railway.toml','tsconfig.json','postcss.config.mjs','.env.example','.npmrc']
+roots=['src','prisma','scripts','tests','supabase','public','verifier']
+extra=['package.json','next.config.ts','railway.toml','railpack.json','tsconfig.json','postcss.config.mjs','.env.example','.npmrc']
 h=hashlib.sha256()
 files=[]
 for name in roots:
