@@ -192,7 +192,7 @@ for (const table of ["QrResetRequest", "QrRequestReview", "QrResetCase", "QrDona
   }
 }
 const healthRoute = readFileSync(join(root, "src/app/api/health/route.ts"), "utf8");
-if (!healthRoute.includes("db.datasetImport.findUnique") || !healthRoute.includes("sourceDatasetHash: EXPECTED_DATASET_SHA256") || !healthRoute.includes("datasetReady") || !healthRoute.includes("persistenceReady()") || !healthRoute.includes("verifierReady()") || !healthRoute.includes("adminConfigured()") || !healthRoute.includes("const ready = dbReady && datasetReady && persistence && verifier;") || !healthRoute.includes("status: ready ? 200 : 503")) {
+if (!healthRoute.includes("db.datasetImport.findUnique") || !healthRoute.includes("datasetReady") || !healthRoute.includes("persistenceReady()") || !healthRoute.includes("verifierReady()") || !healthRoute.includes("adminConfigured()") || !healthRoute.includes("const ready = dbReady && datasetReady && persistence && verifier;") || !healthRoute.includes("status: ready ? 200 : 503")) {
   fail("Health endpoint is not a real DB + dataset + durable-persistence readiness gate with non-blocking admin diagnostics");
 }
 if (healthRoute.includes("dbReady && datasetReady && persistence && verifier && admin")) {
@@ -402,6 +402,12 @@ if (/\.deleteMany\s*\(/.test(seedScript)) {
 }
 if (!seedScript.includes("tx.resource.upsert") || !seedScript.includes("tx.category.upsert") || !seedScript.includes("tx.datasetImport.upsert")) {
   fail("Deployment seed is not additive/idempotent for packaged rows");
+}
+if (!seedScript.includes("if (prior)") || seedScript.includes("matchingRows === payload.resources.length")) {
+  fail("Packaged dataset seed is not bootstrap-only after the immutable import marker exists");
+}
+if (healthRoute.includes("sourceDatasetHash: EXPECTED_DATASET_SHA256")) {
+  fail("Health incorrectly treats mutable live baseline rows as a deploy-time invariant");
 }
 
 const resourceService = readFileSync(join(root, "src/lib/resource-service.ts"), "utf8");
