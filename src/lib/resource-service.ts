@@ -1,6 +1,7 @@
 // Server-only resource mutation service. All resource content comes from the
 // database; this module contains no seed rows, fallback rows, or demo records.
 
+import type { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import {
   findExistingIdentityConflict,
@@ -18,13 +19,14 @@ export class ResourceNotFoundError extends Error {
   }
 }
 
-export async function createResourceRecord(
+export async function createResourceRecordInTransaction(
+  tx: Prisma.TransactionClient,
   input: ResourceInput,
   actor: string,
 ) {
   const prepared = prepareResourceCandidate(input as unknown as Record<string, unknown>);
   const normalized = normalizeResource(prepared.input);
-  const existing = await db.resource.findMany({
+  const existing = await tx.resource.findMany({
     select: { id: true, name: true, email: true, website: true, phoneNormalized: true },
   });
   const conflict = findExistingIdentityConflict(prepared, existing);
@@ -35,48 +37,53 @@ export async function createResourceRecord(
     );
   }
 
-  return db.$transaction(async (tx) => {
-    const created = await tx.resource.create({
-      data: {
-        name: normalized.name,
-        acronym: prepared.input.acronym,
-        description: normalized.description,
-        category: prepared.input.category,
-        subcategory: prepared.input.subcategory,
-        phoneRaw: prepared.input.phoneRaw,
-        phoneNormalized: prepared.phoneNormalized,
-        email: normalized.email,
-        address: prepared.input.address,
-        website: normalized.website,
-        tags: prepared.input.tags,
-        priority: prepared.input.priority,
-        verified: prepared.input.verified,
-        published: prepared.input.published,
-        sourceNote: prepared.input.sourceNote,
-        piipassAt: new Date(),
-        piipassNotes: normalized.changes.length
-          ? normalized.changes.join(" | ")
-          : "no changes",
-      },
-    });
-
-    await tx.auditLog.create({
-      data: {
-        action: "create",
-        resourceId: created.id,
-        actor,
-        summary: `Created resource: ${created.name}`,
-        details: JSON.stringify({
-          changes: normalized.changes,
-          issues: prepared.issues,
-          viability: prepared.viability,
-          source: "admin",
-        }),
-      },
-    });
-
-    return created;
+  const created = await tx.resource.create({
+    data: {
+      name: normalized.name,
+      acronym: prepared.input.acronym,
+      description: normalized.description,
+      category: prepared.input.category,
+      subcategory: prepared.input.subcategory,
+      phoneRaw: prepared.input.phoneRaw,
+      phoneNormalized: prepared.phoneNormalized,
+      email: normalized.email,
+      address: prepared.input.address,
+      website: normalized.website,
+      tags: prepared.input.tags,
+      priority: prepared.input.priority,
+      verified: prepared.input.verified,
+      published: prepared.input.published,
+      sourceNote: prepared.input.sourceNote,
+      piipassAt: new Date(),
+      piipassNotes: normalized.changes.length
+        ? normalized.changes.join(" | ")
+        : "no changes",
+    },
   });
+
+  await tx.auditLog.create({
+    data: {
+      action: "create",
+      resourceId: created.id,
+      actor,
+      summary: `Created resource: ${created.name}`,
+      details: JSON.stringify({
+        changes: normalized.changes,
+        issues: prepared.issues,
+        viability: prepared.viability,
+        source: "admin",
+      }),
+    },
+  });
+
+  return created;
+}
+
+export async function createResourceRecord(
+  input: ResourceInput,
+  actor: string,
+) {
+  return db.$transaction((tx) => createResourceRecordInTransaction(tx, input, actor));
 }
 
 export async function updateResourceRecord(
