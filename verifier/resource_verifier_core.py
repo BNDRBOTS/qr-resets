@@ -639,7 +639,7 @@ def parse_excel(path: Path) -> tuple[list[RawRecord], list[ParseIssue]]:
     try:
         import openpyxl  # type: ignore
     except Exception as e:
-        return [], [ParseIssue(str(path), "excel", f"Excel support requires openpyxl; bootstrap should install it. Import failed: {e}", fatal=True)]
+        return [], [ParseIssue(str(path), "excel", f"Excel support requires openpyxl; install verifier/requirements.txt to enable it. Import failed: {e}", fatal=True)]
     records: list[RawRecord] = []
     try:
         wb = openpyxl.load_workbook(path, read_only=True, data_only=True)
