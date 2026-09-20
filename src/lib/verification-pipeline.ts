@@ -33,7 +33,7 @@ import {
   normalizeVerifierRecord,
   summarizeDecisions,
 } from "@/lib/verification-core.mjs";
-import { probeEgress, runVerifierBatch } from "@/lib/verifier-v4";
+import { probeEgress, probeVerifier, runVerifierBatch } from "@/lib/verifier-v4";
 
 export const MAX_RUN_ATTEMPTS = 3;
 
@@ -453,6 +453,14 @@ export async function processVerificationRun(runId: string, workerId: string): P
   const run = await db.verificationRun.findUnique({ where: { id: runId } });
   if (!run || run.status !== "running") return;
 
+  const verifierProbe = await probeVerifier();
+  if (!verifierProbe.available || !verifierProbe.version) {
+    throw new Error(`verifier unavailable: ${verifierProbe.error ?? "version unknown"}`);
+  }
+  if (compareVersions(verifierProbe.version, VERIFIER_MIN_VERSION) < 0) {
+    throw new Error(`verifier version ${verifierProbe.version} is below minimum ${VERIFIER_MIN_VERSION}`);
+  }
+
   const egress = await probeEgress();
   const egressRestricted = egress.egressRestricted;
 
@@ -461,7 +469,7 @@ export async function processVerificationRun(runId: string, workerId: string): P
   });
 
   let decisions: Array<{ publishState: string; reason: string }> = [];
-  let verifierVersion: string | null = run.verifierVersion;
+  let verifierVersion: string | null = verifierProbe.version;
 
   if (pending.length) {
     const inputRecords = pending.map((row) => ({
@@ -479,9 +487,21 @@ export async function processVerificationRun(runId: string, workerId: string): P
       },
     });
 
+    if (batch.exitCode !== 0) {
+      throw new Error(
+        `verifier exited unsuccessfully (${batch.exitCode ?? "killed"}): ${batch.stderrTail.slice(-400)}`,
+      );
+    }
     if (!batch.records.length) {
       throw new Error(
         `verifier produced no output (exit ${batch.exitCode ?? "killed"}): ${batch.stderrTail.slice(-400)}`,
+      );
+    }
+
+    const manifestVersion = asTrimmed(batch.manifest?.verifier_version);
+    if (!manifestVersion || compareVersions(manifestVersion, VERIFIER_MIN_VERSION) < 0) {
+      throw new Error(
+        `verifier manifest version ${manifestVersion || "missing"} is below minimum ${VERIFIER_MIN_VERSION}`,
       );
     }
 
@@ -491,7 +511,7 @@ export async function processVerificationRun(runId: string, workerId: string): P
       reviewPairs: batch.reviewPairs,
     });
     decisions = outcome.decisions;
-    verifierVersion = asTrimmed(batch.manifest?.verifier_version) || verifierVersion;
+    verifierVersion = manifestVersion;
   }
 
   // Anything the verifier did not return stays held - never guessed.
@@ -520,10 +540,9 @@ export async function processVerificationRun(runId: string, workerId: string): P
     });
   }
 
-  const versionBelowMin =
-    verifierVersion !== null &&
-    verifierVersion !== "" &&
-    compareVersions(verifierVersion, VERIFIER_MIN_VERSION) < 0;
+  if (!verifierVersion || compareVersions(verifierVersion, VERIFIER_MIN_VERSION) < 0) {
+    throw new Error(`verification run cannot complete without verifier >= ${VERIFIER_MIN_VERSION}`);
+  }
 
   await db.verificationRun.update({
     where: { id: runId },
@@ -537,7 +556,7 @@ export async function processVerificationRun(runId: string, workerId: string): P
         egressRestricted,
         leftovers: leftovers.length,
       } as object,
-      error: versionBelowMin ? `verifier_version_below_minimum_${VERIFIER_MIN_VERSION}` : null,
+      error: null,
     },
   });
   await db.auditLog.create({
