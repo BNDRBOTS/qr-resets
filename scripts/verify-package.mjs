@@ -51,6 +51,8 @@ const required = [
   "scripts/verify-syntax.mjs",
   "scripts/release-verify.mjs",
   "scripts/verify-verifier-runtime.mjs",
+  "verifier/resource_verifier_core.py",
+  "scripts/verify-verifier-runtime.mjs",
   "scripts/controlled-verification-e2e.mjs",
   "verifier/resource_verifier_core.py",
   "verifier/requirements.txt",
@@ -377,6 +379,17 @@ if (packageJson.scripts?.["db:prepare"] !== "node scripts/prepare-database.mjs")
 const storageBackendSource = readFileSync(join(root, "scripts/storage-backend.mjs"), "utf8");
 if (!storageBackendSource.includes('STORAGE_BACKEND || "sqlite"') || !storageBackendSource.includes("RAILWAY_VOLUME_MOUNT_PATH")) {
   fail("Railway-local SQLite is not the explicit default persistence backend");
+}
+const buildNext = String(packageJson.scripts?.["build:next"] ?? "");
+if (!buildNext.includes("cp -R verifier .next/standalone/verifier")) {
+  fail("Standalone production bundle does not explicitly include the Python verifier directory");
+}
+if (packageJson.scripts?.["verify:verifier-runtime"] !== "node scripts/verify-verifier-runtime.mjs verifier/resource_verifier_core.py") {
+  fail("Verifier runtime preflight command is missing or inconsistent");
+}
+const verifierRuntimeSource = readFileSync(join(root, "scripts/verify-verifier-runtime.mjs"), "utf8");
+if (!verifierRuntimeSource.includes('EXPECTED_VERIFIER_VERSION = "4.0.0"') || !verifierRuntimeSource.includes("python3")) {
+  fail("Verifier runtime preflight does not enforce Python + verifier v4.0.0");
 }
 const startProductionSource = readFileSync(join(root, "scripts/start-production.mjs"), "utf8");
 if (!startProductionSource.includes("Railway SQLite mode requires an attached persistent volume") || !startProductionSource.includes("assertVerifierRuntime") || !startProductionSource.includes('["db", "push"') || !startProductionSource.includes("seed-verified-resources.mjs")) {
