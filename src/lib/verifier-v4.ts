@@ -103,6 +103,68 @@ async function readJsonIfExists(path: string): Promise<unknown | null> {
   }
 }
 
+function sourceIndexes(record: Record<string, unknown>): number[] {
+  return Array.isArray(record.source_indexes)
+    ? record.source_indexes.filter((value): value is number => Number.isInteger(value) && value >= 0)
+    : [];
+}
+
+function correlateRecord(
+  record: Record<string, unknown>,
+  inputs: VerifierInputRecord[],
+): Record<string, unknown> {
+  const verifierRecordId =
+    typeof record.record_id === "string" && record.record_id.trim()
+      ? record.record_id.trim()
+      : null;
+  const sourceIndex = sourceIndexes(record)[0];
+  const stagedRecordId =
+    sourceIndex !== undefined && typeof inputs[sourceIndex]?.record_id === "string"
+      ? inputs[sourceIndex].record_id?.trim()
+      : "";
+  if (!stagedRecordId) return record;
+  return {
+    ...record,
+    ...(verifierRecordId ? { verifier_record_id: verifierRecordId } : {}),
+    record_id: stagedRecordId,
+  };
+}
+
+function correlationMap(
+  normalized: Array<Record<string, unknown>>,
+  inputs: VerifierInputRecord[],
+): Map<string, string> {
+  const mapping = new Map<string, string>();
+  for (const record of normalized) {
+    const verifierRecordId =
+      typeof record.record_id === "string" ? record.record_id.trim() : "";
+    const sourceIndex = sourceIndexes(record)[0];
+    const stagedRecordId =
+      sourceIndex !== undefined && typeof inputs[sourceIndex]?.record_id === "string"
+        ? inputs[sourceIndex].record_id?.trim()
+        : "";
+    if (verifierRecordId && stagedRecordId) mapping.set(verifierRecordId, stagedRecordId);
+  }
+  return mapping;
+}
+
+function correlateReviewPairs(
+  pairs: Array<Record<string, unknown>>,
+  mapping: Map<string, string>,
+): Array<Record<string, unknown>> {
+  return pairs.map((pair) => {
+    const a = typeof pair.record_a === "string" ? pair.record_a.trim() : "";
+    const b = typeof pair.record_b === "string" ? pair.record_b.trim() : "";
+    return {
+      ...pair,
+      ...(a ? { verifier_record_a: a } : {}),
+      ...(b ? { verifier_record_b: b } : {}),
+      record_a: mapping.get(a) ?? pair.record_a,
+      record_b: mapping.get(b) ?? pair.record_b,
+    };
+  });
+}
+
 /**
  * Run the bundled verifier v4 against a batch of records.
  * - Streams checkpoint_partial.json through onCheckpoint so callers can
@@ -156,7 +218,11 @@ export async function runVerifierBatch(options: {
             : null;
         if (records) {
           try {
-            await options.onCheckpoint(records as Array<Record<string, unknown>>);
+            await options.onCheckpoint(
+              (records as Array<Record<string, unknown>>).map((record) =>
+                correlateRecord(record, options.records),
+              ),
+            );
           } catch {
             // Checkpoint persistence must never kill the verifier run.
           }
@@ -181,17 +247,28 @@ export async function runVerifierBatch(options: {
   const verified = await readJsonIfExists(join(options.outDir, "verified_resources.json"));
   const manifest = await readJsonIfExists(join(options.outDir, "run_manifest.json"));
   const reviewPairs = await readJsonIfExists(join(options.outDir, "possible_duplicates_review.json"));
+  const normalizedSnapshot = await readJsonIfExists(
+    join(options.outDir, "normalized_records_snapshot.json"),
+  );
 
-  const records = Array.isArray(verified)
+  const rawRecords = Array.isArray(verified)
     ? (verified as Array<Record<string, unknown>>)
     : Array.isArray((verified as { records?: unknown[] } | null)?.records)
       ? (((verified as { records: unknown[] }).records) as Array<Record<string, unknown>>)
       : [];
 
+  const records = rawRecords.map((record) => correlateRecord(record, options.records));
+  const normalized = Array.isArray(normalizedSnapshot)
+    ? (normalizedSnapshot as Array<Record<string, unknown>>)
+    : [];
+  const mapping = correlationMap(normalized, options.records);
+
   return {
     records,
     manifest: manifest && typeof manifest === "object" && !Array.isArray(manifest) ? (manifest as Record<string, unknown>) : null,
-    reviewPairs: Array.isArray(reviewPairs) ? (reviewPairs as Array<Record<string, unknown>>) : [],
+    reviewPairs: Array.isArray(reviewPairs)
+      ? correlateReviewPairs(reviewPairs as Array<Record<string, unknown>>, mapping)
+      : [],
     exitCode,
     stderrTail: stderr,
   };
