@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "next dev -p 3000",
-    "build": "npm run db:generate && npm run verify:prebuild && npm run build:next",
+    "build": "npm run db:generate && npm run verify:prebuild && npm run build:next && npm run test:e2e:controlled",
     "build:next": "next build && mkdir -p .next/standalone/.next && rm -rf .next/standalone/.next/static .next/standalone/public .next/standalone/verifier && cp -R .next/static .next/standalone/.next/static && cp -R public .next/standalone/public && cp -R verifier .next/standalone/verifier",
     "start": "node scripts/start-production.mjs",
     "lint": "eslint .",
@@ -27,7 +27,8 @@
     "verify:syntax": "node scripts/verify-syntax.mjs",
     "verify:release": "node scripts/release-verify.mjs",
     "verify:prebuild": "npm run verify:package && npm run verify:dataset && npm run verify:imports && npm run verify:syntax && npm run test:contracts && npm run typecheck",
-    "verify:verifier-runtime": "node scripts/verify-verifier-runtime.mjs verifier/resource_verifier_core.py"
+    "verify:verifier-runtime": "node scripts/verify-verifier-runtime.mjs verifier/resource_verifier_core.py",
+    "test:e2e:controlled": "node scripts/controlled-verification-e2e.mjs"
   },
   "dependencies": {
     "@prisma/client": "6.19.2",
