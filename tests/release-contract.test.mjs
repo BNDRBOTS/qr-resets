@@ -72,14 +72,16 @@ test("Railway initializes durable local storage at service start and uses real h
   assert.match(read("scripts/start-production.mjs"), /\["db", "push"/);
 });
 
-test("deployment seed is additive and canonical health check is data-backed", () => {
+test("deployment seed bootstraps once and health does not overwrite mutable live resource state", () => {
   const seed = read("scripts/seed-verified-resources.mjs");
   const health = read("src/app/api/health/route.ts");
   assert.doesNotMatch(seed, /\.deleteMany\s*\(/);
   assert.match(seed, /tx\.resource\.upsert/);
   assert.match(seed, /tx\.datasetImport\.upsert/);
+  assert.match(seed, /if \(prior\)/);
+  assert.doesNotMatch(seed, /matchingRows === payload\.resources\.length/);
   assert.match(health, /db\.datasetImport\.findUnique/);
-  assert.match(health, /sourceDatasetHash: EXPECTED_DATASET_SHA256/);
+  assert.doesNotMatch(health, /sourceDatasetHash: EXPECTED_DATASET_SHA256/);
   assert.match(health, /status: ready \? 200 : 503/);
 });
 
