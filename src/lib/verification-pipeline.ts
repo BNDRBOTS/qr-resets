@@ -507,12 +507,22 @@ export async function processVerificationRun(runId: string, workerId: string): P
   const egress = await probeEgress();
   const egressRestricted = egress.egressRestricted;
 
-  const pending = await db.verificationResult.findMany({
+  let pending = await db.verificationResult.findMany({
     where: { runId, checkedAt: null },
   });
 
+  // A checkpoint can legitimately persist every row just before the Python
+  // process fails prior to final outputs/manifest. Such a run has no persisted
+  // successful verifierVersion. Re-run the staged batch instead of allowing a
+  // retry to "complete" merely because checkedAt is populated.
+  if (!pending.length && !run.verifierVersion) {
+    pending = await db.verificationResult.findMany({
+      where: { runId, publishState: { not: "published" } },
+    });
+  }
+
   let decisions: Array<{ publishState: string; reason: string }> = [];
-  let verifierVersion: string | null = verifierProbe.version;
+  let verifierVersion: string | null = run.verifierVersion;
 
   if (pending.length) {
     const inputRecords = pending.map((row) => ({
