@@ -135,8 +135,8 @@ test("Railway health gates real data readiness without making admin setup a depl
   const health = read("src/app/api/health/route.ts");
   assert.match(health, /persistenceReady\(\)/);
   assert.match(health, /adminConfigured\(\)/);
-  assert.match(health, /const ready = dbReady && datasetReady && persistence;/);
-  assert.doesNotMatch(health, /dbReady && datasetReady && persistence && admin/);
+  assert.match(health, /const ready = dbReady && datasetReady && persistence && verifier;/);
+  assert.doesNotMatch(health, /dbReady && datasetReady && persistence && verifier && admin/);
 });
 
 test("release verifier requires production start plus HTTP 200 health before runtime pass", () => {
