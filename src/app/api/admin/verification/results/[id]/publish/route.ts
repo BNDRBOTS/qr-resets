@@ -126,7 +126,7 @@ export async function POST(req: NextRequest, context: RouteContext) {
         pick(source, ["source", "sourceNote", "Source_Document"]) || "verification-pipeline",
       verified: row.organizationStatus === ORG_VERIFIED,
       published: true,
-    } as Parameters<typeof createResourceRecord>[0];
+    } as Parameters<typeof createResourceRecordInTransaction>[1];
 
     try {
       const created = await db.$transaction(async (tx) => {
