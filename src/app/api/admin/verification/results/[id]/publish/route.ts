@@ -8,13 +8,24 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getAdminSession, requireAdminRateLimited, apiError } from "@/lib/require-admin";
 import { RATE_LIMITS } from "@/lib/rate-limit";
-import { createResourceRecord } from "@/lib/resource-service";
+import { createResourceRecordInTransaction } from "@/lib/resource-service";
 import { ResourceIngestionError } from "@/lib/resource-ingestion";
-import { ORG_VERIFIED } from "@/lib/verification-core.mjs";
+import { ORG_VERIFIED, VERIFIER_MIN_VERSION } from "@/lib/verification-core.mjs";
 
 export const dynamic = "force-dynamic";
 
 type RouteContext = { params: Promise<{ id: string }> };
+
+function versionAtLeast(actual: string | null, minimum: string): boolean {
+  if (!actual) return false;
+  const a = actual.split(".").map((part) => Number.parseInt(part, 10) || 0);
+  const b = minimum.split(".").map((part) => Number.parseInt(part, 10) || 0);
+  for (let i = 0; i < Math.max(a.length, b.length); i += 1) {
+    if ((a[i] ?? 0) > (b[i] ?? 0)) return true;
+    if ((a[i] ?? 0) < (b[i] ?? 0)) return false;
+  }
+  return true;
+}
 
 function pick(source: Record<string, unknown> | null, keys: string[]): string {
   for (const key of keys) {
@@ -36,10 +47,25 @@ export async function POST(req: NextRequest, context: RouteContext) {
 
     const row = await db.verificationResult.findUnique({
       where: { id },
-      include: { issues: true },
+      include: {
+        issues: true,
+        run: { select: { status: true, verifierVersion: true, error: true } },
+      },
     });
     if (!row) return apiError("NOT_FOUND", "Verification result not found.", 404);
 
+    if (
+      row.checkedAt === null ||
+      row.run.status !== "completed" ||
+      row.run.error ||
+      !versionAtLeast(row.run.verifierVersion, VERIFIER_MIN_VERSION)
+    ) {
+      return apiError(
+        "VERIFICATION_INCOMPLETE",
+        "This candidate cannot be published until a successful supported verifier run has completed.",
+        409,
+      );
+    }
     if (row.publishState === "published") {
       return apiError("ALREADY_PUBLISHED", "This candidate is already published.", 409);
     }
@@ -103,13 +129,13 @@ export async function POST(req: NextRequest, context: RouteContext) {
     } as Parameters<typeof createResourceRecord>[0];
 
     try {
-      const created = await createResourceRecord(input, actor);
-      await db.$transaction(async (tx) => {
+      const created = await db.$transaction(async (tx) => {
+        const resource = await createResourceRecordInTransaction(tx, input, actor);
         await tx.verificationResult.update({
           where: { id },
           data: {
             publishState: "published",
-            resourceId: created.id,
+            resourceId: resource.id,
             reviewState: "reviewed",
             resolvedAt: new Date(),
             resolvedBy: actor,
@@ -118,12 +144,13 @@ export async function POST(req: NextRequest, context: RouteContext) {
         await tx.auditLog.create({
           data: {
             action: "verification-publish",
-            resourceId: created.id,
+            resourceId: resource.id,
             actor,
             summary: `Published verified candidate '${name}' to the directory`,
-            details: JSON.stringify({ resultId: id, resourceId: created.id }),
+            details: JSON.stringify({ resultId: id, resourceId: resource.id }),
           },
         });
+        return resource;
       });
       return NextResponse.json({
         ok: true,
